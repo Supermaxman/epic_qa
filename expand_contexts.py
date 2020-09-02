@@ -58,6 +58,9 @@ def extract_passages(doc):
   return passages
 
 def expand_doc(doc_name):
+  # ignore already existing expanded files
+  if os.path.exists(os.path.join(expanded_path, doc_name)):
+    return
   with open(os.path.join(collection_path, doc_name), 'r') as f:
     doc = json.load(f)
   # gather all passages for batch processing
