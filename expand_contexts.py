@@ -12,7 +12,7 @@ print(device)
 
 collection_path = '/users/max/data/corpora/epic_qa/expert/epic_qa_cord_2020-06-19_v2/'
 expanded_path = '/users/max/data/corpora/epic_qa/expert/epic_qa_cord_2020-06-19_v2_expanded/'
-batch_size = 256
+batch_size = 128
 
 tokenizer = T5Tokenizer.from_pretrained('t5-base')
 config = T5Config.from_pretrained('t5-base')
