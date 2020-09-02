@@ -29,7 +29,9 @@ def expand(passages, num_samples=1, max_length=64, top_k=10):
       # query, passage
       batch_text_or_text_pairs=[f'{x} </s>' for x in passages[b_idx * batch_size:(b_idx + 1) * batch_size]],
       padding=True,
-      return_tensors='pt'
+      return_tensors='pt',
+      max_length=512,
+      truncation=True
     )
 
     outputs = model.generate(
