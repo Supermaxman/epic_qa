@@ -53,7 +53,7 @@ def expand_doc(doc_name):
     context['expanded_queries'] = expanded_queries
 
   with open(os.path.join(expanded_path, doc_name), 'w') as f:
-    json.dump(doc)
+    json.dump(doc, f)
 
 print('Loading files...')
 docs = [x for x in os.listdir(collection_path)]
