@@ -61,8 +61,16 @@ def expand_doc(doc_name):
   # ignore already existing expanded files
   if os.path.exists(os.path.join(expanded_path, doc_name)):
     return
-  with open(os.path.join(collection_path, doc_name), 'r') as f:
-    doc = json.load(f)
+  try:
+    with open(os.path.join(collection_path, doc_name), 'r') as f:
+      doc = json.load(f)
+  except Exception as e:
+    print('----------------------')
+    print('ERROR with doc:')
+    print(os.path.join(collection_path, doc_name))
+    print(e)
+    print('----------------------')
+    return
   # gather all passages for batch processing
   passages = extract_passages(doc)
   expanded_queries = expand(passages)
