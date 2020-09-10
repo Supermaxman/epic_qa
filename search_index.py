@@ -9,7 +9,7 @@ parser.add_argument('-dt', '--doc_type', required=True)
 parser.add_argument('-i', '--index', required=True)
 parser.add_argument('-q', '--query', required=True)
 parser.add_argument('-r', '--run_name', required=True)
-parser.add_argument('-k', '--top_k', default=5000, type=int)
+parser.add_argument('-k', '--top_k', default=1000, type=int)
 
 args = parser.parse_args()
 
@@ -42,4 +42,5 @@ with open(run_path, 'w') as fo:
 			score = hit.score
 			line = f'{query_id}\tQ0\t{doc_id}\t{rank}\t{score:.4f}\t{run_name}\n'
 			fo.write(line)
+		print(f'{query_id}: {len(seen_docids)}')
 print('Done!')
