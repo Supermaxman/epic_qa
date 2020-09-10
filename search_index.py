@@ -42,5 +42,4 @@ with open(run_path, 'w') as fo:
 			score = hit.score
 			line = f'{query_id}\tQ0\t{doc_id}\t{rank}\t{score:.4f}\t{run_name}\n'
 			fo.write(line)
-		print(f'{query_id}: {len(seen_docids)}')
 print('Done!')
