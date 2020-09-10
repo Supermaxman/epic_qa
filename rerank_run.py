@@ -67,7 +67,8 @@ def extract_passages(doc_name):
 def rerank(query, passages):
 	pairs = [(query, passage) for passage in passages]
 	all_scores = []
-	for b_idx in range(int(np.ceil(len(pairs) / batch_size))):
+	num_batches = int(np.ceil(len(pairs) / batch_size))
+	for b_idx in tqdm(range(num_batches), total=num_batches):
 		batch = tokenizer.batch_encode_plus(
 			# query, passage
 			batch_text_or_text_pairs=pairs[b_idx * batch_size:(b_idx + 1) * batch_size],
