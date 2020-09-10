@@ -3,26 +3,34 @@ import os
 import json
 from tqdm import tqdm
 from multiprocessing import Pool
+# TODO make args
+import argparse
 
 collection_path = 'data/expert/epic_qa_cord_2020-06-19_v2/'
-expanded_path = 'data/expert/epic_qa_cord_2020-06-19_v2_doc_json/'
+output_path = 'data/expert/epic_qa_cord_2020-06-19_v2_expanded_doc_json/'
 nrof_processes = 8
+expand_docs = True
 
-if not os.path.exists(expanded_path):
-  os.mkdir(expanded_path)
+if not os.path.exists(output_path):
+  os.mkdir(output_path)
 
 
 def extract_text(doc):
   # TODO add expanded sentence text, maybe doc title
   doc_text = ' '.join([c['text'] for c in doc['contexts']])
-
+  if expand_docs:
+    exp_text = []
+    for context in doc['contexts']:
+      for sentence in context['sentences']:
+        exp_text.add(sentence['expanded_query'])
+    doc_text += ' '.join(exp_text)
   return doc_text
 
 
 def convert_doc(doc_name):
   # ignore already existing expanded files
   input_path = os.path.join(collection_path, doc_name)
-  output_path = os.path.join(expanded_path, doc_name)
+  output_path = os.path.join(output_path, doc_name)
   if os.path.exists(output_path):
     return None
   try:
