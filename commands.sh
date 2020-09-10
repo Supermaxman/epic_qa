@@ -37,6 +37,7 @@ trec_eval -m recip_rank data/expert/qrels-covid_d4_j3.5-4.txt runs/expert/expand
 python rerank_run.py \
   --doc_type expert \
   --query expert_questions_prelim.json \
+  --collection_path data/expert/epic_qa_cord_2020-06-19_v2 \
   --input_run_name baseline_doc \
   --run_name baseline_doc_rerank
 trec_eval -m recip_rank data/expert/qrels-covid_d4_j3.5-4.txt runs/expert/baseline_doc_rerank

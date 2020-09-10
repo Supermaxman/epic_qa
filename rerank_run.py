@@ -10,9 +10,12 @@ from transformers import AutoTokenizer, AutoModelForSequenceClassification
 parser = argparse.ArgumentParser()
 parser.add_argument('-dt', '--doc_type', required=True)
 parser.add_argument('-q', '--query', required=True)
-parser.add_argument('-r', '--run_name', required=True)
-parser.add_argument('-ri', '--input_run_name', required=True)
 parser.add_argument('-cp', '--collection_path', required=True)
+parser.add_argument('-ri', '--input_run_name', required=True)
+parser.add_argument('-r', '--run_name', required=True)
+
+# TODO consider other reranking models
+rerank_model_name = 'nboost/pt-biobert-base-msmarco'
 
 args = parser.parse_args()
 
@@ -30,8 +33,6 @@ input_run_path = f'runs/{doc_type}/{input_run_name}'
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 print(f'Using device {device}')
 
-# TODO consider other reranking models
-rerank_model_name = 'nboost/pt-biobert-base-msmarco'
 tokenizer = AutoTokenizer.from_pretrained(rerank_model_name)
 
 model = AutoModelForSequenceClassification.from_pretrained(rerank_model_name)
@@ -91,7 +92,6 @@ with open(input_run_path) as f:
 		if line:
 			query_id, _, doc_id, _, _, _ = line
 			query_id = int(query_id)
-			doc_id = int(doc_id)
 			query_hits[query_id].append(doc_id)
 
 with open(query_path) as f:
