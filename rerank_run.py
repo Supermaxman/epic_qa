@@ -62,7 +62,7 @@ def extract_passages(doc_name):
 		# 	additional_passages.extend(tri_grams)
 		# context_passages = context_passages + additional_passages
 		# passages.extend(context_passages)
-		passages.extend(context_text)
+		passages.append(context_text)
 	return passages
 
 
