@@ -9,7 +9,7 @@ parser.add_argument('-dt', '--doc_type', required=True)
 parser.add_argument('-i', '--index', required=True)
 parser.add_argument('-q', '--query', required=True)
 parser.add_argument('-r', '--run_name', required=True)
-parser.add_argument('-k', '--top_k', default=1000, type=int)
+parser.add_argument('-k', '--top_k', default=5000, type=int)
 
 args = parser.parse_args()
 
