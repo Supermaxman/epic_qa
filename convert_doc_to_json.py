@@ -7,12 +7,12 @@ from multiprocessing import Pool
 import argparse
 
 collection_path = 'data/expert/epic_qa_cord_2020-06-19_v2/'
-output_path = 'data/expert/epic_qa_cord_2020-06-19_v2_expanded_doc_json/'
+json_collection_path = 'data/expert/epic_qa_cord_2020-06-19_v2_expanded_doc_json/'
 nrof_processes = 8
 expand_docs = True
 
-if not os.path.exists(output_path):
-  os.mkdir(output_path)
+if not os.path.exists(json_collection_path):
+  os.mkdir(json_collection_path)
 
 
 def extract_text(doc):
@@ -22,7 +22,7 @@ def extract_text(doc):
     exp_text = []
     for context in doc['contexts']:
       for sentence in context['sentences']:
-        exp_text.add(sentence['expanded_query'])
+        exp_text.append(sentence['expanded_query'])
     doc_text += ' '.join(exp_text)
   return doc_text
 
@@ -30,7 +30,7 @@ def extract_text(doc):
 def convert_doc(doc_name):
   # ignore already existing expanded files
   input_path = os.path.join(collection_path, doc_name)
-  output_path = os.path.join(output_path, doc_name)
+  output_path = os.path.join(json_collection_path, doc_name)
   if os.path.exists(output_path):
     return None
   try:
