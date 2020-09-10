@@ -127,6 +127,8 @@ with open(run_path, 'w') as fo:
 				seen_docs.add(passage_doc)
 
 		for rank, (doc_id, score) in enumerate(rerank_hits, start=1):
+			# smaller is better
+			score = -score
 			line = f'{query_id}\tQ0\t{doc_id}\t{rank}\t{score:.4f}\t{run_name}\n'
 			fo.write(line)
 print('Done!')
