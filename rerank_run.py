@@ -48,7 +48,9 @@ def extract_passages(doc_name):
 		context_text = context['text']
 		context_passages = []
 		for sentence in context['sentences']:
-			context_passages.append(context_text[sentence['start']:sentence['end']])
+			sentence_text = context_text[sentence['start']:sentence['end']]
+			if sentence_text.strip():
+				context_passages.append(sentence_text)
 		additional_passages = []
 		if len(context_passages) >= 2:
 			bi_grams = list([' '.join(x) for x in zip(context_passages[:1], context_passages[1:])])
@@ -62,7 +64,7 @@ def extract_passages(doc_name):
 
 
 def rerank(query, passages):
-	batch_size = 4
+	batch_size = 8
 	pairs = [(query, passage) for passage in passages]
 	all_scores = []
 	for b_idx in range(int(np.ceil(len(pairs) / batch_size))):
@@ -71,7 +73,8 @@ def rerank(query, passages):
 			batch_text_or_text_pairs=pairs[b_idx * batch_size:(b_idx + 1) * batch_size],
 			add_special_tokens=True,
 			padding=True,
-			return_tensors='pt'
+			return_tensors='pt',
+			truncation='only_second'
 		)
 
 		scores = model(
