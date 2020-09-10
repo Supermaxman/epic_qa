@@ -13,6 +13,7 @@ if not os.path.exists(expanded_path):
 
 
 def extract_text(doc):
+  # TODO add expanded sentence text, maybe doc title
   doc_text = ' '.join([c['text'] for c in doc['contexts']])
 
   return doc_text
