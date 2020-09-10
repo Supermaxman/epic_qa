@@ -17,4 +17,12 @@ python -m pyserini.index -collection JsonCollection -generator DefaultLuceneDocu
 
 alias trec_eval=/users/max/code/anserini-tools/eval/trec_eval.9.0.4/trec_eval
 
-trec_eval -m map data/expert/qrels-covid_d4_j3.5-4.txt runs/expert/baseline_doc
+#trec_eval -m map qrels/expert/baseline_doc runs/expert/baseline_doc
+trec_eval -m map qrels/expert/baseline_doc runs/expert/baseline_doc
+
+# f'data/{doc_type}/expert_questions_prelim.json'
+python search_index.py \
+  --doc_type expert \
+  --index baseline_doc \
+  --query expert_questions_prelim.json \
+  --run_name baseline_doc

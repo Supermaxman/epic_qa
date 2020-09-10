@@ -2,13 +2,26 @@
 import json
 from tqdm import tqdm
 from pyserini.search import SimpleSearcher
+import argparse
 
-doc_type = 'expert'
-index_path = f'indices/{doc_type}/baseline_doc'
-query_path = f'data/{doc_type}/expert_questions_prelim.json'
-run_name = 'baseline_doc'
+parser = argparse.ArgumentParser()
+parser.add_argument('-dt', '--doc_type', required=True)
+parser.add_argument('-i', '--index', required=True)
+parser.add_argument('-q', '--query', required=True)
+parser.add_argument('-r', '--run_name', required=True)
+parser.add_argument('-k', '--top_k', default=1000, type=int)
+
+args = parser.parse_args()
+
+# 'expert'
+doc_type = args.doc_type
+# 'baseline_doc'
+run_name = args.run_name
+index_path = f'indices/{doc_type}/{args.index}'
+# expert_questions_prelim.json
+query_path = f'data/{doc_type}/{args.query}'
 run_path = f'runs/{doc_type}/{run_name}'
-top_k = 1000
+top_k = args.top_k
 
 with open(query_path) as f:
 	queries = json.load(f)

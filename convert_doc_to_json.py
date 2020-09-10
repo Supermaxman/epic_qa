@@ -6,10 +6,20 @@ from multiprocessing import Pool
 # TODO make args
 import argparse
 
-collection_path = 'data/expert/epic_qa_cord_2020-06-19_v2_expanded/'
-json_collection_path = 'data/expert/epic_qa_cord_2020-06-19_v2_expanded_doc_json/'
-nrof_processes = 8
-expand_docs = True
+parser = argparse.ArgumentParser()
+parser.add_argument('-c', '--collection_path', required=True)
+parser.add_argument('-jc', '--json_collection_path', required=True)
+parser.add_argument('-p', '--nrof_processes', default=8, type=int)
+parser.add_argument('-ex', '--expand_docs', default=True, type=bool)
+
+args = parser.parse_args()
+
+# collection_path = 'data/expert/epic_qa_cord_2020-06-19_v2_expanded/'
+collection_path = args.collection_path
+# json_collection_path = 'data/expert/epic_qa_cord_2020-06-19_v2_expanded_doc_json/'
+json_collection_path = args.json_collection_path
+nrof_processes = args.nrof_processes
+expand_docs = args.expand_docs
 
 if not os.path.exists(json_collection_path):
   os.mkdir(json_collection_path)
