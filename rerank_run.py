@@ -53,12 +53,13 @@ def extract_passages(doc_name):
 			if sentence_text.strip():
 				context_passages.append(sentence_text)
 		additional_passages = []
-		if len(context_passages) >= 2:
-			bi_grams = list([' '.join(x) for x in zip(context_passages[:1], context_passages[1:])])
-			additional_passages.extend(bi_grams)
-		if len(context_passages) >= 3:
-			tri_grams = list([' '.join(x) for x in zip(context_passages[:2], context_passages[1:1], context_passages[2:])])
-			additional_passages.extend(tri_grams)
+		# TODO add back in when efficient
+		# if len(context_passages) >= 2:
+		# 	bi_grams = list([' '.join(x) for x in zip(context_passages[:1], context_passages[1:])])
+		# 	additional_passages.extend(bi_grams)
+		# if len(context_passages) >= 3:
+		# 	tri_grams = list([' '.join(x) for x in zip(context_passages[:2], context_passages[1:1], context_passages[2:])])
+		# 	additional_passages.extend(tri_grams)
 		context_passages = context_passages + additional_passages
 		passages.extend(context_passages)
 	return passages
@@ -118,13 +119,13 @@ with open(run_path, 'w') as fo:
 		reranked_passages = rerank(query['question'], all_passages)
 		rerank_hits = []
 		seen_docs = set()
-		for passage, passage_idx in reranked_passages:
+		for passage_score, passage_idx in reranked_passages:
 			passage_doc = doc_lookup[passage_idx]
 			if passage_doc not in seen_docs:
-				rerank_hits.append(passage_doc)
+				rerank_hits.append((passage_doc, passage_score))
 				seen_docs.add(passage_doc)
 
-		for rank, hit in enumerate(rerank_hits, start=1):
-			line = f'{query_id}\tQ0\t{hit.docid}\t{rank}\t{hit.score:.4f}\t{run_name}\n'
+		for rank, (doc_id, score) in enumerate(rerank_hits, start=1):
+			line = f'{query_id}\tQ0\t{doc_id}\t{rank}\t{score:.4f}\t{run_name}\n'
 			fo.write(line)
 print('Done!')
