@@ -20,6 +20,8 @@ collection_path = args.collection_path
 json_collection_path = args.json_collection_path
 nrof_processes = args.nrof_processes
 expand_docs = args.expand_docs
+if expand_docs:
+  print('Expanding docs')
 
 if not os.path.exists(json_collection_path):
   os.mkdir(json_collection_path)

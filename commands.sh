@@ -34,14 +34,6 @@ python search_index.py \
   --run_name expanded_doc
 trec_eval -m recip_rank data/expert/qrels-covid_d4_j3.5-4.txt runs/expert/expanded_doc
 
-python rerank_run.py \
-  --doc_type expert \
-  --query expert_questions_prelim.json \
-  --collection_path data/expert/epic_qa_cord_2020-06-19_v2 \
-  --input_run_name baseline_doc \
-  --run_name baseline_doc_rerank
-trec_eval -m recip_rank data/expert/qrels-covid_d4_j3.5-4.txt runs/expert/baseline_doc_rerank
-
 python convert_passages_to_json.py \
   --collection_path data/expert/epic_qa_cord_2020-06-19_v2 \
   --json_collection_path data/expert/epic_qa_cord_2020-06-19_v2_pass_json
@@ -71,6 +63,45 @@ python search_pass_index.py \
   --index baseline_pass \
   --query expert_questions_prelim.json \
   --run_name baseline_pass_full
+
+# expand
+python convert_passages_to_json.py \
+  --collection_path data/expert/epic_qa_cord_2020-06-19_v2 \
+  --json_collection_path data/expert/epic_qa_cord_2020-06-19_v2_pass_json \
+  --ex
+
+python -m pyserini.index \
+  -collection JsonCollection \
+  -generator DefaultLuceneDocumentGenerator \
+  -threads 8 \
+  -input data/expert/epic_qa_cord_2020-06-19_v2_pass_json/ \
+  -index indices/expert/baseline_pass \
+  -storePositions \
+  -storeDocvectors \
+  -storeRaw
+
+python search_index.py \
+  --doc_type expert \
+  --index baseline_pass \
+  --query expert_questions_prelim.json \
+  --run_name baseline_pass_doc
+
+trec_eval -m recip_rank \
+  data/expert/qrels-covid_d4_j3.5-4.txt \
+  runs/expert/baseline_pass_doc
+
+
+
+
+
+
+python rerank_run.py \
+  --doc_type expert \
+  --query expert_questions_prelim.json \
+  --collection_path data/expert/epic_qa_cord_2020-06-19_v2 \
+  --input_run_name baseline_doc \
+  --run_name baseline_doc_rerank
+trec_eval -m recip_rank data/expert/qrels-covid_d4_j3.5-4.txt runs/expert/baseline_doc_rerank
 
 
 
