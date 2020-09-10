@@ -33,6 +33,7 @@ def extract_passages(doc):
       exp_text = []
       for sentence in context['sentences']:
         exp_text.append(sentence['expanded_query'])
+      passage_text += ' '
       passage_text += ' '.join(exp_text)
     passages.append(passage_text)
   return passages

@@ -31,15 +31,7 @@ print(f'Running search and writing results to {run_path}...')
 with open(run_path, 'w') as fo:
 	for query_id, query in tqdm(enumerate(queries, start=1), total=len(queries)):
 		hits = searcher.search(query['question'], k=top_k)
-		seen_docids = set()
 		for rank, hit in enumerate(hits[:top_k], start=1):
-			doc_id = hit.docid
-			if '-' in doc_id:
-				doc_id = doc_id.split('-')[0]
-			if doc_id in seen_docids:
-				continue
-			seen_docids.add(doc_id)
-			score = hit.score
-			line = f'{query_id}\tQ0\t{doc_id}\t{rank}\t{score:.4f}\t{run_name}\n'
+			line = f'{query_id}\tQ0\t{hit.docid}\t{rank}\t{hit.score:.4f}\t{run_name}\n'
 			fo.write(line)
 print('Done!')
