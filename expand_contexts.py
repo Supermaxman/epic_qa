@@ -84,7 +84,7 @@ def expand_doc(doc_name):
     json.dump(doc, f)
 
 print('Loading files...')
-docs = [x for x in os.listdir(collection_path)]
+docs = [x for x in os.listdir(collection_path) if x.endswith('.json')]
 print(f'Total files: {len(docs)}')
 print(f'Generating queries...')
 for doc in tqdm(docs, total=len(docs)):
