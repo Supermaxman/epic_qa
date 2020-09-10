@@ -16,6 +16,7 @@ parser.add_argument('-r', '--run_name', required=True)
 
 # TODO consider other reranking models
 rerank_model_name = 'nboost/pt-biobert-base-msmarco'
+batch_size = 16
 
 args = parser.parse_args()
 
@@ -64,7 +65,6 @@ def extract_passages(doc_name):
 
 
 def rerank(query, passages):
-	batch_size = 8
 	pairs = [(query, passage) for passage in passages]
 	all_scores = []
 	for b_idx in range(int(np.ceil(len(pairs) / batch_size))):
