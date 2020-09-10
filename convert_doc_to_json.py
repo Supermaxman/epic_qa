@@ -6,7 +6,7 @@ from multiprocessing import Pool
 # TODO make args
 import argparse
 
-collection_path = 'data/expert/epic_qa_cord_2020-06-19_v2/'
+collection_path = 'data/expert/epic_qa_cord_2020-06-19_v2_expanded/'
 json_collection_path = 'data/expert/epic_qa_cord_2020-06-19_v2_expanded_doc_json/'
 nrof_processes = 8
 expand_docs = True
