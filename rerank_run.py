@@ -74,7 +74,8 @@ def rerank(query, passages):
 			add_special_tokens=True,
 			padding=True,
 			return_tensors='pt',
-			truncation='only_second'
+			truncation='only_second',
+			max_length=512
 		)
 
 		scores = model(
