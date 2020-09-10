@@ -41,29 +41,28 @@ model.to(device)
 model.eval()
 
 
-def extract_passages(doc_name):
-	with open(os.path.join(collection_path, doc_name + '.json'), 'r') as f:
+def extract_passage(doc_id, pass_id):
+	with open(os.path.join(collection_path, doc_id + '.json'), 'r') as f:
 		doc = json.load(f)
-	passages = []
-	for context in doc['contexts']:
-		context_text = context['text']
-		# context_passages = []
-		# for sentence in context['sentences']:
-		# 	sentence_text = context_text[sentence['start']:sentence['end']]
-		# 	if sentence_text.strip():
-		# 		context_passages.append(sentence_text)
-		# additional_passages = []
-		# TODO add back in when efficient
-		# if len(context_passages) >= 2:
-		# 	bi_grams = list([' '.join(x) for x in zip(context_passages[:1], context_passages[1:])])
-		# 	additional_passages.extend(bi_grams)
-		# if len(context_passages) >= 3:
-		# 	tri_grams = list([' '.join(x) for x in zip(context_passages[:2], context_passages[1:1], context_passages[2:])])
-		# 	additional_passages.extend(tri_grams)
-		# context_passages = context_passages + additional_passages
-		# passages.extend(context_passages)
-		passages.append(context_text)
-	return passages
+	# passages = []
+	context_text = doc['contexts'][pass_id]['text']
+	# context_passages = []
+	# for sentence in context['sentences']:
+	# 	sentence_text = context_text[sentence['start']:sentence['end']]
+	# 	if sentence_text.strip():
+	# 		context_passages.append(sentence_text)
+	# additional_passages = []
+	# TODO add back in when efficient
+	# if len(context_passages) >= 2:
+	# 	bi_grams = list([' '.join(x) for x in zip(context_passages[:1], context_passages[1:])])
+	# 	additional_passages.extend(bi_grams)
+	# if len(context_passages) >= 3:
+	# 	tri_grams = list([' '.join(x) for x in zip(context_passages[:2], context_passages[1:1], context_passages[2:])])
+	# 	additional_passages.extend(tri_grams)
+	# context_passages = context_passages + additional_passages
+	# passages.extend(context_passages)
+	# passages.append(context_text)
+	return context_text
 
 
 def rerank(query, passages):
@@ -99,7 +98,9 @@ with open(input_run_path) as f:
 		if line:
 			query_id, _, doc_id, _, _, _ = line
 			query_id = int(query_id)
-			query_hits[query_id].append(doc_id)
+			doc_id, pass_id = doc_id.split('-')
+			pass_id = int(pass_id)
+			query_hits[query_id].append((doc_id, pass_id))
 
 with open(query_path) as f:
 	queries = json.load(f)
@@ -111,11 +112,10 @@ with open(run_path, 'w') as fo:
 
 		all_passages = []
 		doc_lookup = {}
-		for hit in hits:
-			passages = extract_passages(hit)
-			for passage in passages:
-				doc_lookup[len(all_passages)] = hit
-				all_passages.append(passage)
+		for doc_id, pass_id in hits:
+			passage = extract_passage(doc_id, pass_id)
+			doc_lookup[len(all_passages)] = doc_id
+			all_passages.append(passage)
 
 		reranked_passages = rerank(query['question'], all_passages)
 		rerank_hits = []
