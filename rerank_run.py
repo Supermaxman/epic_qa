@@ -47,12 +47,12 @@ def extract_passages(doc_name):
 	passages = []
 	for context in doc['contexts']:
 		context_text = context['text']
-		context_passages = []
-		for sentence in context['sentences']:
-			sentence_text = context_text[sentence['start']:sentence['end']]
-			if sentence_text.strip():
-				context_passages.append(sentence_text)
-		additional_passages = []
+		# context_passages = []
+		# for sentence in context['sentences']:
+		# 	sentence_text = context_text[sentence['start']:sentence['end']]
+		# 	if sentence_text.strip():
+		# 		context_passages.append(sentence_text)
+		# additional_passages = []
 		# TODO add back in when efficient
 		# if len(context_passages) >= 2:
 		# 	bi_grams = list([' '.join(x) for x in zip(context_passages[:1], context_passages[1:])])
@@ -60,8 +60,9 @@ def extract_passages(doc_name):
 		# if len(context_passages) >= 3:
 		# 	tri_grams = list([' '.join(x) for x in zip(context_passages[:2], context_passages[1:1], context_passages[2:])])
 		# 	additional_passages.extend(tri_grams)
-		context_passages = context_passages + additional_passages
-		passages.extend(context_passages)
+		# context_passages = context_passages + additional_passages
+		# passages.extend(context_passages)
+		passages.extend(context_text)
 	return passages
 
 
