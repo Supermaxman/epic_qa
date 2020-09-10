@@ -17,7 +17,7 @@ searcher = SimpleSearcher(index_path)
 print(f'Running search and writing results to {run_path}...')
 with open(run_path, 'w') as fo:
 	for query_id, query in tqdm(enumerate(queries, start=1), total=len(queries)):
-		hits = searcher.search(query['question'])
+		hits = searcher.search(query['question'], k=top_k)
 		for rank, hit in enumerate(hits[:top_k], start=1):
 			line = f'{query_id}\tQ0\t{hit.docid}\t{rank}\t{hit.score:.4f}\t{run_name}\n'
 			fo.write(line)
