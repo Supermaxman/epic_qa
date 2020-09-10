@@ -10,7 +10,7 @@ parser = argparse.ArgumentParser()
 parser.add_argument('-c', '--collection_path', required=True)
 parser.add_argument('-jc', '--json_collection_path', required=True)
 parser.add_argument('-p', '--nrof_processes', default=8, type=int)
-parser.add_argument('-ex', '--expand_docs', default=False, type=bool, action='store_true')
+parser.add_argument('-ex', '--expand_docs', default=False, action='store_true')
 
 args = parser.parse_args()
 
