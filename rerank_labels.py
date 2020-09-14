@@ -58,7 +58,6 @@ collection_path = args.collection_path
 label_path = args.label_path
 # 'baseline_doc'
 run_name = args.run_path
-input_run_name = args.input_run_name
 # expert_questions_prelim.json
 query_path = args.query_path
 run_path = args.run_path
