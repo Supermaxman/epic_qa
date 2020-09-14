@@ -106,5 +106,14 @@ trec_eval -m recip_rank \
   runs/expert/baseline_pass_full_doc_rerank
 
 
+python rerank_labels.py \
+  --query_path data/expert/expert_questions_prelim.json \
+  --collection_path data/expert/epic_qa_cord_2020-06-19_v2 \
+  --label_path data/expert/qrels-covid_d4_j3.5-4.txt \
+  --rerank_model nboost/pt-biobert-base-msmarco \
+  --run_path runs/expert/biobert_msmarco \
+  --batch_size 16
+
+
 
 
