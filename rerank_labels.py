@@ -125,7 +125,7 @@ for query_id, query in tqdm(enumerate(queries, start=1), total=len(queries)):
 		num_workers=1,
 		collate_fn=collate_batch
 	)
-	for batch in tqdm(dataloader, total=len(dataset)):
+	for batch in tqdm(dataloader, total=len(dataloader)):
 		scores = model(
 			input_ids=batch['input_ids'].to(device),
 			token_type_ids=batch['token_type_ids'].to(device),
