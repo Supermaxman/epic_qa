@@ -16,7 +16,7 @@ class PassageDataset(Dataset):
 		self.examples = []
 		self.query = query
 		for file_name in self.file_names:
-			file_path = os.path.join(self.root_dir, file_name)
+			file_path = os.path.join(self.root_dir, file_name + '.json')
 			with open(file_path) as f:
 				doc = json.load(f)
 				for p_id, passage in enumerate(doc['contexts']):
