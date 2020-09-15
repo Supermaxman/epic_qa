@@ -10,26 +10,54 @@ from torch.utils.data import Dataset, DataLoader
 
 
 class PassageDataset(Dataset):
-	def __init__(self, root_dir, file_names, query):
+	def __init__(self, root_dir, file_names, query, multi_sentence):
 		self.root_dir = root_dir
 		self.file_names = file_names
 		self.examples = []
 		self.query = query
+		self.multi_sentence = multi_sentence
 		for d_id in self.file_names:
 			file_path = os.path.join(self.root_dir, d_id + '.json')
 			with open(file_path) as f:
 				doc = json.load(f)
 				for p_id, passage in enumerate(doc['contexts']):
+					context_examples = []
 					for s_id, sentence in enumerate(passage['sentences']):
 						example = {
 							'id': f'{d_id}-{p_id}-{s_id}',
 							'd_id': d_id,
 							'p_id': p_id,
-							's_id': s_id,
+							's_id': s_id if not self.multi_sentence else f'{s_id}-{s_id}',
 							'text': passage['text'][sentence['start']:sentence['end']],
 							'query': query
 						}
 						self.examples.append(example)
+						context_examples.append(example)
+					if self.multi_sentence:
+						# TODO generalize this for n-gram, right now only 1-3 gram
+						if len(context_examples) >= 2:
+							for ex1, ex2 in zip(context_examples[:1], context_examples[1:]):
+								example = {
+									'id': f'{ex1["d_id"]}-{ex1["p_id"]}-{ex1["s_id"]}-{ex2["s_id"]}',
+									'd_id': ex1['d_id'],
+									'p_id': ex1['p_id'],
+									's_id': f'{ex1["s_id"]}-{ex2["s_id"]}',
+									'text': ' '.join([ex1['text'], ex2['text']]),
+									'query': ex1['query']
+								}
+								self.examples.append(example)
+
+						if len(context_examples) >= 3:
+							for ex1, ex2, ex3 in zip(context_examples[:2], context_examples[1:1], context_examples[2:]):
+								example = {
+									'id': f'{ex1["d_id"]}-{ex1["p_id"]}-{ex1["s_id"]}-{ex3["s_id"]}',
+									'd_id': ex1['d_id'],
+									'p_id': ex1['p_id'],
+									's_id': f'{ex1["s_id"]}-{ex3["s_id"]}',
+									'text': ' '.join([ex1['text'], ex2['text'], ex3['text']]),
+									'query': ex1['query']
+								}
+								self.examples.append(example)
 
 	def __len__(self):
 		return len(self.examples)
@@ -49,7 +77,9 @@ parser.add_argument('-c', '--collection_path', required=True)
 parser.add_argument('-l', '--label_path', required=True)
 parser.add_argument('-r', '--run_path', required=True)
 parser.add_argument('-rm', '--rerank_model', default='nboost/pt-biobert-base-msmarco')
-parser.add_argument('-bs', '--batch_size', default=32, type=int)
+parser.add_argument('-bs', '--batch_size', default=64, type=int)
+parser.add_argument('-ml', '--max_length', default=512, type=int)
+parser.add_argument('-ms', '--multi_sentence', default=False, action='store_true')
 
 # TODO consider other reranking models
 
@@ -66,6 +96,8 @@ run_path = args.run_path
 
 rerank_model_name = args.rerank_model
 batch_size = args.batch_size
+max_length = args.max_length
+multi_sentence = args.multi_sentence
 
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 print(f'Using device {device}')
@@ -90,7 +122,7 @@ def collate_batch(examples):
 		padding=True,
 		return_tensors='pt',
 		truncation='only_second',
-		max_length=128
+		max_length=max_length
 	)
 	batch['id'] = [x['id'] for x in examples]
 	batch['d_id'] = [x['d_id'] for x in examples]
@@ -120,7 +152,7 @@ pass_scores = defaultdict(list)
 for query_id, query in tqdm(enumerate(queries, start=1), total=len(queries)):
 	query_labels = qrels[query_id]
 	assert len(query_labels) > 0
-	dataset = PassageDataset(collection_path, query_labels, query['question'])
+	dataset = PassageDataset(collection_path, query_labels, query['question'], multi_sentence)
 	dataloader = DataLoader(
 		dataset,
 		batch_size=batch_size,
