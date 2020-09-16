@@ -9,13 +9,18 @@ from transformers import AutoTokenizer, AutoModelForSequenceClassification
 from torch.utils.data import Dataset, DataLoader
 
 
+def find_ngrams(input_list, n):
+	return zip(*[input_list[i:] for i in range(n)])
+
+
 class PassageDataset(Dataset):
-	def __init__(self, root_dir, file_names, query, multi_sentence):
+	def __init__(self, root_dir, file_names, query, multi_sentence, n_gram_max):
 		self.root_dir = root_dir
 		self.file_names = file_names
 		self.examples = []
 		self.query = query
 		self.multi_sentence = multi_sentence
+		self.n_gram_max = n_gram_max
 		for d_id in self.file_names:
 			file_path = os.path.join(self.root_dir, d_id + '.json')
 			with open(file_path) as f:
@@ -24,38 +29,28 @@ class PassageDataset(Dataset):
 					context_examples = []
 					for s_id, sentence in enumerate(passage['sentences']):
 						example = {
-							'id': f'{d_id}-{p_id}-{s_id}',
+							'id': f'{d_id}-{p_id}-{s_id}-{s_id}',
 							'd_id': d_id,
 							'p_id': p_id,
-							's_id': s_id if not self.multi_sentence else f'{s_id}-{s_id}',
+							's_id': s_id,
 							'text': passage['text'][sentence['start']:sentence['end']],
 							'query': query
 						}
 						self.examples.append(example)
 						context_examples.append(example)
 					if self.multi_sentence:
-						# TODO generalize this for n-gram, right now only 1-3 gram
-						if len(context_examples) >= 2:
-							for ex1, ex2 in zip(context_examples[:1], context_examples[1:]):
+						# generate sentence n-grams from 2 to n_gram_max of contiguous sentence spans
+						for k in range(2, self.n_gram_max+1):
+							for ex_list in find_ngrams(context_examples, n=k):
+								ex_first = ex_list[0]
+								ex_last = ex_list[-1]
 								example = {
-									'id': f'{ex1["d_id"]}-{ex1["p_id"]}-{ex1["s_id"]}-{ex2["s_id"]}',
-									'd_id': ex1['d_id'],
-									'p_id': ex1['p_id'],
-									's_id': f'{ex1["s_id"]}-{ex2["s_id"]}',
-									'text': ' '.join([ex1['text'], ex2['text']]),
-									'query': ex1['query']
-								}
-								self.examples.append(example)
-
-						if len(context_examples) >= 3:
-							for ex1, ex2, ex3 in zip(context_examples[:2], context_examples[1:1], context_examples[2:]):
-								example = {
-									'id': f'{ex1["d_id"]}-{ex1["p_id"]}-{ex1["s_id"]}-{ex3["s_id"]}',
-									'd_id': ex1['d_id'],
-									'p_id': ex1['p_id'],
-									's_id': f'{ex1["s_id"]}-{ex3["s_id"]}',
-									'text': ' '.join([ex1['text'], ex2['text'], ex3['text']]),
-									'query': ex1['query']
+									'id': f'{ex_first["d_id"]}-{ex_first["p_id"]}-{ex_first["s_id"]}-{ex_last["s_id"]}',
+									'd_id': ex_first['d_id'],
+									'p_id': ex_first['p_id'],
+									's_id': f'{ex_first["s_id"]}-{ex_last["s_id"]}',
+									'text': ' '.join([ex['text'] for ex in ex_list]),
+									'query': ex_first['query']
 								}
 								self.examples.append(example)
 
@@ -80,8 +75,7 @@ parser.add_argument('-rm', '--rerank_model', default='nboost/pt-biobert-base-msm
 parser.add_argument('-bs', '--batch_size', default=64, type=int)
 parser.add_argument('-ml', '--max_length', default=512, type=int)
 parser.add_argument('-ms', '--multi_sentence', default=False, action='store_true')
-
-# TODO consider other reranking models
+parser.add_argument('-ng', '--n_gram_max', default=3, type=int)
 
 args = parser.parse_args()
 
@@ -98,6 +92,7 @@ rerank_model_name = args.rerank_model
 batch_size = args.batch_size
 max_length = args.max_length
 multi_sentence = args.multi_sentence
+n_gram_max = args.n_gram_max
 
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 print(f'Using device {device}')
@@ -152,7 +147,13 @@ pass_scores = defaultdict(list)
 for query_id, query in tqdm(enumerate(queries, start=1), total=len(queries)):
 	query_labels = qrels[query_id]
 	assert len(query_labels) > 0
-	dataset = PassageDataset(collection_path, query_labels, query['question'], multi_sentence)
+	dataset = PassageDataset(
+		collection_path,
+		query_labels,
+		query['question'],
+		multi_sentence,
+		n_gram_max
+	)
 	dataloader = DataLoader(
 		dataset,
 		batch_size=batch_size,
@@ -165,7 +166,7 @@ for query_id, query in tqdm(enumerate(queries, start=1), total=len(queries)):
 			input_ids=batch['input_ids'].to(device),
 			token_type_ids=batch['token_type_ids'].to(device),
 			attention_mask=batch['attention_mask'].to(device)
-		)[0][:, 0].data.cpu().numpy()
+		)[0][:, 0].cpu().numpy()
 		# make larger score mean better answer
 		pass_scores[query_id].extend(zip(batch['id'], [-x for x in scores]))
 

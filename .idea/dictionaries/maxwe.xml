@@ -2,6 +2,7 @@
   <dictionary name="maxwe">
     <words>
       <w>dataset</w>
+      <w>ngrams</w>
       <w>rerank</w>
     </words>
   </dictionary>
