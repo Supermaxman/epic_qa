@@ -161,14 +161,16 @@ for query_id, query in tqdm(enumerate(queries, start=1), total=len(queries)):
 		num_workers=1,
 		collate_fn=collate_batch
 	)
+
 	for batch in tqdm(dataloader, total=len(dataloader)):
-		scores = model(
-			input_ids=batch['input_ids'].to(device),
-			token_type_ids=batch['token_type_ids'].to(device),
-			attention_mask=batch['attention_mask'].to(device)
-		)[0][:, 0].cpu().numpy()
-		# make larger score mean better answer
-		pass_scores[query_id].extend(zip(batch['id'], [-x for x in scores]))
+		with torch.no_grad():
+			scores = model(
+				input_ids=batch['input_ids'].to(device),
+				token_type_ids=batch['token_type_ids'].to(device),
+				attention_mask=batch['attention_mask'].to(device)
+			)[0][:, 0].cpu().numpy()
+			# make larger score mean better answer
+			pass_scores[query_id].extend(zip(batch['id'], [-x for x in scores]))
 
 	# sort large to small
 	pass_scores[query_id] = list(sorted(pass_scores[query_id], key=lambda x: x[1], reverse=True))
