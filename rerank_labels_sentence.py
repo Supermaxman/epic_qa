@@ -162,8 +162,8 @@ for query_id, query in tqdm(enumerate(queries, start=1), total=len(queries)):
 		collate_fn=collate_batch
 	)
 
-	for batch in tqdm(dataloader, total=len(dataloader)):
-		with torch.no_grad():
+	with torch.no_grad():
+		for batch in tqdm(dataloader, total=len(dataloader)):
 			scores = model(
 				input_ids=batch['input_ids'].to(device),
 				token_type_ids=batch['token_type_ids'].to(device),
