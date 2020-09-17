@@ -191,7 +191,7 @@ print(f'Running reranking on passages and writing results to {run_path}...')
 pass_scores = {}
 for query_idx, query in tqdm(enumerate(queries, start=1), total=len(queries)):
 	query_labels = qrels[query_idx]
-	query_id = query['query_id']
+	query_id = query['question_id']
 	assert len(query_labels) > 0
 
 	# first we compute scores for all depth-0 (passages) sentence spans
