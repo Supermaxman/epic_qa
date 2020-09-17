@@ -50,7 +50,7 @@ class SentenceSpan(object):
 
 	def full_split(self):
 		splits = []
-		for i in range(start=1, stop=len(self)):
+		for i in range(1, len(self)):
 			left, right = self.split(i)
 			splits.append(left)
 			splits.append(right)
