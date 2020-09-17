@@ -140,7 +140,7 @@ python rerank_labels_sentence.py \
   --label_path data/expert/qrels-covid_d4_j3.5-4.txt \
   --rerank_model nboost/pt-bert-base-uncased-msmarco \
   --run_path runs/expert/bert_base_msmarco_multi_sentence \
-  --batch_size 8 \
+  --batch_size 16 \
   --max_length 512 \
   --multi_sentence
 
@@ -154,3 +154,23 @@ python rerank_labels_sentence.py \
   --max_length 512 \
   --multi_sentence
 
+
+python rerank_labels_sentence.py \
+  --query_path data/consumer/consumer_questions_prelim.json \
+  --collection_path data/consumer/version_2_split \
+  --label_path data/consumer/consumer_fake_qrels.txt \
+  --rerank_model nboost/pt-biobert-base-msmarco \
+  --run_path runs/consumer/biobert_msmarco_multi_sentence \
+  --batch_size 32 \
+  --max_length 512 \
+  --multi_sentence
+
+
+python rerank_labels_sentence_splits.py \
+  --query_path data/expert/expert_questions_prelim.json \
+  --collection_path data/expert/epic_qa_cord_2020-06-19_v2 \
+  --label_path data/expert/qrels-covid_d4_j3.5-4.txt \
+  --rerank_model nboost/pt-biobert-base-msmarco \
+  --run_path runs/expert/biobert_msmarco_span_split \
+  --batch_size 32 \
+  --max_length 512
