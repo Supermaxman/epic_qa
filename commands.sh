@@ -174,4 +174,4 @@ python rerank_labels_sentence_splits.py \
   --run_path runs/expert/biobert_msmarco_span_split \
   --batch_size 32 \
   --max_length 512 \
-  --top_k 100
+  --top_k 1000

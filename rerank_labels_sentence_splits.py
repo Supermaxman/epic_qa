@@ -266,7 +266,6 @@ for query_idx, query in tqdm(enumerate(queries, start=1), total=len(queries)):
 			break
 		current_examples = next_examples
 		depth += 1
-	print(f'{query_id}: {len(all_examples)}')
 	for example in all_examples:
 		example.score = example_scores[example]
 
