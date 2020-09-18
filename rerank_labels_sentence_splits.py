@@ -194,9 +194,11 @@ for query_idx, query in tqdm(enumerate(queries, start=1), total=len(queries)):
 	query_id = query['question_id']
 	assert len(query_labels) > 0
 
+	example_scores = {}
 	# first we compute scores for all depth-0 (passages) sentence spans
 	all_examples = []
 	current_examples = load_passages(collection_path, query_labels)
+	seen_examples = set()
 	prev_examples = None
 	depth = 0
 	while True:
@@ -221,17 +223,17 @@ for query_idx, query in tqdm(enumerate(queries, start=1), total=len(queries)):
 				)[0][:, 0].cpu().numpy()
 			for span, score in zip(batch['examples'], scores):
 				# make larger score mean better answer
-				span.score = -score
+				example_scores[span] = -score
 
 		# remove parent examples ranking lower than children
 		removed_examples = set()
 		for example in current_examples:
 			# example is a child so we must consider pruning parent
 			if example.parent is not None:
-				if example.parent.score < example.score:
+				if example_scores[example.parent] < example_scores[example]:
 					# remove parent, child is better answer
 					removed_examples.add(example.parent)
-				elif example.parent.score < example.sibling.score:
+				elif example_scores[example.parent] < example_scores[example.sibling]:
 					# parent has better answer than child, but sibling better than parent.
 					# We prefer shorter answers (sibling) and it is better, so remove parent in favor of better
 					# sibling and worse child
@@ -246,22 +248,27 @@ for query_idx, query in tqdm(enumerate(queries, start=1), total=len(queries)):
 		# TODO make more efficient
 		# TODO make more efficient
 		all_examples = [ex for ex in all_examples if ex not in removed_examples]
-		all_examples = list(sorted(all_examples, key=lambda x: x.score, reverse=True))
+		all_examples = list(sorted(all_examples, key=lambda x: example_scores[x], reverse=True))
 
 		# next we eliminate spans with less than top-k score:
 		all_examples = all_examples[:top_k]
-		lowest_score = all_examples[-1].score
+		lowest_score = example_scores[all_examples[-1]]
 		# finally we split spans within top-k
 		next_examples = []
 		for span in current_examples:
-			if span.score >= lowest_score:
+			if example_scores[span] >= lowest_score:
 				span_splits = span.full_split()
-				next_examples += span_splits
+				for child in span_splits:
+					if child not in example_scores:
+						next_examples.append(child)
 
 		if len(next_examples) == 0:
 			break
 		current_examples = next_examples
 		depth += 1
+	print(f'{query_id}: {len(all_examples)}')
+	for example in all_examples:
+		example.score = example_scores[example]
 
 	pass_scores[query_id] = all_examples
 
