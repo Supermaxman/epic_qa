@@ -198,7 +198,7 @@ python rerank_labels_sentence.py \
   --multi_sentence \
   --custom_model
 
-# TODO waiting on model file transfer
+# TODO running
 python rerank_labels_sentence.py \
   --query_path data/consumer/consumer_questions_prelim.json \
   --collection_path data/consumer/version_2_split \

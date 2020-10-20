@@ -1,5 +1,4 @@
 
-import torch
 from transformers import BertTokenizer
 import argparse
 import os
@@ -8,6 +7,7 @@ import pytorch_lightning as pl
 from torch.utils.data import DataLoader
 from pytorch_lightning.callbacks import ModelCheckpoint
 from pytorch_lightning import loggers as pl_loggers
+import torch
 
 from model_utils import QuestionAnsweringBert
 from data_utils import SampleCollator, QuestionAnswerDataset, load_expert_data, load_consumer_data, split_data
@@ -58,7 +58,7 @@ if __name__ == "__main__":
 	precision = 16 if use_tpus else 32
 	# precision = 32
 	tpu_cores = 8
-	num_workers = 8
+	num_workers = 4
 	deterministic = True
 	train_model = mode == 'train'
 	load_model = mode != 'train'
