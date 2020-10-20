@@ -23,7 +23,7 @@ if __name__ == "__main__":
 	train_path = 'data/training'
 	test_path = 'data/golden'
 	save_directory = 'models'
-	model_name = 'v6'
+	model_name = 'v2'
 	pre_model_name = 'nboost/pt-biobert-base-msmarco'
 	learning_rate = 5e-5
 	lr_warmup = 0.1
@@ -31,7 +31,7 @@ if __name__ == "__main__":
 	gradient_clip_val = 1.0
 	weight_decay = 0.01
 	max_seq_len = 512
-	val_check_interval = 0.1
+	val_check_interval = 1.0
 	is_distributed = True
 	# export TPU_IP_ADDRESS=10.155.6.34
 	# export XRT_TPU_CONFIG="tpu_worker;0;$TPU_IP_ADDRESS:8470"
