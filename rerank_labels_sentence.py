@@ -7,6 +7,7 @@ import torch
 import numpy as np
 from transformers import AutoTokenizer, AutoModelForSequenceClassification
 from torch.utils.data import Dataset, DataLoader
+from model_utils import QuestionAnsweringBert
 
 
 def find_ngrams(input_list, n):
@@ -76,6 +77,7 @@ parser.add_argument('-bs', '--batch_size', default=64, type=int)
 parser.add_argument('-ml', '--max_length', default=512, type=int)
 parser.add_argument('-ms', '--multi_sentence', default=False, action='store_true')
 parser.add_argument('-ng', '--n_gram_max', default=3, type=int)
+parser.add_argument('-cm', '--custom_model', default=False, action='store_true')
 
 args = parser.parse_args()
 
@@ -93,6 +95,7 @@ batch_size = args.batch_size
 max_length = args.max_length
 multi_sentence = args.multi_sentence
 n_gram_max = args.n_gram_max
+custom_model = args.custom_model
 
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 print(f'Using device {device}')
@@ -101,7 +104,10 @@ print(f'Loading tokenizer: {rerank_model_name}')
 tokenizer = AutoTokenizer.from_pretrained(rerank_model_name)
 
 print(f'Loading model: {rerank_model_name}')
-model = AutoModelForSequenceClassification.from_pretrained(rerank_model_name)
+if custom_model:
+	model = QuestionAnsweringBert.load_from_checkpoint(rerank_model_name)
+else:
+	model = AutoModelForSequenceClassification.from_pretrained(rerank_model_name)
 model.to(device)
 model.eval()
 
@@ -163,14 +169,19 @@ for query_id, query in tqdm(enumerate(queries, start=1), total=len(queries)):
 	)
 
 	with torch.no_grad():
+		score_layer = torch.nn.Softmax(dim=-1)
 		for batch in tqdm(dataloader, total=len(dataloader)):
-			scores = model(
+			logits = model(
 				input_ids=batch['input_ids'].to(device),
 				token_type_ids=batch['token_type_ids'].to(device),
 				attention_mask=batch['attention_mask'].to(device)
-			)[0][:, 0].cpu().numpy()
+			)[0]
+			scores = score_layer(logits)
+			# positive probability
+			scores = scores[:, 1].cpu().numpy()
+
 			# make larger score mean better answer
-			pass_scores[query_id].extend(zip(batch['id'], [-x for x in scores]))
+			pass_scores[query_id].extend(zip(batch['id'], scores))
 
 	# sort large to small
 	pass_scores[query_id] = list(sorted(pass_scores[query_id], key=lambda x: x[1], reverse=True))

@@ -57,7 +57,7 @@ if __name__ == "__main__":
 
 	save_directory = os.path.join(save_directory, model_name)
 
-	checkpoint_path = os.path.join(save_directory, 'model.ckpt')
+	checkpoint_path = os.path.join(save_directory, 'model.bin')
 
 	if not os.path.exists(save_directory):
 		os.mkdir(save_directory)
@@ -135,15 +135,19 @@ if __name__ == "__main__":
 		num_workers=num_workers,
 		collate_fn=val_collator
 	)
-
-	logging.info('Loading model...')
-	model = QuestionAnsweringBert(
-		pre_model_name=pre_model_name,
-		learning_rate=learning_rate,
-		lr_warmup=lr_warmup,
-		updates_total=updates_total,
-		weight_decay=weight_decay
-	)
+	if load_model:
+		logging.info('Loading model...')
+		model = QuestionAnsweringBert.load_from_checkpoint(checkpoint_path)
+	else:
+		logging.info('Loading model...')
+		model = QuestionAnsweringBert(
+			pre_model_name=pre_model_name,
+			learning_rate=learning_rate,
+			lr_warmup=lr_warmup,
+			updates_total=updates_total,
+			weight_decay=weight_decay
+		)
+		tokenizer.save_pretrained(save_directory)
 
 	checkpoint_callback = None
 	if save_on_eval:
