@@ -73,6 +73,7 @@ parser.add_argument('-c', '--collection_path', required=True)
 parser.add_argument('-l', '--label_path', required=True)
 parser.add_argument('-r', '--run_path', required=True)
 parser.add_argument('-rm', '--rerank_model', default='nboost/pt-biobert-base-msmarco')
+parser.add_argument('-t', '--tokenizer', default='nboost/pt-biobert-base-msmarco')
 parser.add_argument('-bs', '--batch_size', default=64, type=int)
 parser.add_argument('-ml', '--max_length', default=512, type=int)
 parser.add_argument('-ms', '--multi_sentence', default=False, action='store_true')
@@ -91,6 +92,7 @@ query_path = args.query_path
 run_path = args.run_path
 
 rerank_model_name = args.rerank_model
+tokenizer_name = args.tokenizer
 batch_size = args.batch_size
 max_length = args.max_length
 multi_sentence = args.multi_sentence
@@ -101,11 +103,11 @@ device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 print(f'Using device {device}')
 
 print(f'Loading tokenizer: {rerank_model_name}')
-tokenizer = AutoTokenizer.from_pretrained(rerank_model_name)
+tokenizer = AutoTokenizer.from_pretrained(tokenizer_name)
 
 print(f'Loading model: {rerank_model_name}')
 if custom_model:
-	model = QuestionAnsweringBert.load_from_checkpoint(rerank_model_name)
+	model = QuestionAnsweringBert.load_from_checkpoint(os.path.join(rerank_model_name, 'pytorch_model.bin'))
 else:
 	model = AutoModelForSequenceClassification.from_pretrained(rerank_model_name)
 model.to(device)
