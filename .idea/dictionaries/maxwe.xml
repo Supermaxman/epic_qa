@@ -1,9 +1,12 @@
 <component name="ProjectDictionaryState">
   <dictionary name="maxwe">
     <words>
+      <w>dataloader</w>
       <w>dataset</w>
+      <w>logits</w>
       <w>ngrams</w>
       <w>rerank</w>
+      <w>warmup</w>
     </words>
   </dictionary>
 </component>
