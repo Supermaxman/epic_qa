@@ -22,7 +22,7 @@ if __name__ == "__main__":
 	train_path = 'data/training'
 	test_path = 'data/golden'
 	save_directory = 'models'
-	model_name = 'v4'
+	model_name = 'v5'
 	pre_model_name = 'nboost/pt-biobert-base-msmarco'
 	learning_rate = 5e-5
 	lr_warmup = 0.1
@@ -35,7 +35,7 @@ if __name__ == "__main__":
 	# export TPU_IP_ADDRESS=10.155.6.34
 	# export XRT_TPU_CONFIG="tpu_worker;0;$TPU_IP_ADDRESS:8470"
 	# batch_size = 64
-	batch_size = 16
+	batch_size = 8
 	negative_sample_size = 1
 	accumulate_grad_batches = 1
 	# accumulate_grad_batches = 4
