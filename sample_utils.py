@@ -56,10 +56,10 @@ class UniformNegativeSampler(NegativeSampler):
 			else:
 				rank = 0
 				print('No process group initialized, using default seed...')
-
+		worker_info = torch.utils.data.get_worker_info()
 		self.gen = torch.Generator()
-		self.gen_seed = hash((self.seed, self.epoch, rank))
-		self.gen.manual_seed(self.gen_seed)
+		self.gen_seed = (self.seed, self.epoch, rank, worker_info.id)
+		self.gen.manual_seed(hash(self.gen_seed))
 		self.seen_seed = False
 
 	def on_train_epoch_start(self, trainer: pl.Trainer, pl_module):
