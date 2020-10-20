@@ -44,8 +44,8 @@ class QuestionAnsweringBert(pl.LightningModule):
 			attention_mask=batch['attention_mask'],
 			token_type_ids=batch['token_type_ids'],
 		)
-		logits = logits.view(-1, batch['sample_size'])
-		scores = scores.view(-1, batch['sample_size'])
+		logits = logits.view(-1, batch['sample_size'], 2)
+		scores = scores.view(-1, batch['sample_size'], 2)
 		labels = batch['labels'].view(-1, batch['sample_size'])
 		loss = self._loss(
 			logits,
@@ -75,8 +75,8 @@ class QuestionAnsweringBert(pl.LightningModule):
 			attention_mask=batch['attention_mask'],
 			token_type_ids=batch['token_type_ids'],
 		)
-		logits = logits.view(-1, batch['sample_size'])
-		scores = scores.view(-1, batch['sample_size'])
+		logits = logits.view(-1, batch['sample_size'], 2)
+		scores = scores.view(-1, batch['sample_size'], 2)
 		labels = batch['labels'].view(-1, batch['sample_size'])
 		loss = self._loss(
 			logits,
