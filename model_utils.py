@@ -101,13 +101,6 @@ class QuestionAnsweringBert(pl.LightningModule):
 		self.log('val_loss', loss)
 		self.log('val_uniform_acc', uniform_acc)
 
-		# TODO calculate proper metrics
-		result = {
-			'val_loss': loss,
-			'val_uniform_acc': uniform_acc
-		}
-		return result
-
 	def configure_optimizers(self):
 		params = self._get_optimizer_params(self.weight_decay)
 		optimizer = AdamW(

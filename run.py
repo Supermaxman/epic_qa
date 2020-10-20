@@ -59,7 +59,6 @@ if __name__ == "__main__":
 	tpu_cores = 8
 	num_workers = 8
 	deterministic = True
-	save_on_eval = True
 	train_model = mode == 'train'
 	load_model = mode != 'train'
 	test_eval = mode == 'test'
@@ -161,15 +160,6 @@ if __name__ == "__main__":
 		tokenizer.save_pretrained(save_directory)
 		model.config.save_pretrained(save_directory)
 
-	checkpoint_callback = None
-	if save_on_eval:
-		checkpoint_callback = ModelCheckpoint(
-			verbose=False,
-			monitor='val_loss',
-			save_last=False,
-			save_top_k=2,
-			mode='min'
-		)
 	logger = pl_loggers.TensorBoardLogger(
 		save_dir=save_directory,
 		flush_secs=30,
@@ -186,9 +176,7 @@ if __name__ == "__main__":
 			precision=precision,
 			val_check_interval=val_check_interval,
 			deterministic=deterministic,
-			callbacks=callbacks,
-			checkpoint_callback=checkpoint_callback,
-			log_every_n_steps=10
+			callbacks=callbacks
 		)
 	else:
 		if len(gpus) > 1:
@@ -205,9 +193,7 @@ if __name__ == "__main__":
 			distributed_backend=backend,
 			gradient_clip_val=gradient_clip_val,
 			deterministic=deterministic,
-			callbacks=callbacks,
-			checkpoint_callback=checkpoint_callback,
-			log_every_n_steps=10
+			callbacks=callbacks
 		)
 
 	if train_model:
