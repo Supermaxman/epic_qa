@@ -1,4 +1,5 @@
 
+import torch
 from transformers import BertTokenizer
 import argparse
 import os
@@ -148,6 +149,7 @@ if __name__ == "__main__":
 	if load_model:
 		logging.info('Loading model...')
 		model = QuestionAnsweringBert.load_from_checkpoint(checkpoint_path)
+		model.to('cpu')
 	else:
 		logging.info('Loading model...')
 		model = QuestionAnsweringBert(
@@ -201,6 +203,10 @@ if __name__ == "__main__":
 		trainer.fit(model, train_data_loader, val_data_loader)
 		logging.info('Saving checkpoint...')
 		trainer.save_checkpoint(checkpoint_path)
+	else:
+		model.to('cpu')
+		torch.save(model, checkpoint_path)
+
 
 	# TODO
 	# if test_eval:
