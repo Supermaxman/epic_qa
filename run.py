@@ -19,8 +19,8 @@ if __name__ == "__main__":
 	# TODO parameterize below into config file for reproducibility
 	seed = 0
 	mode = args.mode
-	train_path = '/users/max/data/corpora/bioasq/2020/8b/training'
-	test_path = '/users/max/data/corpora/bioasq/2020/8b/golden'
+	train_path = 'data/training'
+	test_path = 'data/golden'
 	save_directory = 'models'
 	model_name = 'v1'
 	pre_model_name = 'nboost/pt-biobert-base-msmarco'
