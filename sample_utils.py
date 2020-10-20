@@ -29,10 +29,15 @@ class UniformNegativeSampler(NegativeSampler):
 		self.val_callback = val_callback
 		self.test_callback = test_callback
 		self.gen = None
+		self.gen_seed = None
+		self.seen_seed = False
 
 	def sample(self, pos_example, batch_examples=None):
 		pos_query_id = pos_example['query']['id']
 		num_samples = 0
+		if not self.seen_seed:
+			print(f'Sampler using seed={self.gen_seed}')
+			self.seen_seed = True
 		while num_samples < self.negative_sample_size:
 			sample_idx = torch.randint(low=0, high=len(self.answers), size=(1,), generator=self.gen)[0].item()
 			sample_answer = self.answers[sample_idx]
@@ -53,7 +58,9 @@ class UniformNegativeSampler(NegativeSampler):
 				print('No process group initialized, using default seed...')
 
 		self.gen = torch.Generator()
-		self.gen.manual_seed(hash((self.seed, self.epoch, rank)))
+		self.gen_seed = hash((self.seed, self.epoch, rank))
+		self.gen.manual_seed(self.gen_seed)
+		self.seen_seed = False
 
 	def on_train_epoch_start(self, trainer: pl.Trainer, pl_module):
 		if self.train_callback:
