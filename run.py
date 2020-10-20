@@ -22,7 +22,7 @@ if __name__ == "__main__":
 	train_path = 'data/training'
 	test_path = 'data/golden'
 	save_directory = 'models'
-	model_name = 'v1'
+	model_name = 'v2'
 	pre_model_name = 'nboost/pt-biobert-base-msmarco'
 	learning_rate = 5e-5
 	lr_warmup = 0.1
@@ -44,7 +44,7 @@ if __name__ == "__main__":
 	use_tpus = True
 	precision = 16 if use_tpus else 32
 	tpu_cores = 8
-	num_workers = 1
+	num_workers = 4
 	deterministic = True
 	save_on_eval = False
 	train_model = mode == 'train'
