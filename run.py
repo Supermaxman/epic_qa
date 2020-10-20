@@ -9,21 +9,32 @@ from pytorch_lightning.callbacks import ModelCheckpoint
 from pytorch_lightning import loggers as pl_loggers
 
 from model_utils import QuestionAnsweringBert
-from data_utils import SampleCollator, QuestionAnswerDataset, load_data, split_data
+from data_utils import SampleCollator, QuestionAnswerDataset, load_expert_data, load_consumer_data, split_data
 from sample_utils import UniformNegativeSampler
 
 
 if __name__ == "__main__":
 	parser = argparse.ArgumentParser()
 	parser.add_argument('--mode', help='train/test', type=str, default='train')
+	parser.add_argument('--dataset', help='expert/consumer', type=str, default='expert')
 	args = parser.parse_args()
 	# TODO parameterize below into config file for reproducibility
 	seed = 0
 	mode = args.mode
-	train_path = 'data/training'
-	test_path = 'data/golden'
+	dataset = args.dataset
+	if dataset == 'expert':
+		train_path = 'data/training'
+		test_path = 'data/golden'
+		load_func = load_expert_data
+	elif dataset == 'consumer':
+		train_path = 'consumer_data'
+		test_path = None
+		load_func = load_consumer_data
+	else:
+		raise ValueError(f'Unknown dataset: {dataset}')
+
 	save_directory = 'models'
-	model_name = 'v2'
+	model_name = f'{dataset}-v1'
 	pre_model_name = 'nboost/pt-biobert-base-msmarco'
 	learning_rate = 5e-5
 	lr_warmup = 0.1
@@ -48,7 +59,7 @@ if __name__ == "__main__":
 	tpu_cores = 8
 	num_workers = 8
 	deterministic = True
-	save_on_eval = False
+	save_on_eval = True
 	train_model = mode == 'train'
 	load_model = mode != 'train'
 	test_eval = mode == 'test'
@@ -77,7 +88,7 @@ if __name__ == "__main__":
 	)
 
 	logging.info('Loading dataset...')
-	examples, queries, answers = load_data(train_path)
+	examples, queries, answers = load_func(train_path)
 	train_examples, val_examples = split_data(examples)
 
 	num_batches_per_step = (len(gpus) if not use_tpus else tpu_cores)
@@ -148,6 +159,7 @@ if __name__ == "__main__":
 			weight_decay=weight_decay
 		)
 		tokenizer.save_pretrained(save_directory)
+		model.config.save_pretrained(save_directory)
 
 	checkpoint_callback = None
 	if save_on_eval:
@@ -204,10 +216,10 @@ if __name__ == "__main__":
 		logging.info('Saving checkpoint...')
 		trainer.save_checkpoint(checkpoint_path)
 
-	if test_eval:
-		logging.info('Loading test data...')
-		test_examples, queries, answers = load_data(test_path)
-		# TODO
+	# TODO
+	# if test_eval:
+	# 	logging.info('Loading test data...')
+	# 	test_examples, queries, answers = load_func(test_path)
 		# test_data_loader = DataLoader(
 		# 	test_examples,
 		# 	batch_size=batch_size,

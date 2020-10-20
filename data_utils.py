@@ -1,6 +1,7 @@
 
 import os
 import json
+import xml.etree.ElementTree as ET
 import torch
 from torch.utils.data import Dataset
 from tqdm import tqdm
@@ -30,7 +31,7 @@ def split_data(data, train_ratio=0.8):
 	return train_data, dev_data
 
 
-def load_data(data_path):
+def load_expert_data(data_path):
 	examples = []
 	queries = []
 	answers = []
@@ -57,6 +58,41 @@ def load_data(data_path):
 						'answer': answer
 					}
 					examples.append(example)
+	return examples, queries, answers
+
+
+def load_consumer_data(data_path):
+	examples = []
+	queries = []
+	answers = []
+	# root folders which contain categories
+	for folder_name in os.listdir(data_path):
+		folder_path = os.path.join(data_path, folder_name)
+		if os.path.isdir(folder_path):
+			# xml files with query answer pairs
+			for file_name in os.listdir(folder_path):
+				if file_name.endswith('.xml'):
+					file_path = os.path.join(folder_path, file_name)
+					tree = ET.parse(file_path)
+					qa_pairs = tree.getroot()[2]
+					for q_xml, a_xml in qa_pairs:
+						q_text = q_xml.text
+						a_text = a_xml.text
+						query = {
+							'id': hash(q_text),
+							'text': q_text
+						}
+						queries.append(query)
+						answer = {
+							'id': hash(a_text),
+							'text': a_text
+						}
+						answers.append(answer)
+						example = {
+							'query': query,
+							'answer': answer
+						}
+						examples.append(example)
 	return examples, queries, answers
 
 

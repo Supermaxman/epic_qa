@@ -102,7 +102,7 @@ custom_model = args.custom_model
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 print(f'Using device {device}')
 
-print(f'Loading tokenizer: {rerank_model_name}')
+print(f'Loading tokenizer: {tokenizer_name}')
 tokenizer = AutoTokenizer.from_pretrained(tokenizer_name)
 
 print(f'Loading model: {rerank_model_name}')

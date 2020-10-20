@@ -11,6 +11,7 @@ class QuestionAnsweringBert(pl.LightningModule):
 		super().__init__()
 		# self.bert = BertModel.from_pretrained(pre_model_name)
 		self.bert = AutoModelForSequenceClassification.from_pretrained(pre_model_name)
+		self.config = self.bert.config
 		self.learning_rate = learning_rate
 		self.weight_decay = weight_decay
 		self.lr_warmup = lr_warmup
