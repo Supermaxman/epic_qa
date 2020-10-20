@@ -188,7 +188,7 @@ if __name__ == "__main__":
 			deterministic=deterministic,
 			callbacks=callbacks,
 			checkpoint_callback=checkpoint_callback,
-			log_save_interval=10
+			log_every_n_steps=10
 		)
 	else:
 		if len(gpus) > 1:
@@ -207,7 +207,7 @@ if __name__ == "__main__":
 			deterministic=deterministic,
 			callbacks=callbacks,
 			checkpoint_callback=checkpoint_callback,
-			log_save_interval=10
+			log_every_n_steps=10
 		)
 
 	if train_model:
