@@ -6,6 +6,7 @@ import logging
 import pytorch_lightning as pl
 from torch.utils.data import DataLoader
 from pytorch_lightning.callbacks import ModelCheckpoint
+from pytorch_lightning import loggers as pl_loggers
 
 from model_utils import QuestionAnsweringBert
 from data_utils import SampleCollator, QuestionAnswerDataset, load_data, split_data
@@ -22,7 +23,7 @@ if __name__ == "__main__":
 	train_path = 'data/training'
 	test_path = 'data/golden'
 	save_directory = 'models'
-	model_name = 'v5'
+	model_name = 'v6'
 	pre_model_name = 'nboost/pt-biobert-base-msmarco'
 	learning_rate = 5e-5
 	lr_warmup = 0.1
@@ -30,7 +31,7 @@ if __name__ == "__main__":
 	gradient_clip_val = 1.0
 	weight_decay = 0.01
 	max_seq_len = 512
-	val_check_interval = 1.0
+	val_check_interval = 0.1
 	is_distributed = True
 	# export TPU_IP_ADDRESS=10.155.6.34
 	# export XRT_TPU_CONFIG="tpu_worker;0;$TPU_IP_ADDRESS:8470"
@@ -153,9 +154,16 @@ if __name__ == "__main__":
 			save_top_k=2,
 			mode='min'
 		)
+	logger = pl_loggers.TensorBoardLogger(
+		save_dir=save_directory,
+		flush_secs=30,
+		max_queue=2
+	)
+
 	if use_tpus:
 		logging.warning('Gradient clipping slows down TPU training drastically, disabled for now.')
 		trainer = pl.Trainer(
+			logger=logger,
 			tpu_cores=tpu_cores,
 			default_root_dir=save_directory,
 			max_epochs=epochs,
@@ -164,7 +172,7 @@ if __name__ == "__main__":
 			deterministic=deterministic,
 			callbacks=callbacks,
 			checkpoint_callback=checkpoint_callback,
-			log_save_interval=20
+			log_save_interval=10
 		)
 	else:
 		if len(gpus) > 1:
@@ -172,6 +180,7 @@ if __name__ == "__main__":
 		else:
 			backend = None
 		trainer = pl.Trainer(
+			logger=logger,
 			gpus=gpus,
 			default_root_dir=save_directory,
 			max_epochs=epochs,
@@ -182,7 +191,7 @@ if __name__ == "__main__":
 			deterministic=deterministic,
 			callbacks=callbacks,
 			checkpoint_callback=checkpoint_callback,
-			log_save_interval=20
+			log_save_interval=10
 		)
 
 	if train_model:
