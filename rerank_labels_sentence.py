@@ -171,16 +171,16 @@ for query_id, query in tqdm(enumerate(queries, start=1), total=len(queries)):
 	)
 
 	with torch.no_grad():
-		score_layer = torch.nn.Softmax(dim=-1)
+		# score_layer = torch.nn.Softmax(dim=-1)
 		for batch in tqdm(dataloader, total=len(dataloader)):
 			logits = model(
 				input_ids=batch['input_ids'].to(device),
 				token_type_ids=batch['token_type_ids'].to(device),
 				attention_mask=batch['attention_mask'].to(device)
 			)[0]
-			scores = score_layer(logits)
+			# scores = score_layer(logits)
 			# positive probability
-			scores = scores[:, 1].cpu().numpy()
+			scores = logits[:, 1].cpu().numpy()
 
 			# make larger score mean better answer
 			pass_scores[query_id].extend(zip(batch['id'], scores))
