@@ -36,7 +36,7 @@ class UniformNegativeSampler(NegativeSampler):
 		pos_query_id = pos_example['query']['id']
 		num_samples = 0
 		if not self.seen_seed:
-			print(f'Sampler using seed={self.gen_seed}')
+			self.set_seed()
 			self.seen_seed = True
 		while num_samples < self.negative_sample_size:
 			sample_idx = torch.randint(low=0, high=len(self.answers), size=(1,), generator=self.gen)[0].item()
@@ -46,8 +46,7 @@ class UniformNegativeSampler(NegativeSampler):
 				num_samples += 1
 				yield {'query': pos_example['query'], 'answer': sample_answer}
 
-	def update_epoch(self, epoch):
-		self.epoch = epoch
+	def set_seed(self):
 		try:
 			rank = dist.get_rank()
 		except AssertionError:
@@ -59,7 +58,12 @@ class UniformNegativeSampler(NegativeSampler):
 		worker_info = torch.utils.data.get_worker_info()
 		self.gen = torch.Generator()
 		self.gen_seed = (self.seed, self.epoch, rank, worker_info.id)
+		print(f'Sampler using seed={self.gen_seed}')
 		self.gen.manual_seed(hash(self.gen_seed))
+		self.seen_seed = True
+
+	def update_epoch(self, epoch):
+		self.epoch = epoch
 		self.seen_seed = False
 
 	def on_train_epoch_start(self, trainer: pl.Trainer, pl_module):
