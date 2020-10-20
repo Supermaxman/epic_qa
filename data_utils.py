@@ -95,14 +95,13 @@ class SampleCollator(object):
 			max_length=self.max_seq_len
 		)
 		labels = torch.tensor(labels, dtype=torch.long)
-		batch_size = len(pos_examples)
 		sample_size = batch_negative_sample_size + 1
-		max_seq_len = tokenizer_batch['input_ids'].shape[1]
 		batch = {
-			'input_ids': tokenizer_batch['input_ids'].view(batch_size, sample_size, max_seq_len),
-			'attention_mask': tokenizer_batch['attention_mask'].view(batch_size, sample_size, max_seq_len),
-			'token_type_ids': tokenizer_batch['token_type_ids'].view(batch_size, sample_size, max_seq_len),
-			'labels': labels.view(batch_size, sample_size),
+			'input_ids': tokenizer_batch['input_ids'],
+			'attention_mask': tokenizer_batch['attention_mask'],
+			'token_type_ids': tokenizer_batch['token_type_ids'],
+			'labels': labels,
+			'sample_size': sample_size
 		}
 
 		return batch

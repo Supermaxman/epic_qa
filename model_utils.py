@@ -20,19 +20,12 @@ class QuestionAnsweringBert(pl.LightningModule):
 		self.save_hyperparameters()
 
 	def forward(self, input_ids, attention_mask, token_type_ids):
-		batch_size, sample_size, max_seq_len = input_ids.shape
-		# [batch_size * sample_size, max_seq_len]
-		input_ids = input_ids.view(batch_size * sample_size, max_seq_len)
-		# [batch_size * sample_size, max_seq_len]
-		attention_mask = attention_mask.view(batch_size * sample_size, max_seq_len)
-
 		# [batch_size * sample_size, 2]
 		logits = self.bert(
 			input_ids,
 			attention_mask=attention_mask,
 			token_type_ids=token_type_ids
 		)[0]
-		logits = logits.view(batch_size, sample_size, 2)
 		scores = self.score_func(logits)
 		return logits, scores
 
@@ -51,9 +44,12 @@ class QuestionAnsweringBert(pl.LightningModule):
 			attention_mask=batch['attention_mask'],
 			token_type_ids=batch['token_type_ids'],
 		)
+		logits = logits.view(-1, batch['sample_size'])
+		scores = scores.view(-1, batch['sample_size'])
+		labels = batch['labels'].view(-1, batch['sample_size'])
 		loss = self._loss(
 			logits,
-			batch['labels']
+			labels
 		)
 
 		loss = loss.mean()
@@ -79,9 +75,12 @@ class QuestionAnsweringBert(pl.LightningModule):
 			attention_mask=batch['attention_mask'],
 			token_type_ids=batch['token_type_ids'],
 		)
+		logits = logits.view(-1, batch['sample_size'])
+		scores = scores.view(-1, batch['sample_size'])
+		labels = batch['labels'].view(-1, batch['sample_size'])
 		loss = self._loss(
 			logits,
-			batch['labels']
+			labels
 		)
 
 		pos_scores = scores[:, 0, 1]
