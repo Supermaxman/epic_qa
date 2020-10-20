@@ -35,12 +35,12 @@ if __name__ == "__main__":
 	# export TPU_IP_ADDRESS=10.155.6.34
 	# export XRT_TPU_CONFIG="tpu_worker;0;$TPU_IP_ADDRESS:8470"
 	# batch_size = 64
-	batch_size = 8
+	batch_size = 4
 	negative_sample_size = 1
 	accumulate_grad_batches = 1
 	# accumulate_grad_batches = 4
 	# gpus = [3, 4, 6, 7]
-	gpus = [4]
+	gpus = [0]
 	use_tpus = False
 	precision = 16 if use_tpus else 32
 	tpu_cores = 8
