@@ -37,14 +37,17 @@ class UniformNegativeSampler(NegativeSampler):
 		num_samples = 0
 		if not self.seen_seed:
 			self.set_seed()
-			self.seen_seed = True
 		while num_samples < self.negative_sample_size:
 			sample_idx = torch.randint(low=0, high=len(self.answers), size=(1,), generator=self.gen)[0].item()
 			sample_answer = self.answers[sample_idx]
 			sample_answer_id = sample_answer['id']
 			if (pos_query_id, sample_answer_id) not in self.examples:
 				num_samples += 1
-				yield {'query': pos_example['query'], 'answer': sample_answer}
+				sample_example = {
+					'query': pos_example['query'],
+					'answer': sample_answer
+				}
+				yield sample_example
 
 	def set_seed(self):
 		try:

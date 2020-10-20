@@ -22,7 +22,7 @@ if __name__ == "__main__":
 	train_path = 'data/training'
 	test_path = 'data/golden'
 	save_directory = 'models'
-	model_name = 'v2'
+	model_name = 'v1'
 	pre_model_name = 'nboost/pt-biobert-base-msmarco'
 	learning_rate = 5e-5
 	lr_warmup = 0.1
