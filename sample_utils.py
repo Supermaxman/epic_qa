@@ -61,7 +61,7 @@ class UniformNegativeSampler(NegativeSampler):
 		worker_info = torch.utils.data.get_worker_info()
 		self.gen = torch.Generator()
 		self.gen_seed = (self.seed, self.epoch, rank, worker_info.id)
-		print(f'Sampler using seed={self.gen_seed}')
+		# print(f'Sampler using seed={self.gen_seed}')
 		self.gen.manual_seed(hash(self.gen_seed))
 		self.seen_seed = True
 
