@@ -107,10 +107,13 @@ tokenizer = AutoTokenizer.from_pretrained(tokenizer_name)
 
 print(f'Loading model: {rerank_model_name}')
 if custom_model:
-	model = QuestionAnsweringBert.load_from_checkpoint(os.path.join(rerank_model_name, 'pytorch_model.bin'))
+	model = QuestionAnsweringBert.load_from_checkpoint(
+		os.path.join(rerank_model_name, 'pytorch_model.bin'),
+		map_location=device
+	)
 else:
 	model = AutoModelForSequenceClassification.from_pretrained(rerank_model_name)
-model.to(device)
+	model.to(device)
 model.eval()
 
 
