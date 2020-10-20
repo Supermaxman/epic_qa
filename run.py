@@ -7,6 +7,7 @@ import pytorch_lightning as pl
 from torch.utils.data import DataLoader
 from pytorch_lightning.callbacks import ModelCheckpoint
 from pytorch_lightning import loggers as pl_loggers
+# note: do NOT import torch before pytorch_lightning, really breaks TPUs
 import torch
 
 from model_utils import QuestionAnsweringBert
@@ -35,11 +36,14 @@ if __name__ == "__main__":
 		raise ValueError(f'Unknown dataset: {dataset}')
 
 	save_directory = 'models'
-	model_name = f'{dataset}-v1'
+	model_name = f'{dataset}-v2'
 	pre_model_name = 'nboost/pt-biobert-base-msmarco'
 	learning_rate = 5e-5
 	lr_warmup = 0.1
-	epochs = 10
+	# v1
+	# epochs = 10
+	# v2
+	epochs = 20
 	gradient_clip_val = 1.0
 	weight_decay = 0.01
 	max_seq_len = 512
