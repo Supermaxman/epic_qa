@@ -60,13 +60,10 @@ class QuestionAnsweringBert(pl.LightningModule):
 		correct_count = (pos_scores > neg_scores).float()
 
 		uniform_acc = correct_count.mean()
-
+		self.log('train_loss', loss)
+		self.log('train_uniform_acc', uniform_acc)
 		result = {
-			'loss': loss,
-			'log': {
-				'train_loss': loss,
-				'train_uniform_acc': uniform_acc
-			}
+			'loss': loss
 		}
 		return result
 
@@ -89,7 +86,6 @@ class QuestionAnsweringBert(pl.LightningModule):
 		correct_count = (pos_scores > neg_scores).float()
 
 		uniform_acc = correct_count.mean()
-		# TODO calculate proper metrics
 		result = {
 			'val_loss': loss.mean(),
 			'val_batch_loss': loss,
@@ -98,17 +94,17 @@ class QuestionAnsweringBert(pl.LightningModule):
 
 		return result
 
-	def validation_end(self, outputs):
+	def validation_epoch_end(self, outputs):
 		loss = torch.cat([x['val_batch_loss'] for x in outputs], dim=0).mean()
 		uniform_acc = torch.stack([x['val_batch_uniform_acc'] for x in outputs], dim=0).mean()
 
+		self.log('val_loss', loss)
+		self.log('val_uniform_acc', uniform_acc)
+
+		# TODO calculate proper metrics
 		result = {
 			'val_loss': loss,
-			'val_uniform_acc': uniform_acc,
-			'log': {
-				'val_loss': loss,
-				'val_uniform_acc': uniform_acc
-			}
+			'val_uniform_acc': uniform_acc
 		}
 		return result
 

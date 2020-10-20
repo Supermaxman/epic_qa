@@ -1,5 +1,5 @@
+
 from abc import ABC, abstractmethod
-import numpy as np
 import torch
 import pytorch_lightning as pl
 import torch.distributed as dist
