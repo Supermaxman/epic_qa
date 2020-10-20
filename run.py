@@ -202,8 +202,6 @@ if __name__ == "__main__":
 		logging.info('Training...')
 		trainer.fit(model, train_data_loader, val_data_loader)
 		logging.info('Saving checkpoint...')
-		trainer.save_checkpoint(checkpoint_path)
-	else:
 		model.to('cpu')
 		torch.save(model, checkpoint_path)
 
