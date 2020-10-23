@@ -56,7 +56,7 @@ class QuestionAnsweringBert(pl.LightningModule):
 		)
 		energies = energies.view(-1, batch['sample_size'])
 		batch_size = energies.shape[0]
-		neg_size = energies.shape[1]
+		neg_size = energies.shape[1] - 1
 		pos_energies, neg_energies, neg_probs, loss = self._energy_loss(
 			energies
 		)
@@ -88,7 +88,7 @@ class QuestionAnsweringBert(pl.LightningModule):
 		)
 		energies = energies.view(-1, batch['sample_size'])
 		batch_size = energies.shape[0]
-		neg_size = energies.shape[1]
+		neg_size = energies.shape[1] - 1
 		pos_energies, neg_energies, neg_probs, loss = self._energy_loss(
 			energies
 		)
