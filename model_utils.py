@@ -7,7 +7,7 @@ import pytorch_lightning as pl
 
 
 class QuestionAnsweringBert(pl.LightningModule):
-	def __init__(self, pre_model_name, learning_rate, weight_decay, lr_warmup, updates_total):
+	def __init__(self, pre_model_name, learning_rate, weight_decay, lr_warmup, updates_total, gamma, adv_temp):
 		super().__init__()
 		# self.bert = BertModel.from_pretrained(pre_model_name)
 		self.bert = AutoModelForSequenceClassification.from_pretrained(pre_model_name)
@@ -16,8 +16,8 @@ class QuestionAnsweringBert(pl.LightningModule):
 		self.weight_decay = weight_decay
 		self.lr_warmup = lr_warmup
 		self.updates_total = updates_total
-		self.criterion = nn.CrossEntropyLoss(reduction='none')
-		self.score_func = nn.Softmax(dim=-1)
+		self.adv_temp = adv_temp
+		self.gamma = gamma
 		self.save_hyperparameters()
 
 	def forward(self, input_ids, attention_mask, token_type_ids):
@@ -27,69 +27,77 @@ class QuestionAnsweringBert(pl.LightningModule):
 			attention_mask=attention_mask,
 			token_type_ids=token_type_ids
 		)[0]
-		scores = self.score_func(logits)
-		return logits, scores
+		# add positive class logit score, subtract negative class logit score
+		# convert from softmax logits to sigmoid score
+		# [batch_size * sample_size]
+		energies = logits[:, 1] - logits[:, 0]
+		return energies, None
 
-	def _loss(self, logits, labels):
-
-		# [batch_size, sample_size]
-		loss = self.criterion(logits, labels)
+	def _energy_loss(self, energies):
+		# from Rotate paper
+		# https://arxiv.org/abs/1902.10197
 		# [batch_size]
-		loss = loss.sum(dim=1)
-
-		return loss
+		pos_energies = energies[:, 0]
+		# [batch_size, neg_size]
+		neg_energies = energies[:, 1:]
+		with torch.no_grad():
+			neg_probs = nn.Softmax(dim=1)(self.adv_temp * -neg_energies)
+		pos_loss = -nn.LogSigmoid()(self.gamma - pos_energies)
+		neg_loss = -neg_probs * nn.LogSigmoid()(neg_energies - self.gamma)
+		neg_loss = neg_loss.sum(dim=1)
+		loss = pos_loss + neg_loss
+		return pos_energies, neg_energies, neg_probs, loss
 
 	def training_step(self, batch, batch_nb):
-		logits, scores = self(
+		energies, _ = self(
 			input_ids=batch['input_ids'],
 			attention_mask=batch['attention_mask'],
 			token_type_ids=batch['token_type_ids'],
 		)
-		logits = logits.view(-1, batch['sample_size'], 2)
-		scores = scores.view(-1, batch['sample_size'], 2)
-		labels = batch['labels'].view(-1, batch['sample_size'])
-		loss = self._loss(
-			logits,
-			labels
+		energies = energies.view(-1, batch['sample_size'])
+		batch_size = energies.shape[0]
+		neg_size = energies.shape[1]
+		pos_energies, neg_energies, neg_probs, loss = self._energy_loss(
+			energies
 		)
 
 		loss = loss.mean()
 
-		pos_scores = scores[:, 0, 1]
-		neg_scores = scores[:, 1, 1]
-		correct_count = (pos_scores > neg_scores).float()
+		correct_count = (pos_energies.unsqueeze(1) < neg_energies).float()
 
-		uniform_acc = correct_count.mean()
+		exp_acc = (neg_probs * correct_count).sum(dim=1).sum(dim=0) / batch_size
+		uniform_acc = correct_count.sum(dim=1).sum(dim=0) / (batch_size * neg_size)
+
 		self.log('train_loss', loss)
 		self.log('train_uniform_acc', uniform_acc)
+		self.log('train_exp_acc', exp_acc)
 		result = {
 			'loss': loss
 		}
 		return result
 
 	def validation_step(self, batch, batch_nb):
-		logits, scores = self(
+		energies, _ = self(
 			input_ids=batch['input_ids'],
 			attention_mask=batch['attention_mask'],
 			token_type_ids=batch['token_type_ids'],
 		)
-		logits = logits.view(-1, batch['sample_size'], 2)
-		scores = scores.view(-1, batch['sample_size'], 2)
-		labels = batch['labels'].view(-1, batch['sample_size'])
-		loss = self._loss(
-			logits,
-			labels
+		energies = energies.view(-1, batch['sample_size'])
+		batch_size = energies.shape[0]
+		neg_size = energies.shape[1]
+		pos_energies, neg_energies, neg_probs, loss = self._energy_loss(
+			energies
 		)
+		correct_count = (pos_energies.unsqueeze(1) < neg_energies).float()
 
-		pos_scores = scores[:, 0, 1]
-		neg_scores = scores[:, 1, 1]
-		correct_count = (pos_scores > neg_scores).float()
+		exp_acc = (neg_probs * correct_count).sum(dim=1).sum(dim=0) / batch_size
+		uniform_acc = correct_count.sum(dim=1).sum(dim=0) / (batch_size * neg_size)
 
-		uniform_acc = correct_count.mean()
 		result = {
 			'val_loss': loss.mean(),
 			'val_batch_loss': loss,
-			'val_batch_uniform_acc': uniform_acc
+			'val_batch_uniform_acc': uniform_acc,
+			'val_batch_exp_acc': exp_acc,
 		}
 
 		return result
@@ -97,9 +105,11 @@ class QuestionAnsweringBert(pl.LightningModule):
 	def validation_epoch_end(self, outputs):
 		loss = torch.cat([x['val_batch_loss'] for x in outputs], dim=0).mean()
 		uniform_acc = torch.stack([x['val_batch_uniform_acc'] for x in outputs], dim=0).mean()
+		exp_acc = torch.stack([x['val_batch_exp_acc'] for x in outputs], dim=0).mean()
 
 		self.log('val_loss', loss)
 		self.log('val_uniform_acc', uniform_acc)
+		self.log('val_exp_acc', exp_acc)
 
 	def configure_optimizers(self):
 		params = self._get_optimizer_params(self.weight_decay)

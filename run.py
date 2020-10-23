@@ -36,7 +36,7 @@ if __name__ == "__main__":
 		raise ValueError(f'Unknown dataset: {dataset}')
 
 	save_directory = 'models'
-	model_name = f'{dataset}-v2'
+	model_name = f'{dataset}-v3'
 	pre_model_name = 'nboost/pt-biobert-base-msmarco'
 	learning_rate = 5e-5
 	lr_warmup = 0.1
@@ -47,6 +47,8 @@ if __name__ == "__main__":
 	gradient_clip_val = 1.0
 	weight_decay = 0.01
 	max_seq_len = 512
+	adv_temp = 1.0
+	gamma = 12.0
 	val_check_interval = 1.0
 	is_distributed = True
 	# export TPU_IP_ADDRESS=10.155.6.34
@@ -68,6 +70,7 @@ if __name__ == "__main__":
 	load_model = mode != 'train'
 	test_eval = mode == 'test'
 
+	calc_seq_len = True
 	pl.seed_everything(seed)
 
 	save_directory = os.path.join(save_directory, model_name)
@@ -137,6 +140,35 @@ if __name__ == "__main__":
 		num_workers=num_workers,
 		collate_fn=train_collator
 	)
+	if calc_seq_len:
+		data_loader = DataLoader(
+			train_dataset,
+			batch_size=1,
+			shuffle=True,
+			num_workers=num_workers,
+			collate_fn=SampleCollator(
+				tokenizer,
+				UniformNegativeSampler(
+					answers,
+					train_examples,
+					0,
+					seed=seed,
+					train_callback=True
+				),
+				max_seq_len,
+				force_max_seq_len=False
+			)
+		)
+		import numpy as np
+		from tqdm import tqdm
+		logging.info('Calculating seq len stats...')
+		seq_lens = []
+		for batch in tqdm(data_loader):
+			seq_len = batch['input_ids'].shape[-1]
+			seq_lens.append(seq_len)
+		p = np.percentile(seq_lens, 95)
+		logging.info(f'95-percentile: {p}')
+		exit()
 
 	val_collator = SampleCollator(
 		tokenizer,
@@ -161,7 +193,9 @@ if __name__ == "__main__":
 			learning_rate=learning_rate,
 			lr_warmup=lr_warmup,
 			updates_total=updates_total,
-			weight_decay=weight_decay
+			weight_decay=weight_decay,
+			adv_temp=adv_temp,
+			gamma=gamma,
 		)
 		tokenizer.save_pretrained(save_directory)
 		model.config.save_pretrained(save_directory)
