@@ -27,10 +27,10 @@ class QuestionAnsweringBert(pl.LightningModule):
 			attention_mask=attention_mask,
 			token_type_ids=token_type_ids
 		)[0]
-		# add positive class logit score, subtract negative class logit score
+		# subtract positive class logit score, add negative class logit score
 		# convert from softmax logits to sigmoid score
 		# [batch_size * sample_size]
-		energies = logits[:, 1] - logits[:, 0]
+		energies = logits[:, 0] - logits[:, 1]
 		return energies, None
 
 	def _energy_loss(self, energies):
@@ -62,8 +62,11 @@ class QuestionAnsweringBert(pl.LightningModule):
 		)
 
 		loss = loss.mean()
-
+		# [bsize, neg_size]
 		correct_count = (pos_energies.unsqueeze(1) < neg_energies).float()
+		# sum number pos is less than and then subtract from neg count to get index, add 1 for rank
+		pos_rank = neg_size - correct_count.sum(axis=1) + 1
+		mrr = (1 / pos_rank).mean()
 
 		exp_acc = (neg_probs * correct_count).sum(dim=1).sum(dim=0) / batch_size
 		uniform_acc = correct_count.sum(dim=1).sum(dim=0) / (batch_size * neg_size)
@@ -71,6 +74,7 @@ class QuestionAnsweringBert(pl.LightningModule):
 		self.log('train_loss', loss)
 		self.log('train_uniform_acc', uniform_acc)
 		self.log('train_exp_acc', exp_acc)
+		self.log(f'train_mrr@{neg_size}', mrr)
 		result = {
 			'loss': loss
 		}
@@ -89,6 +93,9 @@ class QuestionAnsweringBert(pl.LightningModule):
 			energies
 		)
 		correct_count = (pos_energies.unsqueeze(1) < neg_energies).float()
+		# sum number pos is less than and then subtract from neg count to get index, add 1 for rank
+		pos_rank = neg_size - correct_count.sum(axis=1) + 1
+		mrr = (1 / pos_rank).mean()
 
 		exp_acc = (neg_probs * correct_count).sum(dim=1).sum(dim=0) / batch_size
 		uniform_acc = correct_count.sum(dim=1).sum(dim=0) / (batch_size * neg_size)
@@ -98,18 +105,23 @@ class QuestionAnsweringBert(pl.LightningModule):
 			'val_batch_loss': loss,
 			'val_batch_uniform_acc': uniform_acc,
 			'val_batch_exp_acc': exp_acc,
+			f'val_batch_mrr@{neg_size}': mrr,
+			f'neg_size': neg_size,
 		}
 
 		return result
 
 	def validation_epoch_end(self, outputs):
+		neg_size = outputs[0]['neg_size']
 		loss = torch.cat([x['val_batch_loss'] for x in outputs], dim=0).mean()
 		uniform_acc = torch.stack([x['val_batch_uniform_acc'] for x in outputs], dim=0).mean()
 		exp_acc = torch.stack([x['val_batch_exp_acc'] for x in outputs], dim=0).mean()
+		mrr = torch.stack([x[f'val_batch_mrr@{neg_size}'] for x in outputs], dim=0).mean()
 
 		self.log('val_loss', loss)
 		self.log('val_uniform_acc', uniform_acc)
 		self.log('val_exp_acc', exp_acc)
+		self.log(f'val_mrr@{neg_size}', mrr)
 
 	def configure_optimizers(self):
 		params = self._get_optimizer_params(self.weight_decay)

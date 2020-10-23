@@ -28,10 +28,12 @@ if __name__ == "__main__":
 		train_path = 'data/training'
 		test_path = 'data/golden'
 		load_func = load_expert_data
+		max_seq_len = 132
 	elif dataset == 'consumer':
 		train_path = 'consumer_data'
 		test_path = None
 		load_func = load_consumer_data
+		max_seq_len = 512
 	else:
 		raise ValueError(f'Unknown dataset: {dataset}')
 
@@ -40,24 +42,19 @@ if __name__ == "__main__":
 	pre_model_name = 'nboost/pt-biobert-base-msmarco'
 	learning_rate = 5e-5
 	lr_warmup = 0.1
-	# v1
-	# epochs = 10
-	# v2
-	epochs = 20
+	epochs = 10
 	gradient_clip_val = 1.0
 	weight_decay = 0.01
-	max_seq_len = 512
 	adv_temp = 1.0
 	gamma = 12.0
 	val_check_interval = 1.0
 	is_distributed = True
 	# export TPU_IP_ADDRESS=10.155.6.34
 	# export XRT_TPU_CONFIG="tpu_worker;0;$TPU_IP_ADDRESS:8470"
-	# batch_size = 64
+
 	batch_size = 8
-	negative_sample_size = 1
+	negative_sample_size = 16
 	accumulate_grad_batches = 1
-	# accumulate_grad_batches = 4
 	# gpus = [3, 4, 6, 7]
 	gpus = [0]
 	use_tpus = True
@@ -70,7 +67,7 @@ if __name__ == "__main__":
 	load_model = mode != 'train'
 	test_eval = mode == 'test'
 
-	calc_seq_len = True
+	calc_seq_len = False
 	pl.seed_everything(seed)
 
 	save_directory = os.path.join(save_directory, model_name)
