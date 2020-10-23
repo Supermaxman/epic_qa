@@ -54,9 +54,10 @@ class QuestionAnsweringBert(pl.LightningModule):
 			attention_mask=batch['attention_mask'],
 			token_type_ids=batch['token_type_ids'],
 		)
-		energies = energies.view(-1, batch['sample_size'])
+		sample_size = batch['sample_size']
+		energies = energies.view(-1, sample_size)
 		batch_size = energies.shape[0]
-		neg_size = energies.shape[1] - 1
+		neg_size = sample_size - 1
 		pos_energies, neg_energies, neg_probs, loss = self._energy_loss(
 			energies
 		)
@@ -74,7 +75,7 @@ class QuestionAnsweringBert(pl.LightningModule):
 		self.log('train_loss', loss)
 		self.log('train_uniform_acc', uniform_acc)
 		self.log('train_exp_acc', exp_acc)
-		self.log(f'train_mrr@{neg_size}', mrr)
+		self.log(f'train_mrr@{neg_size + 1}', mrr)
 		result = {
 			'loss': loss
 		}
@@ -86,7 +87,8 @@ class QuestionAnsweringBert(pl.LightningModule):
 			attention_mask=batch['attention_mask'],
 			token_type_ids=batch['token_type_ids'],
 		)
-		energies = energies.view(-1, batch['sample_size'])
+		sample_size = batch['sample_size']
+		energies = energies.view(-1, sample_size)
 		batch_size = energies.shape[0]
 		neg_size = energies.shape[1] - 1
 		pos_energies, neg_energies, neg_probs, loss = self._energy_loss(
@@ -105,7 +107,7 @@ class QuestionAnsweringBert(pl.LightningModule):
 			'val_batch_loss': loss,
 			'val_batch_uniform_acc': uniform_acc,
 			'val_batch_exp_acc': exp_acc,
-			f'val_batch_mrr@{neg_size}': mrr,
+			f'val_batch_mrr@{neg_size+1}': mrr,
 			f'neg_size': neg_size,
 		}
 
@@ -116,12 +118,12 @@ class QuestionAnsweringBert(pl.LightningModule):
 		loss = torch.cat([x['val_batch_loss'] for x in outputs], dim=0).mean()
 		uniform_acc = torch.stack([x['val_batch_uniform_acc'] for x in outputs], dim=0).mean()
 		exp_acc = torch.stack([x['val_batch_exp_acc'] for x in outputs], dim=0).mean()
-		mrr = torch.stack([x[f'val_batch_mrr@{neg_size}'] for x in outputs], dim=0).mean()
+		mrr = torch.stack([x[f'val_batch_mrr@{neg_size+1}'] for x in outputs], dim=0).mean()
 
 		self.log('val_loss', loss)
 		self.log('val_uniform_acc', uniform_acc)
 		self.log('val_exp_acc', exp_acc)
-		self.log(f'val_mrr@{neg_size}', mrr)
+		self.log(f'val_mrr@{neg_size+1}', mrr)
 
 	def configure_optimizers(self):
 		params = self._get_optimizer_params(self.weight_decay)
