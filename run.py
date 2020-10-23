@@ -29,11 +29,15 @@ if __name__ == "__main__":
 		test_path = 'data/golden'
 		load_func = load_expert_data
 		max_seq_len = 132
+		batch_size = 8
+		negative_sample_size = 16
 	elif dataset == 'consumer':
 		train_path = 'consumer_data'
 		test_path = None
 		load_func = load_consumer_data
 		max_seq_len = 512
+		batch_size = 4
+		negative_sample_size = 16
 	else:
 		raise ValueError(f'Unknown dataset: {dataset}')
 
@@ -52,8 +56,6 @@ if __name__ == "__main__":
 	# export TPU_IP_ADDRESS=10.155.6.34
 	# export XRT_TPU_CONFIG="tpu_worker;0;$TPU_IP_ADDRESS:8470"
 
-	batch_size = 8
-	negative_sample_size = 16
 	accumulate_grad_batches = 1
 	# gpus = [3, 4, 6, 7]
 	gpus = [0]
