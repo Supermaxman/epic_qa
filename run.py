@@ -36,7 +36,7 @@ if __name__ == "__main__":
 		test_path = None
 		load_func = load_consumer_data
 		max_seq_len = 512
-		batch_size = 2
+		batch_size = 1
 		negative_sample_size = 8
 	else:
 		raise ValueError(f'Unknown dataset: {dataset}')
