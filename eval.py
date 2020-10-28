@@ -80,7 +80,7 @@ for question_id, question_labels in labels.items():
 	for true_sent in label_sentences:
 		if true_sent not in pred_sentences:
 			pred_labels.append(1)
-			pred_scores.append(float('-inf'))
+			pred_scores.append(0.0)
 	try:
 		ap = average_precision_score(
 			y_true=np.array(pred_labels),
