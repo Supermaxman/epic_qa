@@ -237,7 +237,26 @@ python rerank.py \
 python eval.py \
   --query_path data/expert/expert_questions_prelim.json \
   --run_path runs/expert/expert-v3-full \
-  --top_k 10 \
+  --top_k 10
+
+
+python search_pass_index.py \
+  --doc_type expert \
+  --index bm25_pass \
+  --query expert_questions_prelim.json \
+  --run_name bm25_pass_full \
+  --top_k 1000
+
+python rerank.py \
+  --query_path data/expert/expert_questions_prelim.json \
+  --collection_path data/expert/epic_qa_cord_2020-06-19_v2 \
+  --search_run runs/expert/bm25_pass_full \
+  --search_top_k 1000 \
+  --rerank_model models/expert-v3 \
+  --run_path runs/expert/expert-v3-bm25-pass-full \
+  --batch_size 64 \
+  --max_length 128 \
+  --custom_model
 
 python eval.py \
   --query_path data/expert/expert_questions_prelim.json \
