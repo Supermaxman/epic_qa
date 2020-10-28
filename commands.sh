@@ -226,17 +226,18 @@ python rerank.py \
   --query_path data/expert/expert_questions_prelim.json \
   --collection_path data/expert/epic_qa_cord_2020-06-19_v2 \
   --search_run runs/expert/baseline_pass_full \
-  --search_top_k 100 \
+  --search_top_k 1000 \
   --rerank_model models/expert-v3 \
   --run_path runs/expert/expert-v3-full \
-  --batch_size 32 \
-  --max_length 512 \
+  --batch_size 64 \
+  --max_length 128 \
   --custom_model
 
 
 python eval.py \
   --query_path data/expert/expert_questions_prelim.json \
-  --run_path runs/expert/expert-v3-full
+  --run_path runs/expert/expert-v3-full \
+  --top_k 10 \
 
 
 

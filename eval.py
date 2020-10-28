@@ -9,12 +9,14 @@ parser = argparse.ArgumentParser()
 parser.add_argument('-q', '--query_path', required=True)
 parser.add_argument('-r', '--run_path', required=True)
 parser.add_argument('-l', '--label_path', default='data/prelim_judgments.json')
+parser.add_argument('-k', '--top_k', default=100)
 
 args = parser.parse_args()
 
 query_path = args.query_path
 run_path = args.run_path
 label_path = args.label_path
+top_k = args.top_k
 
 with open(query_path) as f:
 	queries_list = json.load(f)
@@ -50,7 +52,8 @@ with open(run_path) as f:
 				'run_name': run_name
 			}
 			if question_id in labels:
-				qrels[question_id].append(rel)
+				if len(qrels[question_id]) < top_k:
+					qrels[question_id].append(rel)
 
 total_tp = 0.0
 total_fp = 0.0
