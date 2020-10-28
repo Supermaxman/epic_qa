@@ -88,7 +88,7 @@ for question_id, question_labels in labels.items():
 			average='macro'
 		)
 		# adjust ap for total number of true documents which can never contribute regardless of threshold
-		ap = (ap * nrof_found_true) / nrof_true
+		# ap = (ap * nrof_found_true) / nrof_true
 	except IndexError:
 		ap = 0.0
 	if np.isnan(ap):
