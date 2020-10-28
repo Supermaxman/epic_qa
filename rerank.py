@@ -164,6 +164,7 @@ for query_id, query in tqdm(enumerate(queries, start=1), total=len(queries)):
 	if debug and query_id != 1:
 		continue
 	query_labels = qrels[query_id]
+	assert len(query_labels) > 0
 	dataset = PassageDataset(
 		collection_path,
 		query_labels,
