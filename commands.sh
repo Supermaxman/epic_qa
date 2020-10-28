@@ -421,15 +421,15 @@ python search_pass_index.py \
   --doc_type expert \
   --index baseline_pass \
   --query expert_questions_prelim.json \
-  --run_name bm25_pass_100 \
-  --top_k 100
+  --run_name bm25_pass_1000 \
+  --top_k 1000
 
 python rerank.py \
   --query_path data/expert/expert_questions_prelim.json \
   --collection_path data/expert/epic_qa_cord_2020-06-19_v2 \
-  --search_run runs/expert/bm25_pass_100 \
+  --search_run runs/expert/bm25_pass_1000 \
   --rerank_model models/expert-v3 \
-  --run_path runs/expert/expert-v3-bm25-pass \
+  --run_path runs/expert/expert-v3-bm25-pass-1000 \
   --batch_size 16 \
   --max_length 512 \
   --custom_model
@@ -437,7 +437,7 @@ python rerank.py \
 
 python eval.py \
   --query_path data/expert/expert_questions_prelim.json \
-  --run_path runs/expert/expert-v3-bm25-pass
+  --run_path runs/expert/expert-v3-bm25-pass-1000
 
 #EQ001: AP=0.032
 #EQ040: AP=0.000

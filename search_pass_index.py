@@ -37,7 +37,7 @@ with open(run_path, 'w') as fo:
 	for query_id, query in tqdm(enumerate(queries, start=1), total=len(queries)):
 		if debug and query_id != 1:
 			continue
-		hits = searcher.search(query['question'] + ' ' + query['query'], k=top_k)
+		hits = searcher.search(query['question'], k=top_k)
 		for rank, hit in enumerate(hits[:top_k], start=1):
 			line = f'{query_id}\tQ0\t{hit.docid}\t{rank}\t{hit.score:.4f}\t{run_name}\n'
 			fo.write(line)
