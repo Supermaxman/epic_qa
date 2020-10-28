@@ -77,6 +77,10 @@ for question_id, question_labels in labels.items():
 			pred_sentences.add(doc_pass_sent_id)
 			pred_scores.append(rel['score'])
 			pred_labels.append(1 if doc_pass_sent_id in label_sentences else 0)
+	for true_sent in label_sentences:
+		if true_sent not in pred_sentences:
+			pred_labels.append(1)
+			pred_scores.append(float('-inf'))
 	try:
 		ap = average_precision_score(
 			y_true=np.array(pred_labels),
