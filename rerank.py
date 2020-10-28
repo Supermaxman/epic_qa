@@ -204,7 +204,7 @@ for query_id, query in tqdm(enumerate(queries, start=1), total=len(queries)):
 			)[0]
 
 			if custom_model:
-				scores = (logits).cpu().numpy()
+				scores = (-logits).cpu().numpy()
 			else:
 				scores = logits[:, 1].cpu().numpy()
 
