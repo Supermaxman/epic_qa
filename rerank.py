@@ -156,6 +156,7 @@ with open(search_run) as f:
 			query_id = int(query_id)
 			doc_id, pass_id = doc_id.split('-')
 			pass_id = int(pass_id)
+			qrels[query_id].append((doc_id, pass_id))
 
 
 print(f'Running reranking on passages and writing results to {run_path}...')
