@@ -221,3 +221,14 @@ python rerank_labels_sentence.py \
   --max_length 512 \
   --multi_sentence \
   --custom_model
+
+python rerank.py \
+  --query_path data/expert/expert_questions_prelim.json \
+  --collection_path data/expert/epic_qa_cord_2020-06-19_v2 \
+  --search_run runs/expert/baseline_pass_full \
+  --rerank_model models/expert-v3 \
+  --run_path runs/expert/expert-v3-full \
+  --batch_size 32 \
+  --max_length 512 \
+  --custom_model
+
