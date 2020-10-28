@@ -79,6 +79,7 @@ parser = argparse.ArgumentParser()
 parser.add_argument('-q', '--query_path', required=True)
 parser.add_argument('-c', '--collection_path', required=True)
 parser.add_argument('-l', '--search_run', required=True)
+parser.add_argument('-tk', '--search_top_k', default=100)
 parser.add_argument('-r', '--run_path', required=True)
 parser.add_argument('-rm', '--rerank_model', default='nboost/pt-biobert-base-msmarco')
 parser.add_argument('-bs', '--batch_size', default=64, type=int)
@@ -92,6 +93,7 @@ args = parser.parse_args()
 # 'expert'
 collection_path = args.collection_path
 search_run = args.search_run
+search_top_k = args.search_top_k
 # 'baseline_doc'
 run_name = args.run_path
 # expert_questions_prelim.json
@@ -153,7 +155,11 @@ with open(search_run) as f:
 			query_id = int(query_id)
 			doc_id, pass_id = doc_id.split('-')
 			pass_id = int(pass_id)
-			qrels[query_id].append((doc_id, pass_id))
+			# assume in ranked order, only rerank top k passages
+			if len(qrels[query_id]) < search_top_k:
+				qrels[query_id].append((doc_id, pass_id))
+			else:
+				continue
 
 
 print(f'Running reranking on passages and writing results to {run_path}...')
