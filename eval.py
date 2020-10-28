@@ -51,7 +51,7 @@ with open(run_path) as f:
 				'sent_end_id': int(sent_end_id),
 				'id': doc_pass_sent_id,
 				'rank': int(rank),
-				'score': -float(score),
+				'score': float(score),
 				'run_name': run_name
 			}
 			if question_id in labels:
