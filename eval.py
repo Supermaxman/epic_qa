@@ -71,22 +71,24 @@ for question_id, question_labels in labels.items():
 	pred_sentences = set()
 	pred_scores = []
 	pred_labels = []
+	nrof_found_true = 0
 	for rel in question_rels:
 		for sent_id in range(rel['sent_start_id'], rel['sent_end_id'] + 1):
 			doc_pass_sent_id = f'{rel["doc_id"]}-C{rel["pass_id"]:03d}-S{sent_id:03d}'
 			pred_sentences.add(doc_pass_sent_id)
 			pred_scores.append(rel['score'])
-			pred_labels.append(1 if doc_pass_sent_id in label_sentences else 0)
-	for true_sent in label_sentences:
-		if true_sent not in pred_sentences:
-			pred_labels.append(1)
-			pred_scores.append(0.0)
+			pred_label = 1 if doc_pass_sent_id in label_sentences else 0
+			pred_labels.append(pred_label)
+			nrof_found_true += pred_label
+	nrof_true = len(label_sentences)
 	try:
 		ap = average_precision_score(
 			y_true=np.array(pred_labels),
 			y_score=np.array(pred_scores),
 			average='macro'
 		)
+		# adjust ap for total number of true documents which can never contribute regardless of threshold
+		ap = (ap * nrof_found_true) / nrof_true
 	except IndexError:
 		ap = 0.0
 	if np.isnan(ap):
