@@ -10,6 +10,8 @@ parser.add_argument('-i', '--index', required=True)
 parser.add_argument('-q', '--query', required=True)
 parser.add_argument('-r', '--run_name', required=True)
 parser.add_argument('-k', '--top_k', default=1000, type=int)
+parser.add_argument('-bk1', '--bm25_k1', default=0.82, type=float)
+parser.add_argument('-bb', '--bm25_b', default=0.68, type=float)
 
 args = parser.parse_args()
 
@@ -27,6 +29,7 @@ with open(query_path) as f:
 	queries = json.load(f)
 
 searcher = SimpleSearcher(index_path)
+searcher.set_bm25(args.bm25_k1, args.bm25_b)
 print(f'Running search and writing results to {run_path}...')
 with open(run_path, 'w') as fo:
 	for query_id, query in tqdm(enumerate(queries, start=1), total=len(queries)):
