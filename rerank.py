@@ -206,6 +206,6 @@ print(f'Saving results...')
 with open(run_path, 'w') as fo:
 	for query_id, passages in pass_scores.items():
 		for rank, (doc_pass_sent_id, score) in enumerate(passages, start=1):
-			line = f'{query_id}\tQ0\t{doc_pass_sent_id}\t{rank}\t{score:.4f}\t{run_name}\n'
+			line = f'{query_id}\tQ0\t{doc_pass_sent_id}\t{rank}\t{score:.8f}\t{run_name}\n'
 			fo.write(line)
 print('Done!')

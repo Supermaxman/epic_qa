@@ -233,3 +233,11 @@ python rerank.py \
   --max_length 512 \
   --custom_model
 
+
+python eval.py \
+  --query_path data/expert/expert_questions_prelim.json \
+  --run_path runs/expert/expert-v3-full
+
+
+
+
