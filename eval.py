@@ -50,8 +50,8 @@ with open(run_path) as f:
 				'sent_start_id': int(sent_start_id),
 				'sent_end_id': int(sent_end_id),
 				'id': doc_pass_sent_id,
-				'rank': rank,
-				'score': score,
+				'rank': int(rank),
+				'score': float(score),
 				'run_name': run_name
 			}
 			if question_id in labels:
@@ -78,8 +78,8 @@ for question_id, question_labels in labels.items():
 			pred_scores.append(rel['score'])
 			pred_labels.append(1 if doc_pass_sent_id in label_sentences else 0)
 	ap = average_precision_score(
-		y_true=pred_labels,
-		y_score=pred_scores,
+		y_true=np.array(pred_labels),
+		y_score=np.array(pred_scores),
 		average='macro'
 	)
 	query_aps[question_id] = ap
