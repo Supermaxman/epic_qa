@@ -37,13 +37,6 @@ class QuestionAnsweringBert(pl.LightningModule):
 			labels
 		)
 
-		# [batch_size]
-		pos_loss = loss[:, 0]
-		# [batch_size, neg_size]
-		neg_loss = loss[:, 1:]
-
-		neg_loss = neg_loss.mean(dim=1)
-		loss = pos_loss + neg_loss
 		return loss
 
 	def training_step(self, batch, batch_nb):
