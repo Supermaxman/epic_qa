@@ -33,9 +33,7 @@ with open(run_path) as f:
 		if line:
 			query_id, _, doc_pass_sent_id, rank, score, run_name = line
 			query_id = int(query_id)
-			start_sent, end_sent = doc_pass_sent_id.split(':')
-			doc_id, pass_id, sent_start_id = start_sent.split('-')
-			_, _, sent_end_id = end_sent.split('-')
+			doc_id, pass_id, sent_start_id, sent_end_id = doc_pass_sent_id.split('-')
 			question_id = queries[query_id]['question_id']
 			rel = {
 				'doc_id': doc_id,
