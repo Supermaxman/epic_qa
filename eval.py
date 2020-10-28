@@ -37,9 +37,9 @@ with open(run_path) as f:
 			question_id = queries[query_id]['question_id']
 			rel = {
 				'doc_id': doc_id,
-				'pass_id': pass_id,
-				'sent_start_id': int(sent_start_id[1:]),
-				'sent_end_id': int(sent_end_id[1:]),
+				'pass_id': int(pass_id),
+				'sent_start_id': int(sent_start_id),
+				'sent_end_id': int(sent_end_id),
 				'id': doc_pass_sent_id,
 				'rank': rank,
 				'score': score,
@@ -59,7 +59,7 @@ for question_id, question_labels in labels.items():
 	pred_sentences = set()
 	for rel in question_rels:
 		for sent_id in range(rel['sent_start_id'], rel['sent_end_id'] + 1):
-			pred_sentences.add(f'{rel["doc_id"]}-{rel["pass_id"]}-S{sent_id:03d}')
+			pred_sentences.add(f'{rel["doc_id"]}-C{rel["pass_id"]:03d}-S{sent_id:03d}')
 
 	overlap = pred_sentences.intersection(label_sentences)
 	# overlap of pred and true is tp
