@@ -83,7 +83,7 @@ for question_id, question_labels in labels.items():
 			y_score=np.array(pred_scores),
 			average='macro'
 		)
-	except RuntimeWarning:
+	except IndexError:
 		ap = 0.0
 	query_aps[question_id] = ap
 
