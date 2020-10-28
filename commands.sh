@@ -341,11 +341,11 @@ python rerank.py \
   --max_length 128 \
   --custom_model
 
+
 python eval.py \
   --query_path data/expert/expert_questions_prelim.json \
   --run_path runs/expert/expert-v3-bm25-pass-100 \
   --top_k 1000
-
 #EQ001: P=0.300, R=0.026, F1=0.015
 #EQ040: P=0.000, R=0.000, F1=0.000
 #EQ002: P=0.100, R=0.012, F1=0.002
@@ -368,3 +368,29 @@ python eval.py \
 #EQ037: P=0.200, R=0.022, F1=0.009
 #EQ045: P=0.000, R=0.000, F1=0.000
 #TOTAL Micro: P=0.119, R=0.009, F1=0.002
+
+
+python search_pass_index.py \
+  --doc_type expert \
+  --index baseline_pass \
+  --query expert_questions_prelim.json \
+  --run_name bm25_pass_1000 \
+  --top_k 1000 \
+  --debug
+
+python rerank.py \
+  --query_path data/expert/expert_questions_prelim.json \
+  --collection_path data/expert/epic_qa_cord_2020-06-19_v2 \
+  --search_run runs/expert/bm25_pass_1000 \
+  --rerank_model models/expert-v3 \
+  --run_path runs/expert/expert-v3-bm25-pass \
+  --batch_size 64 \
+  --max_length 128 \
+  --custom_model \
+  --debug
+
+
+python eval.py \
+  --query_path data/expert/expert_questions_prelim.json \
+  --run_path runs/expert/expert-v3-bm25-pass \
+  --debug
