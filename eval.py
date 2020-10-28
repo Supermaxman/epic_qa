@@ -77,11 +77,14 @@ for question_id, question_labels in labels.items():
 			pred_sentences.add(doc_pass_sent_id)
 			pred_scores.append(rel['score'])
 			pred_labels.append(1 if doc_pass_sent_id in label_sentences else 0)
-	ap = average_precision_score(
-		y_true=np.array(pred_labels),
-		y_score=np.array(pred_scores),
-		average='macro'
-	)
+	try:
+		ap = average_precision_score(
+			y_true=np.array(pred_labels),
+			y_score=np.array(pred_scores),
+			average='macro'
+		)
+	except RuntimeWarning:
+		ap = 0.0
 	query_aps[question_id] = ap
 
 for question_id, question_ap in query_aps.items():
