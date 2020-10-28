@@ -87,6 +87,7 @@ parser.add_argument('-ng', '--n_gram_max', default=3, type=int)
 parser.add_argument('-cm', '--custom_model', default=False, action='store_true')
 parser.add_argument('-db', '--debug', default=False, action='store_true')
 parser.add_argument('-t', '--threshold', default=0.0, type=float)
+parser.add_argument('-lp', '--label_path', default='data/prelim_judgments.json')
 
 args = parser.parse_args()
 
@@ -100,6 +101,7 @@ query_path = args.query_path
 run_path = args.run_path
 debug = args.debug
 threshold = args.threshold
+label_path = args.label_path
 
 rerank_model_name = args.rerank_model
 tokenizer_name = args.rerank_model
@@ -158,11 +160,23 @@ with open(search_run) as f:
 			pass_id = int(pass_id)
 			qrels[query_id].append((doc_id, pass_id))
 
+keep_ids = None
+if label_path:
+	keep_ids = set()
+	with open(label_path) as f:
+		questions = json.load(f)
+		for question in questions:
+			question_id = question['question_id']
+			if question_id in queries:
+				keep_ids.add(question_id)
 
 print(f'Running reranking on passages and writing results to {run_path}...')
 pass_scores = defaultdict(list)
 for query_id, query in tqdm(enumerate(queries, start=1), total=len(queries)):
 	if debug and query_id != 1:
+		continue
+	question_id = query['question_id']
+	if keep_ids is not None and question_id not in keep_ids:
 		continue
 	query_labels = qrels[query_id]
 	assert len(query_labels) > 0
