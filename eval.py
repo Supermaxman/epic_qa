@@ -69,11 +69,11 @@ for question_id, question_labels in labels.items():
 	# subtract tp from labels for fn
 	fn = len(label_sentences - overlap)
 
-	precision = tp / (tp + fp)
+	precision = tp / (max(tp + fp, 1))
 
-	recall = tp / (tp + fn)
+	recall = tp / (max(tp + fn, 1))
 
-	f1 = 2.0 * ((precision * recall) / (precision + recall))
+	f1 = 2.0 * ((precision * recall) / (max(precision + recall, 1)))
 	results[question_id] = {
 		'precision': precision,
 		'recall': recall,
@@ -86,8 +86,8 @@ for question_id, question_labels in labels.items():
 for question_id, result in results.items():
 	print(f'{question_id}: P={result["precision"]:.3f}, R={result["recall"]:.3f}, F1={result["f1"]:.3f}')
 
-total_precision = total_tp / (total_tp + total_fp)
-total_recall = total_tp / (total_tp + total_fn)
-total_f1 = 2.0 * ((total_precision * total_recall) / (total_precision + total_recall))
+total_precision = total_tp / (max(total_tp + total_fp, 1))
+total_recall = total_tp / (max(total_tp + total_fn, 1))
+total_f1 = 2.0 * ((total_precision * total_recall) / (max(total_precision + total_recall, 1)))
 
 print(f'TOTAL Micro: P={total_precision:.3f}, R={total_recall:.3f}, F1={total_f1:.3f}')
