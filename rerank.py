@@ -32,9 +32,8 @@ class PassageDataset(Dataset):
 			file_path = os.path.join(self.root_dir, d_id + '.json')
 			with open(file_path) as f:
 				doc = json.load(f)
-			lookup = {pass_id: passage for pass_id, passage in doc['contexts']}
 			for p_id in p_ids:
-				passage = lookup[p_id]
+				passage = doc['contexts'][p_id]
 				context_examples = []
 				for s_id, sentence in enumerate(passage['sentences']):
 					example = {
