@@ -31,19 +31,21 @@ class QuestionAnsweringBert(pl.LightningModule):
 		scores = self.score_func(logits)
 		return logits, scores
 
-	def _loss(self, logits):
+	def _loss(self, logits, labels):
 		# [batch_size]
 		pos_logits = logits[:, 0]
+		pos_labels = labels[:, 0]
 		# [batch_size, neg_size]
 		neg_logits = logits[:, 1:]
+		neg_labels = labels[:, 1:]
 
 		pos_loss = self.criterion(
 			pos_logits,
-			torch.ones_like(pos_logits, dtype=torch.long)
+			pos_labels
 		)
 		neg_loss = self.criterion(
 			neg_logits,
-			torch.zeros_like(neg_logits, dtype=torch.long)
+			neg_labels
 		)
 		neg_loss = neg_loss.mean(dim=1)
 		loss = pos_loss + neg_loss
@@ -55,12 +57,14 @@ class QuestionAnsweringBert(pl.LightningModule):
 			attention_mask=batch['attention_mask'],
 			token_type_ids=batch['token_type_ids'],
 		)
+		labels = batch['labels']
 		sample_size = batch['sample_size']
 		logits = logits.view(-1, sample_size)
 		batch_size = logits.shape[0]
 		neg_size = sample_size - 1
 		pos_logits, neg_logits, loss = self._loss(
-			logits
+			logits,
+			labels
 		)
 
 		loss = loss.mean()
