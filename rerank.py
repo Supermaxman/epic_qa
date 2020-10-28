@@ -167,8 +167,7 @@ if label_path:
 		questions = json.load(f)
 		for question in questions:
 			question_id = question['question_id']
-			if question_id in queries:
-				keep_ids.add(question_id)
+			keep_ids.add(question_id)
 
 print(f'Running reranking on passages and writing results to {run_path}...')
 pass_scores = defaultdict(list)
