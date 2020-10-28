@@ -84,7 +84,7 @@ for question_id, question_labels in labels.items():
 	)
 	query_aps[question_id] = ap
 
-for question_id, question_ap in query_aps:
+for question_id, question_ap in query_aps.items():
 	print(f'{question_id}: AP={question_ap:.3f}')
 
 map = np.mean(query_aps)
