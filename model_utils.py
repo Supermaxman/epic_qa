@@ -32,24 +32,19 @@ class QuestionAnsweringBert(pl.LightningModule):
 		return logits, scores
 
 	def _loss(self, logits, labels):
-		# [batch_size]
-		pos_logits = logits[:, 0]
-		pos_labels = labels[:, 0]
-		# [batch_size, neg_size]
-		neg_logits = logits[:, 1:]
-		neg_labels = labels[:, 1:]
+		loss = self.criterion(
+			logits,
+			labels
+		)
 
-		pos_loss = self.criterion(
-			pos_logits,
-			pos_labels
-		)
-		neg_loss = self.criterion(
-			neg_logits,
-			neg_labels
-		)
+		# [batch_size]
+		pos_loss = loss[:, 0]
+		# [batch_size, neg_size]
+		neg_loss = loss[:, 1:]
+
 		neg_loss = neg_loss.mean(dim=1)
 		loss = pos_loss + neg_loss
-		return pos_logits, neg_logits, loss
+		return loss
 
 	def training_step(self, batch, batch_nb):
 		logits, _ = self(
@@ -57,18 +52,18 @@ class QuestionAnsweringBert(pl.LightningModule):
 			attention_mask=batch['attention_mask'],
 			token_type_ids=batch['token_type_ids'],
 		)
+		loss = self._loss(
+			logits,
+			batch['labels']
+		)
+		loss = loss.mean()
 		sample_size = batch['sample_size']
 		logits = logits.view(-1, sample_size, 2)
-		labels = batch['labels']
-		labels = labels.view(-1, sample_size)
+		pos_logits = logits[:, 0, 1]
+		neg_logits = logits[:, 1:, 1]
 		batch_size = logits.shape[0]
 		neg_size = sample_size - 1
-		pos_logits, neg_logits, loss = self._loss(
-			logits,
-			labels
-		)
 
-		loss = loss.mean()
 		# [bsize, neg_size]
 		correct_count = (pos_logits.unsqueeze(1) > neg_logits).float()
 		# sum number pos is less than and then subtract from neg count to get index, add 1 for rank
@@ -93,16 +88,17 @@ class QuestionAnsweringBert(pl.LightningModule):
 			attention_mask=batch['attention_mask'],
 			token_type_ids=batch['token_type_ids'],
 		)
+
+		loss = self._loss(
+			logits,
+			batch['labels']
+		)
 		sample_size = batch['sample_size']
 		logits = logits.view(-1, sample_size, 2)
-		labels = batch['labels']
-		labels = labels.view(-1, sample_size)
 		batch_size = logits.shape[0]
 		neg_size = logits.shape[1] - 1
-		pos_logits, neg_logits, loss = self._loss(
-			logits,
-			labels
-		)
+		pos_logits = logits[:, 0, 1]
+		neg_logits = logits[:, 1:, 1]
 		correct_count = (pos_logits.unsqueeze(1) > neg_logits).float()
 		# sum number pos is less than and then subtract from neg count to get index, add 1 for rank
 		pos_rank = neg_size - correct_count.sum(axis=1) + 1
