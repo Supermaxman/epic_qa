@@ -59,7 +59,7 @@ class QuestionAnsweringBert(pl.LightningModule):
 		)
 		labels = batch['labels']
 		sample_size = batch['sample_size']
-		logits = logits.view(-1, sample_size)
+		logits = logits.view(-1, sample_size, 2)
 		batch_size = logits.shape[0]
 		neg_size = sample_size - 1
 		pos_logits, neg_logits, loss = self._loss(
@@ -93,7 +93,7 @@ class QuestionAnsweringBert(pl.LightningModule):
 			token_type_ids=batch['token_type_ids'],
 		)
 		sample_size = batch['sample_size']
-		logits = logits.view(-1, sample_size)
+		logits = logits.view(-1, sample_size, 2)
 		batch_size = logits.shape[0]
 		neg_size = logits.shape[1] - 1
 		pos_logits, neg_logits, loss = self._energy_loss(
