@@ -9,7 +9,7 @@ parser = argparse.ArgumentParser()
 parser.add_argument('-q', '--query_path', required=True)
 parser.add_argument('-r', '--run_path', required=True)
 parser.add_argument('-l', '--label_path', default='data/prelim_judgments.json')
-parser.add_argument('-k', '--top_k', default=100)
+parser.add_argument('-k', '--top_k', default=100, type=int)
 
 args = parser.parse_args()
 

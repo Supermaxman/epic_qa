@@ -239,6 +239,9 @@ python eval.py \
   --run_path runs/expert/expert-v3-full \
   --top_k 10 \
 
-
+python eval.py \
+  --query_path data/expert/expert_questions_prelim.json \
+  --run_path runs/expert/expert-v1 \
+  --top_k 10 \
 
 
