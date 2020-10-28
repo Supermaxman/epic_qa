@@ -81,6 +81,9 @@ for question_id, question_labels in labels.items():
 			pred_labels.append(pred_label)
 			nrof_found_true += pred_label
 	nrof_true = len(label_sentences)
+	print(label_sentences)
+	print('------------------')
+	print(pred_sentences)
 	try:
 		ap = average_precision_score(
 			y_true=np.array(pred_labels),
