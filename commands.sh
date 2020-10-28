@@ -384,8 +384,8 @@ python rerank.py \
   --search_run runs/expert/bm25_pass_1000 \
   --rerank_model models/expert-v3 \
   --run_path runs/expert/expert-v3-bm25-pass \
-  --batch_size 64 \
-  --max_length 128 \
+  --batch_size 16 \
+  --max_length 512 \
   --custom_model \
   --debug
 
@@ -393,4 +393,24 @@ python rerank.py \
 python eval.py \
   --query_path data/expert/expert_questions_prelim.json \
   --run_path runs/expert/expert-v3-bm25-pass \
+  --debug
+
+python eval.py \
+  --query_path data/expert/expert_questions_prelim.json \
+  --run_path runs/expert/bm25_pass_1000 \
+  --debug
+
+python rerank.py \
+  --query_path data/expert/expert_questions_prelim.json \
+  --collection_path data/expert/epic_qa_cord_2020-06-19_v2 \
+  --search_run runs/expert/bm25_pass_1000 \
+  --rerank_model nboost/pt-biobert-base-msmarco \
+  --run_path runs/expert/baseline-bm25-pass \
+  --batch_size 16 \
+  --max_length 512 \
+  --debug
+
+python eval.py \
+  --query_path data/expert/expert_questions_prelim.json \
+  --run_path runs/expert/baseline-bm25-pass \
   --debug

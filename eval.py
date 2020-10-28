@@ -3,6 +3,8 @@ from tqdm import tqdm
 import argparse
 from collections import defaultdict
 import os
+import numpy as np
+from sklearn.metrics import average_precision_score
 
 
 parser = argparse.ArgumentParser()
@@ -59,7 +61,7 @@ total_tp = 0.0
 total_fp = 0.0
 total_fn = 0.0
 
-results = {}
+query_aps = {}
 for question_id, question_labels in labels.items():
 	q_idx = q_lookup_id[question_id]
 	if debug and q_idx != 1:
@@ -67,37 +69,23 @@ for question_id, question_labels in labels.items():
 	question_rels = qrels[question_id]
 	label_sentences = set([sent['sentence_id'] for sent in question_labels['annotations']])
 	pred_sentences = set()
+	pred_scores = []
+	pred_labels = []
 	for rel in question_rels:
 		for sent_id in range(rel['sent_start_id'], rel['sent_end_id'] + 1):
-			pred_sentences.add(f'{rel["doc_id"]}-C{rel["pass_id"]:03d}-S{sent_id:03d}')
+			doc_pass_sent_id = f'{rel["doc_id"]}-C{rel["pass_id"]:03d}-S{sent_id:03d}'
+			pred_sentences.add(doc_pass_sent_id)
+			pred_scores.append(rel['score'])
+			pred_labels.append(1 if doc_pass_sent_id in label_sentences else 0)
+	ap = average_precision_score(
+		y_true=pred_labels,
+		y_score=pred_scores,
+		average='macro'
+	)
+	query_aps[question_id] = ap
 
-	overlap = pred_sentences.intersection(label_sentences)
-	# overlap of pred and true is tp
-	tp = len(overlap)
-	# subtract tp from pred for fp
-	fp = len(pred_sentences - overlap)
-	# subtract tp from labels for fn
-	fn = len(label_sentences - overlap)
+for question_id, question_ap in query_aps:
+	print(f'{question_id}: AP={question_ap:.3f}')
 
-	precision = tp / (max(tp + fp, 1))
-
-	recall = tp / (max(tp + fn, 1))
-
-	f1 = 2.0 * ((precision * recall) / (max(precision + recall, 1)))
-	results[question_id] = {
-		'precision': precision,
-		'recall': recall,
-		'f1': f1
-	}
-	total_tp += tp
-	total_fp += fp
-	total_fn += fn
-
-for question_id, result in results.items():
-	print(f'{question_id}: P={result["precision"]:.3f}, R={result["recall"]:.3f}, F1={result["f1"]:.3f}')
-
-total_precision = total_tp / (max(total_tp + total_fp, 1))
-total_recall = total_tp / (max(total_tp + total_fn, 1))
-total_f1 = 2.0 * ((total_precision * total_recall) / (max(total_precision + total_recall, 1)))
-
-print(f'TOTAL Micro: P={total_precision:.3f}, R={total_recall:.3f}, F1={total_f1:.3f}')
+map = np.mean(query_aps)
+print(f'MAP: {map:.3f}')
