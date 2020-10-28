@@ -86,7 +86,7 @@ parser.add_argument('-ms', '--multi_sentence', default=False, action='store_true
 parser.add_argument('-ng', '--n_gram_max', default=3, type=int)
 parser.add_argument('-cm', '--custom_model', default=False, action='store_true')
 parser.add_argument('-db', '--debug', default=False, action='store_true')
-parser.add_argument('-t', '--threshold', default=0.0, type=float)
+# parser.add_argument('-t', '--threshold', default=0.0, type=float)
 parser.add_argument('-lp', '--label_path', default='data/prelim_judgments.json')
 
 args = parser.parse_args()
@@ -100,7 +100,7 @@ run_name = args.run_path
 query_path = args.query_path
 run_path = args.run_path
 debug = args.debug
-threshold = args.threshold
+# threshold = args.threshold
 label_path = args.label_path
 
 rerank_model_name = args.rerank_model
@@ -219,7 +219,7 @@ print(f'Saving results...')
 with open(run_path, 'w') as fo:
 	for query_id, passages in pass_scores.items():
 		for rank, (doc_pass_sent_id, score) in enumerate(passages, start=1):
-			if score > threshold:
-				line = f'{query_id}\tQ0\t{doc_pass_sent_id}\t{rank}\t{score:.8f}\t{run_name}\n'
-				fo.write(line)
+			# if score > threshold:
+			line = f'{query_id}\tQ0\t{doc_pass_sent_id}\t{rank}\t{score:.8f}\t{run_name}\n'
+			fo.write(line)
 print('Done!')
