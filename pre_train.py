@@ -30,7 +30,8 @@ if __name__ == "__main__":
 		load_func = load_expert_data
 		max_seq_len = 132
 		batch_size = 8
-		negative_sample_size = 16
+		# 16
+		negative_sample_size = 1
 	elif dataset == 'consumer':
 		train_path = 'consumer_data'
 		test_path = None
@@ -42,7 +43,7 @@ if __name__ == "__main__":
 		raise ValueError(f'Unknown dataset: {dataset}')
 
 	save_directory = 'models'
-	model_name = f'{dataset}-v3'
+	model_name = f'{dataset}-adv-bin-v1'
 	pre_model_name = 'nboost/pt-biobert-base-msmarco'
 	learning_rate = 5e-5
 	lr_warmup = 0.1
@@ -50,7 +51,6 @@ if __name__ == "__main__":
 	gradient_clip_val = 1.0
 	weight_decay = 0.01
 	adv_temp = 1.0
-	gamma = 12.0
 	val_check_interval = 1.0
 	is_distributed = True
 	# export TPU_IP_ADDRESS=10.155.6.34
@@ -193,8 +193,7 @@ if __name__ == "__main__":
 			lr_warmup=lr_warmup,
 			updates_total=updates_total,
 			weight_decay=weight_decay,
-			adv_temp=adv_temp,
-			gamma=gamma,
+			adv_temp=adv_temp
 		)
 		tokenizer.save_pretrained(save_directory)
 		model.config.save_pretrained(save_directory)
