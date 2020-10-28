@@ -29,7 +29,7 @@ if __name__ == "__main__":
 		test_path = 'data/golden'
 		load_func = load_expert_data
 		max_seq_len = 132
-		batch_size = 8
+		batch_size = 16
 		# 16
 		negative_sample_size = 1
 	elif dataset == 'consumer':
