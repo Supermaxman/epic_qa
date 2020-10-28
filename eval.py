@@ -17,13 +17,17 @@ run_path = args.run_path
 label_path = args.label_path
 
 with open(query_path) as f:
-	queries = json.load(f)
+	queries_list = json.load(f)
+	queries = {q['question_id']: q for q in queries_list}
+	q_id_lookup = {q_idx: q_id for q_idx, q_id in enumerate(queries, start=1)}
 
 labels = {}
 with open(label_path) as f:
 	questions = json.load(f)
 	for question in questions:
-		labels[question['question_id']] = question
+		question_id = question['question_id']
+		if question_id in queries:
+			labels[question_id] = question
 
 
 qrels = defaultdict(list)
@@ -34,7 +38,7 @@ with open(run_path) as f:
 			query_id, _, doc_pass_sent_id, rank, score, run_name = line
 			query_id = int(query_id)
 			doc_id, pass_id, sent_start_id, sent_end_id = doc_pass_sent_id.split('-')
-			question_id = queries[query_id-1]['question_id']
+			question_id = q_id_lookup[query_id]
 			rel = {
 				'doc_id': doc_id,
 				'pass_id': int(pass_id),
