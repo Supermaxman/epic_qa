@@ -242,10 +242,20 @@ python eval.py \
 
 python search_pass_index.py \
   --doc_type expert \
-  --index bm25_pass \
+  --index baseline_pass \
   --query expert_questions_prelim.json \
   --run_name bm25_pass_full \
   --top_k 1000
+
+python rerank.py \
+  --query_path data/expert/expert_questions_prelim.json \
+  --collection_path data/expert/epic_qa_cord_2020-06-19_v2 \
+  --search_run runs/expert/bm25_pass_full \
+  --search_top_k 1000 \
+  --rerank_model nboost/pt-biobert-base-msmarco \
+  --run_path runs/expert/baseline-bm25-pass-full \
+  --batch_size 64 \
+  --max_length 128
 
 python rerank.py \
   --query_path data/expert/expert_questions_prelim.json \
@@ -260,7 +270,101 @@ python rerank.py \
 
 python eval.py \
   --query_path data/expert/expert_questions_prelim.json \
-  --run_path runs/expert/expert-v1 \
-  --top_k 10 \
+  --run_path runs/expert/baseline-bm25-pass-full \
+  --top_k 10
 
+#EQ001: P=0.000, R=0.000, F1=0.000
+#EQ040: P=0.100, R=0.006, F1=0.001
+#EQ002: P=0.100, R=0.012, F1=0.002
+#EQ005: P=0.100, R=0.012, F1=0.002
+#EQ007: P=0.200, R=0.011, F1=0.004
+#EQ011: P=0.000, R=0.000, F1=0.000
+#EQ013: P=0.100, R=0.007, F1=0.001
+#EQ029: P=0.000, R=0.000, F1=0.000
+#EQ018: P=0.100, R=0.017, F1=0.003
+#EQ020: P=0.400, R=0.095, F1=0.076
+#EQ021: P=0.000, R=0.000, F1=0.000
+#EQ036: P=0.000, R=0.000, F1=0.000
+#EQ022: P=0.300, R=0.018, F1=0.011
+#EQ023: P=0.000, R=0.000, F1=0.000
+#EQ041: P=0.400, R=0.027, F1=0.022
+#EQ025: P=0.000, R=0.000, F1=0.000
+#EQ026: P=0.200, R=0.018, F1=0.007
+#EQ030: P=0.200, R=0.006, F1=0.002
+#EQ034: P=0.100, R=0.036, F1=0.007
+#EQ037: P=0.100, R=0.011, F1=0.002
+#EQ045: P=0.100, R=0.005, F1=0.001
+#TOTAL Micro: P=0.119, R=0.009, F1=0.002
 
+python eval.py \
+  --query_path data/expert/expert_questions_prelim.json \
+  --run_path runs/expert/expert-v3-bm25-pass-full \
+  --top_k 10
+#EQ001: P=0.000, R=0.000, F1=0.000
+#EQ040: P=0.000, R=0.000, F1=0.000
+#EQ002: P=0.100, R=0.012, F1=0.002
+#EQ005: P=0.000, R=0.000, F1=0.000
+#EQ007: P=0.200, R=0.011, F1=0.004
+#EQ011: P=0.000, R=0.000, F1=0.000
+#EQ013: P=0.100, R=0.007, F1=0.001
+#EQ029: P=0.000, R=0.000, F1=0.000
+#EQ018: P=0.100, R=0.017, F1=0.003
+#EQ020: P=0.400, R=0.095, F1=0.076
+#EQ021: P=0.000, R=0.000, F1=0.000
+#EQ036: P=0.100, R=0.011, F1=0.002
+#EQ022: P=0.300, R=0.018, F1=0.011
+#EQ023: P=0.200, R=0.015, F1=0.006
+#EQ041: P=0.300, R=0.020, F1=0.012
+#EQ025: P=0.100, R=0.011, F1=0.002
+#EQ026: P=0.300, R=0.027, F1=0.016
+#EQ030: P=0.200, R=0.006, F1=0.002
+#EQ034: P=0.000, R=0.000, F1=0.000
+#EQ037: P=0.100, R=0.011, F1=0.002
+#EQ045: P=0.100, R=0.005, F1=0.001
+#TOTAL Micro: P=0.124, R=0.009, F1=0.002
+
+python search_pass_index.py \
+  --doc_type expert \
+  --index baseline_pass \
+  --query expert_questions_prelim.json \
+  --run_name bm25_pass_100 \
+  --top_k 100
+
+python rerank.py \
+  --query_path data/expert/expert_questions_prelim.json \
+  --collection_path data/expert/epic_qa_cord_2020-06-19_v2 \
+  --search_run runs/expert/bm25_pass_100 \
+  --search_top_k 100 \
+  --rerank_model models/expert-v3 \
+  --run_path runs/expert/expert-v3-bm25-pass-100 \
+  --batch_size 64 \
+  --max_length 128 \
+  --custom_model
+
+python eval.py \
+  --query_path data/expert/expert_questions_prelim.json \
+  --run_path runs/expert/expert-v3-bm25-pass-100 \
+  --top_k 1000
+
+#EQ001: P=0.300, R=0.026, F1=0.015
+#EQ040: P=0.000, R=0.000, F1=0.000
+#EQ002: P=0.100, R=0.012, F1=0.002
+#EQ005: P=0.000, R=0.000, F1=0.000
+#EQ007: P=0.200, R=0.011, F1=0.004
+#EQ011: P=0.000, R=0.000, F1=0.000
+#EQ013: P=0.100, R=0.007, F1=0.001
+#EQ029: P=0.000, R=0.000, F1=0.000
+#EQ018: P=0.000, R=0.000, F1=0.000
+#EQ020: P=0.400, R=0.095, F1=0.076
+#EQ021: P=0.000, R=0.000, F1=0.000
+#EQ036: P=0.100, R=0.011, F1=0.002
+#EQ022: P=0.400, R=0.024, F1=0.019
+#EQ023: P=0.200, R=0.015, F1=0.006
+#EQ041: P=0.100, R=0.007, F1=0.001
+#EQ025: P=0.200, R=0.022, F1=0.009
+#EQ026: P=0.000, R=0.000, F1=0.000
+#EQ030: P=0.200, R=0.006, F1=0.002
+#EQ034: P=0.000, R=0.000, F1=0.000
+#EQ037: P=0.200, R=0.022, F1=0.009
+#EQ045: P=0.000, R=0.000, F1=0.000
+#TOTAL Micro: P=0.119, R=0.009, F1=0.002

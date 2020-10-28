@@ -78,7 +78,6 @@ parser = argparse.ArgumentParser()
 parser.add_argument('-q', '--query_path', required=True)
 parser.add_argument('-c', '--collection_path', required=True)
 parser.add_argument('-l', '--search_run', required=True)
-parser.add_argument('-tk', '--search_top_k', default=100, type=int)
 parser.add_argument('-r', '--run_path', required=True)
 parser.add_argument('-rm', '--rerank_model', default='nboost/pt-biobert-base-msmarco')
 parser.add_argument('-bs', '--batch_size', default=64, type=int)
@@ -86,18 +85,21 @@ parser.add_argument('-ml', '--max_length', default=512, type=int)
 parser.add_argument('-ms', '--multi_sentence', default=False, action='store_true')
 parser.add_argument('-ng', '--n_gram_max', default=3, type=int)
 parser.add_argument('-cm', '--custom_model', default=False, action='store_true')
+parser.add_argument('-db', '--debug', default=False, action='store_true')
+parser.add_argument('-t', '--threshold', default=0.0, type=float)
 
 args = parser.parse_args()
 
 # 'expert'
 collection_path = args.collection_path
 search_run = args.search_run
-search_top_k = args.search_top_k
 # 'baseline_doc'
 run_name = args.run_path
 # expert_questions_prelim.json
 query_path = args.query_path
 run_path = args.run_path
+debug = args.debug
+threshold = args.threshold
 
 rerank_model_name = args.rerank_model
 tokenizer_name = args.rerank_model
@@ -154,16 +156,13 @@ with open(search_run) as f:
 			query_id = int(query_id)
 			doc_id, pass_id = doc_id.split('-')
 			pass_id = int(pass_id)
-			# assume in ranked order, only rerank top k passages
-			if len(qrels[query_id]) < search_top_k:
-				qrels[query_id].append((doc_id, pass_id))
-			else:
-				continue
 
 
 print(f'Running reranking on passages and writing results to {run_path}...')
 pass_scores = defaultdict(list)
 for query_id, query in tqdm(enumerate(queries, start=1), total=len(queries)):
+	if debug and query_id != 1:
+		continue
 	query_labels = qrels[query_id]
 	assert len(query_labels) > 0
 	dataset = PassageDataset(
@@ -206,6 +205,7 @@ print(f'Saving results...')
 with open(run_path, 'w') as fo:
 	for query_id, passages in pass_scores.items():
 		for rank, (doc_pass_sent_id, score) in enumerate(passages, start=1):
-			line = f'{query_id}\tQ0\t{doc_pass_sent_id}\t{rank}\t{score:.8f}\t{run_name}\n'
-			fo.write(line)
+			if score > threshold:
+				line = f'{query_id}\tQ0\t{doc_pass_sent_id}\t{rank}\t{score:.8f}\t{run_name}\n'
+				fo.write(line)
 print('Done!')

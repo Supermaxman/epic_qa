@@ -12,6 +12,7 @@ parser.add_argument('-r', '--run_name', required=True)
 parser.add_argument('-k', '--top_k', default=1000, type=int)
 parser.add_argument('-bk1', '--bm25_k1', default=0.82, type=float)
 parser.add_argument('-bb', '--bm25_b', default=0.68, type=float)
+parser.add_argument('-db', '--debug', default=False, action='store_true')
 
 args = parser.parse_args()
 
@@ -19,6 +20,7 @@ args = parser.parse_args()
 doc_type = args.doc_type
 # 'baseline_doc'
 run_name = args.run_name
+debug = args.debug
 index_path = f'indices/{doc_type}/{args.index}'
 # expert_questions_prelim.json
 query_path = f'data/{doc_type}/{args.query}'
@@ -33,7 +35,9 @@ searcher.set_bm25(args.bm25_k1, args.bm25_b)
 print(f'Running search and writing results to {run_path}...')
 with open(run_path, 'w') as fo:
 	for query_id, query in tqdm(enumerate(queries, start=1), total=len(queries)):
-		hits = searcher.search(query['question'], k=top_k)
+		if debug and query_id != 1:
+			continue
+		hits = searcher.search(query['question'] + ' ' + query['query'], k=top_k)
 		for rank, hit in enumerate(hits[:top_k], start=1):
 			line = f'{query_id}\tQ0\t{hit.docid}\t{rank}\t{hit.score:.4f}\t{run_name}\n'
 			fo.write(line)

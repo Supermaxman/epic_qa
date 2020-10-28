@@ -9,19 +9,20 @@ parser = argparse.ArgumentParser()
 parser.add_argument('-q', '--query_path', required=True)
 parser.add_argument('-r', '--run_path', required=True)
 parser.add_argument('-l', '--label_path', default='data/prelim_judgments.json')
-parser.add_argument('-k', '--top_k', default=100, type=int)
+parser.add_argument('-db', '--debug', default=False, action='store_true')
 
 args = parser.parse_args()
 
 query_path = args.query_path
 run_path = args.run_path
 label_path = args.label_path
-top_k = args.top_k
+debug = args.debug
 
 with open(query_path) as f:
 	queries_list = json.load(f)
 	queries = {q['question_id']: q for q in queries_list}
 	q_id_lookup = {q_idx: q_id for q_idx, q_id in enumerate(queries, start=1)}
+	q_lookup_id = {q_id: q_idx for q_idx, q_id in enumerate(queries, start=1)}
 
 labels = {}
 with open(label_path) as f:
@@ -52,8 +53,7 @@ with open(run_path) as f:
 				'run_name': run_name
 			}
 			if question_id in labels:
-				if len(qrels[question_id]) < top_k:
-					qrels[question_id].append(rel)
+				qrels[question_id].append(rel)
 
 total_tp = 0.0
 total_fp = 0.0
@@ -61,6 +61,9 @@ total_fn = 0.0
 
 results = {}
 for question_id, question_labels in labels.items():
+	q_idx = q_lookup_id[question_id]
+	if debug and q_idx != 1:
+		continue
 	question_rels = qrels[question_id]
 	label_sentences = set([sent['sentence_id'] for sent in question_labels['annotations']])
 	pred_sentences = set()
