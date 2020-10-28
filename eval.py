@@ -85,6 +85,8 @@ for question_id, question_labels in labels.items():
 		)
 	except IndexError:
 		ap = 0.0
+	if np.isnan(ap):
+		ap = 0.0
 	query_aps[question_id] = ap
 
 for question_id, question_ap in query_aps.items():
