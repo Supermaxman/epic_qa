@@ -57,9 +57,10 @@ class QuestionAnsweringBert(pl.LightningModule):
 			attention_mask=batch['attention_mask'],
 			token_type_ids=batch['token_type_ids'],
 		)
-		labels = batch['labels']
 		sample_size = batch['sample_size']
 		logits = logits.view(-1, sample_size, 2)
+		labels = batch['labels']
+		labels = labels.view(-1, sample_size)
 		batch_size = logits.shape[0]
 		neg_size = sample_size - 1
 		pos_logits, neg_logits, loss = self._loss(
@@ -94,10 +95,13 @@ class QuestionAnsweringBert(pl.LightningModule):
 		)
 		sample_size = batch['sample_size']
 		logits = logits.view(-1, sample_size, 2)
+		labels = batch['labels']
+		labels = labels.view(-1, sample_size)
 		batch_size = logits.shape[0]
 		neg_size = logits.shape[1] - 1
-		pos_logits, neg_logits, loss = self._energy_loss(
-			logits
+		pos_logits, neg_logits, loss = self._loss(
+			logits,
+			labels
 		)
 		correct_count = (pos_logits.unsqueeze(1) > neg_logits).float()
 		# sum number pos is less than and then subtract from neg count to get index, add 1 for rank
