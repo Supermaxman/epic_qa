@@ -560,7 +560,7 @@ python rerank_labels_sentence.py \
 python rerank_labels_sentence.py \
   --query_path data/consumer/consumer_questions_prelim.json \
   --collection_path data/consumer/version_2_split \
-  --label_path data/consumer/consumer_fake_qrels.txt \
+  --search_run data/consumer/consumer_fake_qrels.txt \
   --rerank_model nboost/pt-biobert-base-msmarco \
   --run_path runs/consumer/baseline-pos \
   --batch_size 32 \

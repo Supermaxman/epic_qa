@@ -70,7 +70,7 @@ class QueryPassageDataset(Dataset):
 parser = argparse.ArgumentParser()
 parser.add_argument('-q', '--query_path', required=True)
 parser.add_argument('-c', '--collection_path', required=True)
-parser.add_argument('-l', '--search_run', required=True)
+parser.add_argument('-s', '--search_run', required=True)
 parser.add_argument('-l', '--label_path', default='data/prelim_judgments.json')
 parser.add_argument('-r', '--run_path', required=True)
 parser.add_argument('-rm', '--rerank_model', default='nboost/pt-biobert-base-msmarco')
