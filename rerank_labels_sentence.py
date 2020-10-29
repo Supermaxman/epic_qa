@@ -14,7 +14,7 @@ def find_ngrams(input_list, n):
 	return zip(*[input_list[i:] for i in range(n)])
 
 
-class PassageDataset(Dataset):
+class QueryPassageDataset(Dataset):
 	def __init__(self, root_dir, file_names, query, multi_sentence, n_gram_max):
 		self.root_dir = root_dir
 		self.file_names = file_names
@@ -70,7 +70,8 @@ class PassageDataset(Dataset):
 parser = argparse.ArgumentParser()
 parser.add_argument('-q', '--query_path', required=True)
 parser.add_argument('-c', '--collection_path', required=True)
-parser.add_argument('-l', '--label_path', required=True)
+parser.add_argument('-l', '--search_run', required=True)
+parser.add_argument('-l', '--label_path', default='data/prelim_judgments.json')
 parser.add_argument('-r', '--run_path', required=True)
 parser.add_argument('-rm', '--rerank_model', default='nboost/pt-biobert-base-msmarco')
 parser.add_argument('-t', '--tokenizer', default='nboost/pt-biobert-base-msmarco')
@@ -85,6 +86,7 @@ args = parser.parse_args()
 # 'expert'
 collection_path = args.collection_path
 label_path = args.label_path
+search_run = args.search_run
 # 'baseline_doc'
 run_name = args.run_path
 # expert_questions_prelim.json
@@ -139,7 +141,7 @@ with open(query_path) as f:
 
 
 qrels = defaultdict(list)
-with open(label_path, 'r') as f:
+with open(search_run, 'r') as f:
 	for line in f:
 		line = line.strip().split()
 		if line:
@@ -149,13 +151,24 @@ with open(label_path, 'r') as f:
 			if dq_rank > 0:
 				qrels[query_id].append(doc_id)
 
+keep_ids = None
+if label_path:
+	keep_ids = set()
+	with open(label_path) as f:
+		questions = json.load(f)
+		for question in questions:
+			question_id = question['question_id']
+			keep_ids.add(question_id)
 
 print(f'Running reranking on passages and writing results to {run_path}...')
 pass_scores = defaultdict(list)
 for query_id, query in tqdm(enumerate(queries, start=1), total=len(queries)):
 	query_labels = qrels[query_id]
+	question_id = query['question_id']
+	if keep_ids is not None and question_id not in keep_ids:
+		continue
 	assert len(query_labels) > 0
-	dataset = PassageDataset(
+	dataset = QueryPassageDataset(
 		collection_path,
 		query_labels,
 		query['question'],

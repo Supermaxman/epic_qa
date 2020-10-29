@@ -203,8 +203,8 @@ python rerank_labels_sentence.py \
   --query_path data/consumer/consumer_questions_prelim.json \
   --collection_path data/consumer/version_2_split \
   --label_path data/consumer/consumer_fake_qrels.txt \
-  --rerank_model models/consumer-v1 \
-  --run_path runs/consumer/consumer-v1 \
+  --rerank_model models/bioasq-adv-bin-v1 \
+  --run_path runs/consumer/bioasq-adv-bin-v1 \
   --batch_size 32 \
   --max_length 512 \
   --multi_sentence \
@@ -543,3 +543,26 @@ python rerank.py \
 python eval.py \
   --query_path data/expert/expert_questions_prelim.json \
   --run_path runs/expert/expert-v3-bm25-pass-1000
+
+
+
+python rerank_labels_sentence.py \
+  --query_path data/consumer/consumer_questions_prelim.json \
+  --collection_path data/consumer/version_2_split \
+  --label_path data/consumer/consumer_fake_qrels.txt \
+  --rerank_model models/bioasq-adv-bin-v1 \
+  --run_path runs/consumer/bioasq-adv-bin-v1 \
+  --batch_size 32 \
+  --max_length 512 \
+  --multi_sentence \
+  --custom_model
+
+python rerank_labels_sentence.py \
+  --query_path data/consumer/consumer_questions_prelim.json \
+  --collection_path data/consumer/version_2_split \
+  --label_path data/consumer/consumer_fake_qrels.txt \
+  --rerank_model nboost/pt-biobert-base-msmarco \
+  --run_path runs/consumer/baseline-pos \
+  --batch_size 32 \
+  --max_length 512 \
+  --multi_sentence

@@ -68,6 +68,7 @@ if __name__ == "__main__":
 	train_model = mode == 'train'
 	load_model = mode != 'train'
 	test_eval = mode == 'test'
+	predict = False
 
 	calc_seq_len = False
 	pl.seed_everything(seed)
@@ -184,7 +185,7 @@ if __name__ == "__main__":
 	if load_model:
 		logging.info('Loading model...')
 		model = QuestionAnsweringBert.load_from_checkpoint(checkpoint_path)
-		model.to('cpu')
+		# model.to('cpu')
 	else:
 		logging.info('Loading model...')
 		model = QuestionAnsweringBert(
@@ -241,7 +242,6 @@ if __name__ == "__main__":
 		model.to('cpu')
 		torch.save(model, checkpoint_path)
 
-
 	# TODO
 	# if test_eval:
 	# 	logging.info('Loading test data...')
@@ -259,3 +259,8 @@ if __name__ == "__main__":
 		#
 		# logging.info('Evaluating...')
 		# trainer.test(model, test_data_loader)
+
+	# if predict:
+	# 	logging.info('Predicting...')
+	# 	query_data_loader = None
+	# 	trainer.test(model, query_data_loader)
