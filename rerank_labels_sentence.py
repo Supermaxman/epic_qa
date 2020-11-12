@@ -74,7 +74,6 @@ parser.add_argument('-s', '--search_run', required=True)
 parser.add_argument('-l', '--label_path', default='data/prelim_judgments.json')
 parser.add_argument('-r', '--run_path', required=True)
 parser.add_argument('-rm', '--rerank_model', default='nboost/pt-biobert-base-msmarco')
-parser.add_argument('-t', '--tokenizer', default='nboost/pt-biobert-base-msmarco')
 parser.add_argument('-bs', '--batch_size', default=64, type=int)
 parser.add_argument('-ml', '--max_length', default=512, type=int)
 parser.add_argument('-ms', '--multi_sentence', default=False, action='store_true')
@@ -94,7 +93,7 @@ query_path = args.query_path
 run_path = args.run_path
 
 rerank_model_name = args.rerank_model
-tokenizer_name = args.tokenizer
+tokenizer_name = rerank_model_name
 batch_size = args.batch_size
 max_length = args.max_length
 multi_sentence = args.multi_sentence
