@@ -1,4 +1,5 @@
 
+import sys
 from transformers import BertTokenizer
 import argparse
 import os
@@ -85,7 +86,7 @@ if __name__ == "__main__":
 		format="%(asctime)s [%(levelname)s] %(message)s",
 		handlers=[
 			logging.FileHandler(logfile, mode='w'),
-			logging.StreamHandler()]
+			logging.StreamHandler(sys.stdout)]
 	)
 
 	logging.info('Loading dataset...')
