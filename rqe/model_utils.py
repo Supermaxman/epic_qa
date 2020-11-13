@@ -33,22 +33,9 @@ class RQEBert(pl.LightningModule, ABC):
 		return loss
 
 	def training_step(self, batch, batch_nb):
-		logits, _ = self(
-			input_ids=batch['input_ids'],
-			attention_mask=batch['attention_mask'],
-			token_type_ids=batch['token_type_ids'],
-		)
-		labels = batch['labels']
-		loss = self._loss(
-			logits,
-			labels
-		)
-		loss = loss.mean()
-		batch_size = logits.shape[0]
-		prediction = logits.max(dim=1)[1]
-		correct_count = (prediction.eq(labels)).float().sum()
-		accuracy = correct_count.sum(dim=0) / batch_size
+		loss, logits, prediction, correct_count, total_count, accuracy = self._forward_step(batch, batch_nb)
 
+		loss = loss.mean()
 		self.log('train_loss', loss)
 		self.log('train_accuracy', accuracy)
 		result = {
@@ -56,7 +43,13 @@ class RQEBert(pl.LightningModule, ABC):
 		}
 		return result
 
+	def test_step(self, batch, batch_nb):
+		return self._eval_step(batch, batch_nb, 'test')
+
 	def validation_step(self, batch, batch_nb):
+		return self._eval_step(batch, batch_nb, 'val')
+
+	def _forward_step(self, batch, batch_nb):
 		logits, _ = self(
 			input_ids=batch['input_ids'],
 			attention_mask=batch['attention_mask'],
@@ -70,22 +63,36 @@ class RQEBert(pl.LightningModule, ABC):
 		batch_size = logits.shape[0]
 		prediction = logits.max(dim=1)[1]
 		correct_count = (prediction.eq(labels)).float().sum()
-		accuracy = correct_count.sum(dim=0) / batch_size
+		total_count = batch_size.float()
+		accuracy = correct_count / batch_size
+		return loss, logits, prediction, correct_count, total_count, accuracy
+
+	def _eval_step(self, batch, batch_nb, name):
+		loss, logits, prediction, correct_count, total_count, accuracy = self._forward_step(batch, batch_nb)
 
 		result = {
-			'val_loss': loss.mean(),
-			'val_batch_loss': loss,
-			'val_batch_accuracy': accuracy
+			f'{name}_loss': loss.mean(),
+			f'{name}_batch_loss': loss,
+			f'{name}_batch_accuracy': accuracy,
+			f'{name}_correct_count': correct_count,
+			f'{name}_total_count': total_count,
 		}
 
 		return result
 
-	def validation_epoch_end(self, outputs):
-		loss = torch.cat([x['val_batch_loss'] for x in outputs], dim=0).mean()
-		accuracy = torch.stack([x['val_batch_accuracy'] for x in outputs], dim=0).mean()
+	def _eval_epoch_end(self, outputs, name):
+		loss = torch.cat([x[f'{name}_batch_loss'] for x in outputs], dim=0).mean()
+		correct_count = torch.stack([x[f'{name}_correct_count'] for x in outputs], dim=0).sum()
+		total_count = torch.stack([x[f'{name}_total_count'] for x in outputs], dim=0).sum()
+		accuracy = correct_count / total_count
+		self.log(f'{name}_loss', loss)
+		self.log(f'{name}_accuracy', accuracy)
 
-		self.log('val_loss', loss)
-		self.log('val_accuracy', accuracy)
+	def validation_epoch_end(self, outputs):
+		self._eval_epoch_end(outputs, 'val')
+
+	def test_epoch_end(self, outputs):
+		self._eval_epoch_end(outputs, 'test')
 
 	def configure_optimizers(self):
 		params = self._get_optimizer_params(self.weight_decay)

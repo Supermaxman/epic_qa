@@ -18,11 +18,12 @@ if __name__ == "__main__":
 	parser = argparse.ArgumentParser()
 	parser.add_argument('--dataset', help='clinical-qe/quora', type=str, default='clinical-qe')
 	args = parser.parse_args()
-	# TODO parameterize below into config file for reproducibility
+
 	seed = 0
 	dataset = args.dataset
 	if dataset == 'clinical-qe':
-		train_path = 'data/RQE_Data_AMIA2016/RQE_Train_8588_AMIA2016.xml'
+		# eval_path = 'data/RQE_Data_AMIA2016/RQE_Test_302_pairs_AMIA2016.xml'
+		eval_path = 'data/RQE_Data_AMIA2016/MEDIQA2019-Task2-RQE-TestSet-wLabels.xml'
 		load_func = load_clinical_data
 		max_seq_len = 96
 		batch_size = 16
@@ -30,8 +31,9 @@ if __name__ == "__main__":
 		model_class = RQEBertFromSequenceClassification
 		epochs = 10
 	elif dataset == 'quora':
+		# train_path = 'data/quora_duplicate_questions/quora_duplicate_questions.tsv'
 		# TODO do 80% train 10% dev 10% test
-		train_path = 'data/quora_duplicate_questions/quora_duplicate_questions.tsv'
+		eval_path = None
 		load_func = load_quora_data
 		max_seq_len = 64
 		batch_size = 64
@@ -64,10 +66,10 @@ if __name__ == "__main__":
 	tpu_cores = 8
 	num_workers = 1
 	deterministic = True
-	train_model = True
-	load_model = False
+	load_model = True
+	test_eval = True
+	predict = False
 
-	calc_seq_len = False
 	pl.seed_everything(seed)
 
 	save_directory = os.path.join(save_directory, model_name)
@@ -91,57 +93,17 @@ if __name__ == "__main__":
 			logging.StreamHandler()]
 	)
 
-	logging.info('Loading dataset...')
-	examples = load_func(train_path)
-	train_examples, val_examples = split_data(examples)
-
-	num_batches_per_step = (len(gpus) if not use_tpus else tpu_cores)
-	updates_epoch = len(train_examples) // (batch_size * num_batches_per_step)
-	updates_total = updates_epoch * epochs
+	logging.info('Loading eval dataset...')
+	eval_examples = load_func(eval_path)
 
 	callbacks = []
 	logging.info('Loading collator...')
 
 	tokenizer = BertTokenizer.from_pretrained(pre_model_name)
-	train_dataset = RQEDataset(train_examples)
-	val_dataset = RQEDataset(val_examples)
+	eval_dataset = RQEDataset(eval_examples)
 
-	train_data_loader = DataLoader(
-		train_dataset,
-		batch_size=batch_size,
-		shuffle=True,
-		num_workers=num_workers,
-		collate_fn=BatchCollator(
-			tokenizer,
-			max_seq_len,
-			force_max_seq_len=use_tpus
-		)
-	)
-	if calc_seq_len:
-		data_loader = DataLoader(
-			train_dataset,
-			batch_size=1,
-			shuffle=True,
-			num_workers=num_workers,
-			collate_fn=BatchCollator(
-				tokenizer,
-				max_seq_len,
-				force_max_seq_len=False
-			)
-		)
-		import numpy as np
-		from tqdm import tqdm
-		logging.info('Calculating seq len stats...')
-		seq_lens = []
-		for batch in tqdm(data_loader):
-			seq_len = batch['input_ids'].shape[-1]
-			seq_lens.append(seq_len)
-		p = np.percentile(seq_lens, 95)
-		logging.info(f'95-percentile: {p}')
-		exit()
-
-	val_data_loader = DataLoader(
-		val_dataset,
+	eval_data_loader = DataLoader(
+		eval_dataset,
 		batch_size=batch_size,
 		num_workers=num_workers,
 		collate_fn=BatchCollator(
@@ -150,20 +112,17 @@ if __name__ == "__main__":
 			force_max_seq_len=use_tpus
 		)
 	)
+
 	logging.info('Loading model...')
 	model = model_class(
 		pre_model_name=pre_model_name,
 		learning_rate=learning_rate,
 		lr_warmup=lr_warmup,
-		updates_total=updates_total,
+		updates_total=0,
 		weight_decay=weight_decay,
 		torch_cache_dir=torch_cache_dir
 	)
-	if load_model:
-		model.load_state_dict(torch.load(checkpoint_path))
-	else:
-		tokenizer.save_pretrained(save_directory)
-		model.config.save_pretrained(save_directory)
+	model.load_state_dict(torch.load(checkpoint_path))
 
 	logger = pl_loggers.TensorBoardLogger(
 		save_dir=save_directory,
@@ -201,10 +160,5 @@ if __name__ == "__main__":
 			callbacks=callbacks
 		)
 
-	if train_model:
-		logging.info('Training...')
-		trainer.fit(model, train_data_loader, val_data_loader)
-		logging.info('Saving checkpoint...')
-		model.to('cpu')
-		torch.save(model.state_dict(), checkpoint_path)
-
+	logging.info('Evaluating...')
+	trainer.test(model, eval_data_loader)
