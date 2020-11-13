@@ -122,7 +122,7 @@ if __name__ == "__main__":
 		weight_decay=weight_decay,
 		torch_cache_dir=torch_cache_dir
 	)
-	model.load_state_dict(torch.load(checkpoint_path))
+	# model.load_state_dict(torch.load(checkpoint_path))
 
 	logger = pl_loggers.TensorBoardLogger(
 		save_dir=save_directory,
