@@ -55,7 +55,7 @@ def load_quora_data(data_path):
 			if idx == 0:
 				continue
 			line = line.strip().split('\t')
-			if line:
+			if len(line) == 6:
 				# id	qid1	qid2	question1	question2	is_duplicate
 				# A -> B
 				example = {
@@ -65,6 +65,8 @@ def load_quora_data(data_path):
 					'label': int(line[5])
 				}
 				examples.append(example)
+			else:
+				print(line)
 	return examples
 
 
