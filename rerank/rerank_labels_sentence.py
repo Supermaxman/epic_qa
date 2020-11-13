@@ -4,10 +4,8 @@ import argparse
 from collections import defaultdict
 import os
 import torch
-import numpy as np
 from transformers import AutoTokenizer, AutoModelForSequenceClassification
 from torch.utils.data import Dataset, DataLoader
-from model_utils import QuestionAnsweringBert
 
 
 def find_ngrams(input_list, n):

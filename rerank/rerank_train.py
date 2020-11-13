@@ -9,8 +9,9 @@ from pytorch_lightning import loggers as pl_loggers
 # note: do NOT import torch before pytorch_lightning, really breaks TPUs
 import torch
 
-from model_utils import QuestionAnsweringBert
-from data_utils import SampleCollator, QuestionAnswerDataset, load_expert_data, load_consumer_data, split_data
+from rerank.model_utils import QuestionAnsweringBert
+from rerank.data_utils import SampleCollator, QuestionAnswerDataset, load_expert_data, load_consumer_data, split_data
+from rerank.sample_utils import UniformNegativeSampler
 
 
 if __name__ == "__main__":
@@ -22,29 +23,33 @@ if __name__ == "__main__":
 	seed = 0
 	mode = args.mode
 	dataset = args.dataset
-	if dataset == 'clinical-qe':
-		train_path = 'data/RQE_Data_AMIA2016/RQE_Train_8588_AMIA2016.xml'
-		test_path = 'data/RQE_Data_AMIA2016/RQE_Test_302_pairs_AMIA2016.xml'
+	if dataset == 'expert':
+		train_path = 'data/training'
+		test_path = 'data/golden'
 		load_func = load_expert_data
-		max_seq_len = 256
+		max_seq_len = 132
 		batch_size = 16
-	elif dataset == 'quora':
-		train_path = 'data/quora_duplicate_questions/quora_duplicate_questions.tsv'
+		# 16
+		negative_sample_size = 1
+	elif dataset == 'consumer':
+		train_path = 'consumer_data'
 		test_path = None
 		load_func = load_consumer_data
-		max_seq_len = 256
-		batch_size = 16
+		max_seq_len = 512
+		batch_size = 1
+		negative_sample_size = 7
 	else:
 		raise ValueError(f'Unknown dataset: {dataset}')
 
 	save_directory = 'models'
-	model_name = f'{dataset}-rqe-v1'
+	model_name = f'{dataset}-adv-bin-v1'
 	pre_model_name = 'nboost/pt-biobert-base-msmarco'
 	learning_rate = 5e-5
 	lr_warmup = 0.1
 	epochs = 10
 	gradient_clip_val = 1.0
 	weight_decay = 0.01
+	adv_temp = 1.0
 	val_check_interval = 1.0
 	is_distributed = True
 	# export TPU_IP_ADDRESS=10.155.6.34
@@ -99,6 +104,23 @@ if __name__ == "__main__":
 	callbacks = []
 	logging.info('Loading collator...')
 
+	train_neg_sampler = UniformNegativeSampler(
+		answers,
+		train_examples,
+		negative_sample_size,
+		seed=seed,
+		train_callback=True
+	)
+	callbacks.append(train_neg_sampler)
+	val_neg_sampler = UniformNegativeSampler(
+		answers,
+		train_examples,
+		negative_sample_size,
+		seed=seed,
+		val_callback=True
+	)
+	callbacks.append(val_neg_sampler)
+
 	tokenizer = BertTokenizer.from_pretrained(pre_model_name)
 	train_dataset = QuestionAnswerDataset(train_examples)
 	val_dataset = QuestionAnswerDataset(val_examples)
@@ -106,6 +128,7 @@ if __name__ == "__main__":
 	# ensure negative_sample_size is correct based on batch_size
 	train_collator = SampleCollator(
 		tokenizer,
+		train_neg_sampler,
 		max_seq_len,
 		force_max_seq_len=use_tpus
 	)
@@ -124,6 +147,13 @@ if __name__ == "__main__":
 			num_workers=num_workers,
 			collate_fn=SampleCollator(
 				tokenizer,
+				UniformNegativeSampler(
+					answers,
+					train_examples,
+					0,
+					seed=seed,
+					train_callback=True
+				),
 				max_seq_len,
 				force_max_seq_len=False
 			)
@@ -141,6 +171,7 @@ if __name__ == "__main__":
 
 	val_collator = SampleCollator(
 		tokenizer,
+		val_neg_sampler,
 		max_seq_len,
 		force_max_seq_len=use_tpus
 	)
@@ -161,7 +192,8 @@ if __name__ == "__main__":
 			learning_rate=learning_rate,
 			lr_warmup=lr_warmup,
 			updates_total=updates_total,
-			weight_decay=weight_decay
+			weight_decay=weight_decay,
+			adv_temp=adv_temp
 		)
 		tokenizer.save_pretrained(save_directory)
 		model.config.save_pretrained(save_directory)
