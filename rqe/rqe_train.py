@@ -47,18 +47,18 @@ if __name__ == "__main__":
 	gradient_clip_val = 1.0
 	weight_decay = 0.01
 	val_check_interval = 1.0
-	is_distributed = True
+	is_distributed = False
 	# export TPU_IP_ADDRESS=10.155.6.34
 	# export XRT_TPU_CONFIG="tpu_worker;0;$TPU_IP_ADDRESS:8470"
 
 	accumulate_grad_batches = 1
 	# gpus = [3, 4, 6, 7]
 	gpus = [0]
-	use_tpus = True
+	use_tpus = False
 	precision = 16 if use_tpus else 32
 	# precision = 32
 	tpu_cores = 8
-	num_workers = 4
+	num_workers = 1
 	deterministic = True
 	train_model = mode == 'train'
 	load_model = mode != 'train'
