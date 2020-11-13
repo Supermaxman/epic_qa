@@ -89,7 +89,7 @@ if __name__ == "__main__":
 	)
 
 	logging.info('Loading dataset...')
-	examples, queries, answers = load_func(train_path)
+	examples = load_func(train_path)
 	train_examples, val_examples = split_data(examples)
 
 	num_batches_per_step = (len(gpus) if not use_tpus else tpu_cores)
@@ -209,7 +209,7 @@ if __name__ == "__main__":
 	# TODO
 	# if test_eval:
 	# 	logging.info('Loading test data...')
-	# 	test_examples, queries, answers = load_func(test_path)
+	# 	test_examples = load_func(test_path)
 		# test_data_loader = DataLoader(
 		# 	test_examples,
 		# 	batch_size=batch_size,
