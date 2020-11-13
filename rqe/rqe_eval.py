@@ -20,21 +20,22 @@ if __name__ == "__main__":
 	args = parser.parse_args()
 
 	seed = 0
+	pl.seed_everything(seed)
 	dataset = args.dataset
 	if dataset == 'clinical-qe':
 		eval_path = 'data/RQE_Data_AMIA2016/RQE_Test_302_pairs_AMIA2016.xml'
 		# eval_path = 'data/RQE_Data_AMIA2016/MEDIQA2019-Task2-RQE-TestSet-wLabels.xml'
-		load_func = load_clinical_data
 		max_seq_len = 96
 		batch_size = 16
 		pre_model_name = 'nboost/pt-biobert-base-msmarco'
 		model_class = RQEBertFromSequenceClassification
 		epochs = 10
+
+		logging.info('Loading clinical-qe dataset...')
+		eval_examples = load_clinical_data(eval_path)
+
 	elif dataset == 'quora':
-		# train_path = 'data/quora_duplicate_questions/quora_duplicate_questions.tsv'
-		# TODO do 80% train 10% dev 10% test
-		eval_path = None
-		load_func = load_quora_data
+		all_path = 'data/quora_duplicate_questions/quora_duplicate_questions.tsv'
 		max_seq_len = 64
 		batch_size = 64
 		# pre_model_name = 'nboost/pt-bert-base-uncased-msmarco'
@@ -42,6 +43,14 @@ if __name__ == "__main__":
 		pre_model_name = 'bert-base-uncased'
 		model_class = RQEBertFromLanguageModel
 		epochs = 20
+
+		# do 80% train 10% dev 10% test
+		logging.info('Loading quora dataset...')
+		examples = load_quora_data(all_path)
+		# 80/20
+		_, other_examples = split_data(examples, ratio=0.8)
+		# 10/10
+		_, eval_examples = split_data(other_examples, ratio=0.5)
 	else:
 		raise ValueError(f'Unknown dataset: {dataset}')
 
@@ -70,8 +79,6 @@ if __name__ == "__main__":
 	test_eval = True
 	predict = False
 
-	pl.seed_everything(seed)
-
 	save_directory = os.path.join(save_directory, model_name)
 
 	checkpoint_path = os.path.join(save_directory, 'pytorch_model.bin')
@@ -92,9 +99,6 @@ if __name__ == "__main__":
 			logging.FileHandler(logfile, mode='w'),
 			logging.StreamHandler()]
 	)
-
-	logging.info('Loading eval dataset...')
-	eval_examples = load_func(eval_path)
 
 	callbacks = []
 	logging.info('Loading collator...')
@@ -122,7 +126,7 @@ if __name__ == "__main__":
 		weight_decay=weight_decay,
 		torch_cache_dir=torch_cache_dir
 	)
-	# model.load_state_dict(torch.load(checkpoint_path))
+	model.load_state_dict(torch.load(checkpoint_path))
 
 	logger = pl_loggers.TensorBoardLogger(
 		save_dir=save_directory,

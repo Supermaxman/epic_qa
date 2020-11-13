@@ -24,8 +24,8 @@ class RQEDataset(Dataset):
 		return ex
 
 
-def split_data(data, train_ratio=0.8):
-	train_size = int(len(data) * train_ratio)
+def split_data(data, ratio=0.8):
+	train_size = int(len(data) * ratio)
 	train_data = data[:train_size]
 	dev_data = data[train_size:]
 	return train_data, dev_data

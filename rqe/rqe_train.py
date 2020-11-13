@@ -20,19 +20,25 @@ if __name__ == "__main__":
 	args = parser.parse_args()
 	# TODO parameterize below into config file for reproducibility
 	seed = 0
+	pl.seed_everything(seed)
 	dataset = args.dataset
 	if dataset == 'clinical-qe':
 		train_path = 'data/RQE_Data_AMIA2016/RQE_Train_8588_AMIA2016.xml'
-		load_func = load_clinical_data
+		val_path = 'data/RQE_Data_AMIA2016/RQE_Test_302_pairs_AMIA2016.xml'
+		# test_path = 'data/RQE_Data_AMIA2016/MEDIQA2019-Task2-RQE-TestSet-wLabels.xml'
 		max_seq_len = 96
 		batch_size = 16
 		pre_model_name = 'nboost/pt-biobert-base-msmarco'
 		model_class = RQEBertFromSequenceClassification
 		epochs = 10
+
+		# do 80% train 10% dev 10% test
+		logging.info('Loading clinical-qe dataset...')
+		train_examples = load_clinical_data(train_path)
+		val_examples = load_clinical_data(val_path)
+
 	elif dataset == 'quora':
-		# TODO do 80% train 10% dev 10% test
-		train_path = 'data/quora_duplicate_questions/quora_duplicate_questions.tsv'
-		load_func = load_quora_data
+		all_path = 'data/quora_duplicate_questions/quora_duplicate_questions.tsv'
 		max_seq_len = 64
 		batch_size = 64
 		# pre_model_name = 'nboost/pt-bert-base-uncased-msmarco'
@@ -40,6 +46,15 @@ if __name__ == "__main__":
 		pre_model_name = 'bert-base-uncased'
 		model_class = RQEBertFromLanguageModel
 		epochs = 20
+
+		# do 80% train 10% dev 10% test
+		logging.info('Loading quora dataset...')
+		examples = load_quora_data(all_path)
+		# 80/20
+		train_examples, other_examples = split_data(examples, ratio=0.8)
+		# 10/10
+		val_examples, _ = split_data(other_examples, ratio=0.5)
+
 	else:
 		raise ValueError(f'Unknown dataset: {dataset}')
 
@@ -68,7 +83,6 @@ if __name__ == "__main__":
 	load_model = False
 
 	calc_seq_len = False
-	pl.seed_everything(seed)
 
 	save_directory = os.path.join(save_directory, model_name)
 
@@ -90,10 +104,6 @@ if __name__ == "__main__":
 			logging.FileHandler(logfile, mode='w'),
 			logging.StreamHandler()]
 	)
-
-	logging.info('Loading dataset...')
-	examples = load_func(train_path)
-	train_examples, val_examples = split_data(examples)
 
 	num_batches_per_step = (len(gpus) if not use_tpus else tpu_cores)
 	updates_epoch = len(train_examples) // (batch_size * num_batches_per_step)
