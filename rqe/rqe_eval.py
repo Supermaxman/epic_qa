@@ -22,8 +22,8 @@ if __name__ == "__main__":
 	seed = 0
 	dataset = args.dataset
 	if dataset == 'clinical-qe':
-		# eval_path = 'data/RQE_Data_AMIA2016/RQE_Test_302_pairs_AMIA2016.xml'
-		eval_path = 'data/RQE_Data_AMIA2016/MEDIQA2019-Task2-RQE-TestSet-wLabels.xml'
+		eval_path = 'data/RQE_Data_AMIA2016/RQE_Test_302_pairs_AMIA2016.xml'
+		# eval_path = 'data/RQE_Data_AMIA2016/MEDIQA2019-Task2-RQE-TestSet-wLabels.xml'
 		load_func = load_clinical_data
 		max_seq_len = 96
 		batch_size = 16
