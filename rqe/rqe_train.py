@@ -180,7 +180,8 @@ if __name__ == "__main__":
 			precision=precision,
 			val_check_interval=val_check_interval,
 			deterministic=deterministic,
-			callbacks=callbacks
+			callbacks=callbacks,
+			checkpoint_callback=None
 		)
 	else:
 		if len(gpus) > 1:
@@ -197,7 +198,8 @@ if __name__ == "__main__":
 			distributed_backend=backend,
 			gradient_clip_val=gradient_clip_val,
 			deterministic=deterministic,
-			callbacks=callbacks
+			callbacks=callbacks,
+			checkpoint_callback=None
 		)
 
 	if train_model:
