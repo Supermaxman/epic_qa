@@ -10,7 +10,7 @@ from pytorch_lightning import loggers as pl_loggers
 # note: do NOT import torch before pytorch_lightning, really breaks TPUs
 import torch
 
-from rqe.model_utils import RQEBert
+from rqe.model_utils import RQEBertFromSequenceClassification, RQEBertFromLanguageModel
 from rqe.data_utils import BatchCollator, RQEDataset, load_clinical_data, load_quora_data, split_data
 
 
@@ -30,20 +30,25 @@ if __name__ == "__main__":
 		max_seq_len = 96
 		batch_size = 16
 		pre_model_name = 'nboost/pt-biobert-base-msmarco'
+		model_class = RQEBertFromSequenceClassification
 		epochs = 10
 	elif dataset == 'quora':
 		train_path = 'data/quora_duplicate_questions/quora_duplicate_questions.tsv'
+		# TODO do 80% train 10% dev 10% test
 		test_path = None
 		load_func = load_quora_data
 		max_seq_len = 64
 		batch_size = 64
-		pre_model_name = 'nboost/pt-bert-base-uncased-msmarco'
+		# pre_model_name = 'nboost/pt-bert-base-uncased-msmarco'
+		# model_class = RQEBertFromSequenceClassification
+		pre_model_name = 'bert-base-uncased'
+		model_class = RQEBertFromLanguageModel
 		epochs = 20
 	else:
 		raise ValueError(f'Unknown dataset: {dataset}')
 
 	save_directory = 'models'
-	model_name = f'{dataset}-rqe-v2'
+	model_name = f'{dataset}-rqe-v3'
 	learning_rate = 5e-5
 	lr_warmup = 0.1
 	gradient_clip_val = 1.0
@@ -152,11 +157,11 @@ if __name__ == "__main__":
 	)
 	if load_model:
 		logging.info('Loading model...')
-		model = RQEBert.load_from_checkpoint(checkpoint_path)
+		model = model_class.load_from_checkpoint(checkpoint_path)
 		# model.to('cpu')
 	else:
 		logging.info('Loading model...')
-		model = RQEBert(
+		model = model_class(
 			pre_model_name=pre_model_name,
 			learning_rate=learning_rate,
 			lr_warmup=lr_warmup,

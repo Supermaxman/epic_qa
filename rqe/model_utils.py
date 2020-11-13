@@ -1,18 +1,16 @@
 
-from transformers import AutoModelForSequenceClassification
+from transformers import AutoModelForSequenceClassification, BertModel
 from transformers import AdamW, get_linear_schedule_with_warmup
 from torch import nn
 import torch
 import pytorch_lightning as pl
+from abc import ABC, abstractmethod
 
 
-class RQEBert(pl.LightningModule):
+class RQEBert(pl.LightningModule, ABC):
 	def __init__(self, pre_model_name, learning_rate, weight_decay, lr_warmup, updates_total):
 		super().__init__()
-		# TODO support non-seq class model
-		# self.bert = BertModel.from_pretrained(pre_model_name)
-		self.bert = AutoModelForSequenceClassification.from_pretrained(pre_model_name)
-		self.config = self.bert.config
+		self.pre_model_name = pre_model_name
 		self.learning_rate = learning_rate
 		self.weight_decay = weight_decay
 		self.lr_warmup = lr_warmup
@@ -21,15 +19,9 @@ class RQEBert(pl.LightningModule):
 		self.criterion = nn.CrossEntropyLoss(reduction='none')
 		self.save_hyperparameters()
 
+	@abstractmethod
 	def forward(self, input_ids, attention_mask, token_type_ids):
-		# [batch_size, 2]
-		logits = self.bert(
-			input_ids,
-			attention_mask=attention_mask,
-			token_type_ids=token_type_ids
-		)[0]
-		scores = self.score_func(logits)
-		return logits, scores
+		pass
 
 	def _loss(self, logits, labels):
 		loss = self.criterion(
@@ -118,3 +110,42 @@ class RQEBert(pl.LightningModule):
 			{'params': [p for n, p in param_optimizer if any(nd in n for nd in no_decay)], 'weight_decay': 0.0}]
 
 		return optimizer_params
+
+
+class RQEBertFromSequenceClassification(RQEBert):
+	def __init__(self, pre_model_name, learning_rate, weight_decay, lr_warmup, updates_total):
+		super().__init__(pre_model_name, learning_rate, weight_decay, lr_warmup, updates_total)
+		self.bert = AutoModelForSequenceClassification.from_pretrained(pre_model_name)
+		self.config = self.bert.config
+
+	def forward(self, input_ids, attention_mask, token_type_ids):
+		# [batch_size, 2]
+		logits = self.bert(
+			input_ids,
+			attention_mask=attention_mask,
+			token_type_ids=token_type_ids
+		)[0]
+		scores = self.score_func(logits)
+		return logits, scores
+
+
+class RQEBertFromLanguageModel(RQEBert):
+	def __init__(self, pre_model_name, learning_rate, weight_decay, lr_warmup, updates_total):
+		super().__init__(pre_model_name, learning_rate, weight_decay, lr_warmup, updates_total)
+		self.bert = BertModel.from_pretrained(pre_model_name)
+		self.classifier = nn.Linear(
+			self.bert.config.hidden_size,
+			2
+		)
+		self.config = self.bert.config
+
+	def forward(self, input_ids, attention_mask, token_type_ids):
+		cls_embeddings = self.bert(
+			input_ids,
+			attention_mask=attention_mask,
+			token_type_ids=token_type_ids
+		)[0][:, 0]
+		# [batch_size, 2]
+		logits = self.classifier(cls_embeddings)
+		scores = self.score_func(logits)
+		return logits, scores
