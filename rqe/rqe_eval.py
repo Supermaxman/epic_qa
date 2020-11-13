@@ -56,7 +56,7 @@ if __name__ == "__main__":
 
 	save_directory = 'models'
 	torch_cache_dir = '/users/max/data/models/torch_cache'
-	model_name = f'{dataset}-rqe-v1'
+	model_name = f'{dataset}-rqe-v2'
 	learning_rate = 5e-5
 	lr_warmup = 0.1
 	gradient_clip_val = 1.0
