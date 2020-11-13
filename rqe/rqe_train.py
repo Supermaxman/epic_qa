@@ -40,11 +40,11 @@ if __name__ == "__main__":
 	elif dataset == 'quora':
 		all_path = 'data/quora_duplicate_questions/quora_duplicate_questions.tsv'
 		max_seq_len = 64
-		batch_size = 64
-		# pre_model_name = 'nboost/pt-bert-base-uncased-msmarco'
-		# model_class = RQEBertFromSequenceClassification
-		pre_model_name = 'bert-base-uncased'
-		model_class = RQEBertFromLanguageModel
+		batch_size = 32
+		pre_model_name = 'nboost/pt-bert-base-uncased-msmarco'
+		model_class = RQEBertFromSequenceClassification
+		# pre_model_name = 'bert-base-uncased'
+		# model_class = RQEBertFromLanguageModel
 		epochs = 20
 
 		# do 80% train 10% dev 10% test
@@ -59,25 +59,26 @@ if __name__ == "__main__":
 		raise ValueError(f'Unknown dataset: {dataset}')
 
 	save_directory = 'models'
-	torch_cache_dir = '/users/max/data/models/torch_cache'
-	model_name = f'{dataset}-rqe-v3'
+	# torch_cache_dir = '/users/max/data/models/torch_cache'
+	torch_cache_dir = None
+	model_name = f'{dataset}-rqe-v4'
 	learning_rate = 5e-5
 	lr_warmup = 0.1
 	gradient_clip_val = 1.0
 	weight_decay = 0.01
 	val_check_interval = 1.0
-	is_distributed = False
+	is_distributed = True
 	# export TPU_IP_ADDRESS=10.155.6.34
 	# export XRT_TPU_CONFIG="tpu_worker;0;$TPU_IP_ADDRESS:8470"
 
 	accumulate_grad_batches = 1
 	# gpus = [3, 4, 6, 7]
 	gpus = [0]
-	use_tpus = False
+	use_tpus = True
 	precision = 16 if use_tpus else 32
 	# precision = 32
 	tpu_cores = 8
-	num_workers = 1
+	num_workers = 4
 	deterministic = True
 	train_model = True
 	load_model = False

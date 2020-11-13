@@ -1,0 +1,4 @@
+quora dataset accuracy:
+Abacha & Demner-Fushman                 0.8362
+quora-rqe-v3    (bert-base)             0.
+quora-rqe-v2    (msmarco-rerank)        0.8520
