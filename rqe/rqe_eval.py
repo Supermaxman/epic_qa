@@ -38,10 +38,10 @@ if __name__ == "__main__":
 		all_path = 'data/quora_duplicate_questions/quora_duplicate_questions.tsv'
 		max_seq_len = 64
 		batch_size = 64
-		# pre_model_name = 'nboost/pt-bert-base-uncased-msmarco'
-		# model_class = RQEBertFromSequenceClassification
-		pre_model_name = 'bert-base-uncased'
-		model_class = RQEBertFromLanguageModel
+		pre_model_name = 'nboost/pt-bert-base-uncased-msmarco'
+		model_class = RQEBertFromSequenceClassification
+		# pre_model_name = 'bert-base-uncased'
+		# model_class = RQEBertFromLanguageModel
 		epochs = 20
 
 		# do 80% train 10% dev 10% test
