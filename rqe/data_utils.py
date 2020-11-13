@@ -91,7 +91,7 @@ class BatchCollator(object):
 			add_special_tokens=True,
 			padding='max_length' if self.force_max_seq_len else 'longest',
 			return_tensors='pt',
-			truncation='only_second',
+			truncation='longest_first',
 			max_length=self.max_seq_len
 		)
 		labels = torch.tensor(labels, dtype=torch.long)
