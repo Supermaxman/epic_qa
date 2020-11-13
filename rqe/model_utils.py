@@ -63,7 +63,7 @@ class RQEBert(pl.LightningModule, ABC):
 		batch_size = logits.shape[0]
 		prediction = logits.max(dim=1)[1]
 		correct_count = (prediction.eq(labels)).float().sum()
-		total_count = batch_size.float()
+		total_count = float(batch_size)
 		accuracy = correct_count / batch_size
 		return loss, logits, prediction, correct_count, total_count, accuracy
 
