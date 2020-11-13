@@ -180,8 +180,7 @@ if __name__ == "__main__":
 			precision=precision,
 			val_check_interval=val_check_interval,
 			deterministic=deterministic,
-			callbacks=callbacks,
-			checkpoint_callback=None
+			callbacks=callbacks
 		)
 	else:
 		if len(gpus) > 1:
@@ -198,8 +197,7 @@ if __name__ == "__main__":
 			distributed_backend=backend,
 			gradient_clip_val=gradient_clip_val,
 			deterministic=deterministic,
-			callbacks=callbacks,
-			checkpoint_callback=None
+			callbacks=callbacks
 		)
 
 	if train_model:
@@ -208,6 +206,7 @@ if __name__ == "__main__":
 		logging.info('Saving checkpoint...')
 		model.to('cpu')
 		torch.save(model.state_dict(), checkpoint_path)
+		# TODO model.load_state_dict(torch.load(PATH))
 
 	# TODO
 	# if test_eval:
