@@ -95,45 +95,6 @@ def load_consumer_data(data_path):
 						examples.append(example)
 	return examples, queries, answers
 
-# TODO
-class BatchCollator(object):
-	def __init__(self, tokenizer,  max_seq_len: int, force_max_seq_len: bool):
-		super().__init__()
-		self.tokenizer = tokenizer
-		self.max_seq_len = max_seq_len
-		self.force_max_seq_len = force_max_seq_len
-
-	def __call__(self, pos_examples):
-		# creates text examples
-		batch_negative_sample_size = None
-		sequences = []
-		labels = []
-		for pos_ex in pos_examples:
-			sequences.append((pos_ex['query']['text'], pos_ex['answer']['text']))
-			# TODO read from example
-			labels.append(1)
-
-		# "input_ids": batch["input_ids"].to(device),
-		# "attention_mask": batch["attention_mask"].to(device),
-		tokenizer_batch = self.tokenizer.batch_encode_plus(
-			batch_text_or_text_pairs=sequences,
-			add_special_tokens=True,
-			padding='max_length' if self.force_max_seq_len else 'longest',
-			return_tensors='pt',
-			truncation='only_second',
-			max_length=self.max_seq_len
-		)
-		labels = torch.tensor(labels, dtype=torch.long)
-		sample_size = 1
-		batch = {
-			'input_ids': tokenizer_batch['input_ids'],
-			'attention_mask': tokenizer_batch['attention_mask'],
-			'token_type_ids': tokenizer_batch['token_type_ids'],
-			'labels': labels,
-			'sample_size': sample_size
-		}
-
-		return batch
 
 class SampleCollator(object):
 	def __init__(self, tokenizer, neg_sampler: NegativeSampler, max_seq_len: int, force_max_seq_len: bool):
