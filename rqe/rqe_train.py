@@ -26,7 +26,7 @@ if __name__ == "__main__":
 		train_path = 'data/RQE_Data_AMIA2016/RQE_Train_8588_AMIA2016.xml'
 		test_path = 'data/RQE_Data_AMIA2016/RQE_Test_302_pairs_AMIA2016.xml'
 		load_func = load_clinical_data
-		max_seq_len = 256
+		max_seq_len = 92
 		batch_size = 16
 	elif dataset == 'quora':
 		train_path = 'data/quora_duplicate_questions/quora_duplicate_questions.tsv'

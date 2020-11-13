@@ -51,7 +51,9 @@ def load_clinical_data(data_path):
 def load_quora_data(data_path):
 	examples = []
 	with open(data_path, 'r') as f:
-		for line in f:
+		for idx, line in enumerate(f):
+			if idx == 0:
+				continue
 			line = line.strip().split('\t')
 			if line:
 				# id	qid1	qid2	question1	question2	is_duplicate
