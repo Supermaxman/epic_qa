@@ -23,8 +23,8 @@ if __name__ == "__main__":
 	pl.seed_everything(seed)
 	dataset = args.dataset
 	if dataset == 'clinical-qe':
-		eval_path = 'data/RQE_Data_AMIA2016/RQE_Test_302_pairs_AMIA2016.xml'
-		# eval_path = 'data/RQE_Data_AMIA2016/MEDIQA2019-Task2-RQE-TestSet-wLabels.xml'
+		# eval_path = 'data/RQE_Data_AMIA2016/RQE_Test_302_pairs_AMIA2016.xml'
+		eval_path = 'data/RQE_Data_AMIA2016/MEDIQA2019-Task2-RQE-TestSet-wLabels.xml'
 		max_seq_len = 96
 		batch_size = 16
 		pre_model_name = 'nboost/pt-biobert-base-msmarco'
