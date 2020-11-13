@@ -5,6 +5,7 @@ import xml.etree.ElementTree as ET
 import torch
 from torch.utils.data import Dataset
 from tqdm import tqdm
+import csv
 
 
 class RQEDataset(Dataset):
@@ -51,22 +52,22 @@ def load_clinical_data(data_path):
 def load_quora_data(data_path):
 	examples = []
 	with open(data_path, 'r') as f:
-		for idx, line in enumerate(f):
+		csv_reader = csv.reader(f, delimiter='\t')
+		for idx, row in enumerate(csv_reader):
 			if idx == 0:
 				continue
-			line = line.strip().split('\t')
-			if len(line) == 6:
+			if len(row) == 6:
 				# id	qid1	qid2	question1	question2	is_duplicate
 				# A -> B
 				example = {
-					'id': line[0],
-					'A': line[3].strip(),
-					'B': line[4].strip(),
-					'label': int(line[5])
+					'id': row[0],
+					'A': row[3].strip(),
+					'B': row[4].strip(),
+					'label': int(row[5])
 				}
 				examples.append(example)
 			else:
-				print(line)
+				print(row)
 	return examples
 
 
