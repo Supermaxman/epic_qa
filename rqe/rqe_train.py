@@ -26,13 +26,13 @@ if __name__ == "__main__":
 		train_path = 'data/RQE_Data_AMIA2016/RQE_Train_8588_AMIA2016.xml'
 		test_path = 'data/RQE_Data_AMIA2016/RQE_Test_302_pairs_AMIA2016.xml'
 		load_func = load_clinical_data
-		max_seq_len = 92
+		max_seq_len = 96
 		batch_size = 16
 	elif dataset == 'quora':
 		train_path = 'data/quora_duplicate_questions/quora_duplicate_questions.tsv'
 		test_path = None
 		load_func = load_quora_data
-		max_seq_len = 256
+		max_seq_len = 64
 		batch_size = 16
 	else:
 		raise ValueError(f'Unknown dataset: {dataset}')
@@ -46,14 +46,14 @@ if __name__ == "__main__":
 	gradient_clip_val = 1.0
 	weight_decay = 0.01
 	val_check_interval = 1.0
-	is_distributed = False
+	is_distributed = True
 	# export TPU_IP_ADDRESS=10.155.6.34
 	# export XRT_TPU_CONFIG="tpu_worker;0;$TPU_IP_ADDRESS:8470"
 
 	accumulate_grad_batches = 1
 	# gpus = [3, 4, 6, 7]
 	gpus = [0]
-	use_tpus = False
+	use_tpus = True
 	precision = 16 if use_tpus else 32
 	# precision = 32
 	tpu_cores = 8
@@ -64,7 +64,7 @@ if __name__ == "__main__":
 	test_eval = mode == 'test'
 	predict = False
 
-	calc_seq_len = True
+	calc_seq_len = False
 	pl.seed_everything(seed)
 
 	save_directory = os.path.join(save_directory, model_name)

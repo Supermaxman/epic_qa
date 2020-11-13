@@ -56,18 +56,15 @@ def load_quora_data(data_path):
 		for idx, row in enumerate(csv_reader):
 			if idx == 0:
 				continue
-			if len(row) == 6:
-				# id	qid1	qid2	question1	question2	is_duplicate
-				# A -> B
-				example = {
-					'id': row[0],
-					'A': row[3].strip(),
-					'B': row[4].strip(),
-					'label': int(row[5])
-				}
-				examples.append(example)
-			else:
-				print(row)
+			# id	qid1	qid2	question1	question2	is_duplicate
+			# A -> B
+			example = {
+				'id': row[0],
+				'A': row[3].strip(),
+				'B': row[4].strip(),
+				'label': int(row[5])
+			}
+			examples.append(example)
 	return examples
 
 
