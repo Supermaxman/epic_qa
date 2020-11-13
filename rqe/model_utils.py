@@ -8,9 +8,10 @@ from abc import ABC, abstractmethod
 
 
 class RQEBert(pl.LightningModule, ABC):
-	def __init__(self, pre_model_name, learning_rate, weight_decay, lr_warmup, updates_total):
+	def __init__(self, pre_model_name, learning_rate, weight_decay, lr_warmup, updates_total, torch_cache_dir):
 		super().__init__()
 		self.pre_model_name = pre_model_name
+		self.torch_cache_dir = torch_cache_dir
 		self.learning_rate = learning_rate
 		self.weight_decay = weight_decay
 		self.lr_warmup = lr_warmup
@@ -113,11 +114,11 @@ class RQEBert(pl.LightningModule, ABC):
 
 
 class RQEBertFromSequenceClassification(RQEBert):
-	def __init__(self, pre_model_name, learning_rate, weight_decay, lr_warmup, updates_total):
-		super().__init__(pre_model_name, learning_rate, weight_decay, lr_warmup, updates_total)
+	def __init__(self, pre_model_name, learning_rate, weight_decay, lr_warmup, updates_total, torch_cache_dir=None):
+		super().__init__(pre_model_name, learning_rate, weight_decay, lr_warmup, updates_total, torch_cache_dir)
 		self.bert = AutoModelForSequenceClassification.from_pretrained(
 			pre_model_name,
-			cache_dir='/users/max/data/models/torch_cache'
+			cache_dir=torch_cache_dir
 		)
 		self.config = self.bert.config
 
@@ -133,11 +134,11 @@ class RQEBertFromSequenceClassification(RQEBert):
 
 
 class RQEBertFromLanguageModel(RQEBert):
-	def __init__(self, pre_model_name, learning_rate, weight_decay, lr_warmup, updates_total):
-		super().__init__(pre_model_name, learning_rate, weight_decay, lr_warmup, updates_total)
+	def __init__(self, pre_model_name, learning_rate, weight_decay, lr_warmup, updates_total, torch_cache_dir=None):
+		super().__init__(pre_model_name, learning_rate, weight_decay, lr_warmup, updates_total, torch_cache_dir)
 		self.bert = BertModel.from_pretrained(
 			pre_model_name,
-			cache_dir='/users/max/data/models/torch_cache'
+			cache_dir=torch_cache_dir
 		)
 		self.classifier = nn.Linear(
 			self.bert.config.hidden_size,

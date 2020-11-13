@@ -48,6 +48,7 @@ if __name__ == "__main__":
 		raise ValueError(f'Unknown dataset: {dataset}')
 
 	save_directory = 'models'
+	torch_cache_dir = '/users/max/data/models/torch_cache'
 	model_name = f'{dataset}-rqe-v3'
 	learning_rate = 5e-5
 	lr_warmup = 0.1
@@ -157,7 +158,10 @@ if __name__ == "__main__":
 	)
 	if load_model:
 		logging.info('Loading model...')
-		model = model_class.load_from_checkpoint(checkpoint_path)
+		model = model_class.load_from_checkpoint(
+			checkpoint_path,
+			torch_cache_dir=torch_cache_dir
+		)
 		# model.to('cpu')
 	else:
 		logging.info('Loading model...')
@@ -166,7 +170,8 @@ if __name__ == "__main__":
 			learning_rate=learning_rate,
 			lr_warmup=lr_warmup,
 			updates_total=updates_total,
-			weight_decay=weight_decay
+			weight_decay=weight_decay,
+			torch_cache_dir=torch_cache_dir
 		)
 		tokenizer.save_pretrained(save_directory)
 		model.config.save_pretrained(save_directory)
