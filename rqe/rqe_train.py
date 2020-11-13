@@ -29,21 +29,23 @@ if __name__ == "__main__":
 		load_func = load_clinical_data
 		max_seq_len = 96
 		batch_size = 16
+		pre_model_name = 'nboost/pt-biobert-base-msmarco'
+		epochs = 10
 	elif dataset == 'quora':
 		train_path = 'data/quora_duplicate_questions/quora_duplicate_questions.tsv'
 		test_path = None
 		load_func = load_quora_data
 		max_seq_len = 64
-		batch_size = 16
+		batch_size = 64
+		pre_model_name = 'nboost/pt-bert-base-uncased-msmarco'
+		epochs = 20
 	else:
 		raise ValueError(f'Unknown dataset: {dataset}')
 
 	save_directory = 'models'
-	model_name = f'{dataset}-rqe-v1'
-	pre_model_name = 'nboost/pt-biobert-base-msmarco'
+	model_name = f'{dataset}-rqe-v2'
 	learning_rate = 5e-5
 	lr_warmup = 0.1
-	epochs = 10
 	gradient_clip_val = 1.0
 	weight_decay = 0.01
 	val_check_interval = 1.0
