@@ -86,7 +86,7 @@ if __name__ == "__main__":
 		format="%(asctime)s [%(levelname)s] %(message)s",
 		handlers=[
 			logging.FileHandler(logfile, mode='w'),
-			logging.StreamHandler(sys.stdout)]
+			logging.StreamHandler()]
 	)
 
 	logging.info('Loading dataset...')
