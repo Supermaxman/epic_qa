@@ -83,7 +83,7 @@ class RQEBert(pl.LightningModule, ABC):
 	def _eval_epoch_end(self, outputs, name):
 		loss = torch.cat([x[f'{name}_batch_loss'] for x in outputs], dim=0).mean()
 		correct_count = torch.stack([x[f'{name}_correct_count'] for x in outputs], dim=0).sum()
-		total_count = torch.stack([x[f'{name}_total_count'] for x in outputs], dim=0).sum()
+		total_count = sum([x[f'{name}_total_count'] for x in outputs])
 		accuracy = correct_count / total_count
 		self.log(f'{name}_loss', loss)
 		self.log(f'{name}_accuracy', accuracy)
