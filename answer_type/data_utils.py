@@ -51,9 +51,14 @@ def load_smart_data(data_path):
 				if ex_type not in types_map:
 					types_map[ex_type] = len(types_map)
 				ex_types.append(types_map[ex_type])
+		ex_id = ex['id']
+		ex_question = ex['question']
+		if ex_question is None:
+			print(ex)
+			continue
 		example = {
-			'id': ex['id'],
-			'question': ex['question'].strip(),
+			'id': ex_id,
+			'question': ex_question.strip(),
 			# single value like boolean, resource, literal, etc.
 			'label': ex_category,
 			# list of types
