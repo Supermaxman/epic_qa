@@ -25,9 +25,9 @@ if __name__ == "__main__":
 
 	if dataset == 'smart-dbpedia':
 		all_path = 'data/smart/smarttask_dbpedia_train.json'
-		max_seq_len = 512
+		max_seq_len = 64
 		# 32
-		batch_size = 4
+		batch_size = 8
 		pre_model_name = 'bert-base-uncased'
 		model_class = ATPBertFromLanguageModel
 		epochs = 20
@@ -68,7 +68,7 @@ if __name__ == "__main__":
 	train_model = True
 	load_model = False
 
-	calc_seq_len = True
+	calc_seq_len = False
 
 	save_directory = os.path.join(save_directory, model_name)
 
