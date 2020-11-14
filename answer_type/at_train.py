@@ -27,7 +27,7 @@ if __name__ == "__main__":
 		all_path = 'data/smart/smarttask_dbpedia_train.json'
 		max_seq_len = 64
 		# 32
-		batch_size = 8
+		batch_size = 32
 		pre_model_name = 'bert-base-uncased'
 		model_class = ATPBertFromLanguageModel
 		epochs = 20
