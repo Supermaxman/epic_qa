@@ -72,7 +72,7 @@ class ATPBert(pl.LightningModule, ABC):
 			types_labels
 		)
 		batch_size = category_labels.shape[0]
-		prediction = category_labels.max(dim=1)[1]
+		prediction = category_logits.max(dim=1)[1]
 		correct_count = (prediction.eq(category_labels)).float().sum()
 		total_count = float(batch_size)
 		accuracy = correct_count / batch_size
