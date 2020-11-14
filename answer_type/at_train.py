@@ -16,14 +16,14 @@ from answer_type.data_utils import BatchCollator, ATPDataset, load_smart_data, s
 
 if __name__ == "__main__":
 	parser = argparse.ArgumentParser()
-	parser.add_argument('--dataset', help='smart-dbpedia', type=str, default='smart')
+	parser.add_argument('--dataset', help='smart-dbpedia', type=str, default='smart-dbpedia')
 	args = parser.parse_args()
 	# TODO parameterize below into config file for reproducibility
 	seed = 0
 	pl.seed_everything(seed)
 	dataset = args.dataset
 
-	if dataset == 'smart-dbpedia ':
+	if dataset == 'smart-dbpedia':
 		all_path = 'data/smart/smarttask_dbpedia_train.json'
 		max_seq_len = 512
 		# 32
@@ -34,7 +34,7 @@ if __name__ == "__main__":
 
 		# do 80% train 10% dev 10% test
 		logging.info('Loading smart dataset...')
-		examples = load_smart_data(all_path)
+		examples, category_map, types_map = load_smart_data(all_path)
 		# 80/20
 		train_examples, other_examples = split_data(examples, ratio=0.8)
 		# 10/10
@@ -68,7 +68,7 @@ if __name__ == "__main__":
 	train_model = True
 	load_model = False
 
-	calc_seq_len = False
+	calc_seq_len = True
 
 	save_directory = os.path.join(save_directory, model_name)
 
@@ -110,7 +110,8 @@ if __name__ == "__main__":
 		collate_fn=BatchCollator(
 			tokenizer,
 			max_seq_len,
-			force_max_seq_len=use_tpus
+			use_tpus,
+			types_map
 		)
 	)
 	if calc_seq_len:
@@ -122,7 +123,8 @@ if __name__ == "__main__":
 			collate_fn=BatchCollator(
 				tokenizer,
 				max_seq_len,
-				force_max_seq_len=False
+				False,
+				types_map
 			)
 		)
 		import numpy as np
@@ -146,7 +148,8 @@ if __name__ == "__main__":
 		collate_fn=BatchCollator(
 			tokenizer,
 			max_seq_len,
-			force_max_seq_len=use_tpus
+			use_tpus,
+			types_map
 		)
 	)
 	logging.info('Loading model...')
@@ -156,6 +159,8 @@ if __name__ == "__main__":
 		lr_warmup=lr_warmup,
 		updates_total=updates_total,
 		weight_decay=weight_decay,
+		category_map=category_map,
+		types_map=types_map,
 		torch_cache_dir=torch_cache_dir
 	)
 	if load_model:

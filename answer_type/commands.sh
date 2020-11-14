@@ -2,7 +2,7 @@
 
 # v1
 python -m answer_type.at_train \
-  --dataset=clinical-qe
+  --dataset=smart-dbpedia
 
 python -m answer_type.at_train \
   --dataset=quora
