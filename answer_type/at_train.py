@@ -1,5 +1,6 @@
 
 import sys
+import json
 from transformers import BertTokenizer
 import argparse
 import os
@@ -76,6 +77,13 @@ if __name__ == "__main__":
 
 	if not os.path.exists(save_directory):
 		os.mkdir(save_directory)
+
+	category_map_path = os.path.join(save_directory, 'category_map.json')
+	with open(category_map_path, 'w') as f:
+		json.dump(category_map, f, indent=2)
+	types_map_path = os.path.join(save_directory, 'types_map.json')
+	with open(types_map_path, 'w') as f:
+		json.dump(types_map, f, indent=2)
 
 	# Also add the stream handler so that it logs on STD out as well
 	# Ref: https://stackoverflow.com/a/46098711/4535284
