@@ -31,7 +31,7 @@ if __name__ == "__main__":
 		batch_size = 32
 		pre_model_name = 'bert-base-uncased'
 		model_class = ATPBertFromLanguageModel
-		epochs = 100
+		epochs = 50
 
 		# do 80% train 10% dev 10% test
 		logging.info('Loading smart dataset...')
@@ -47,8 +47,9 @@ if __name__ == "__main__":
 	save_directory = 'models'
 	# torch_cache_dir = '/users/max/data/models/torch_cache'
 	torch_cache_dir = None
-	model_name = f'{dataset}-at-v2'
-	learning_rate = 5e-5
+	model_name = f'{dataset}-at-v3'
+	# learning_rate = 5e-5
+	learning_rate = 5e-4
 	lr_warmup = 0.1
 	gradient_clip_val = 1.0
 	weight_decay = 0.01
