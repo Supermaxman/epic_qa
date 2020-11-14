@@ -1,0 +1,22 @@
+Examples from Quora
+
+
+What is the most delicious dish you've ever eaten and why?
+entails
+What is the best/most memorable thing you've ever eaten and why?
+
+
+How can I learn to speak English fluently?
+entails
+How I can speak English fluently?	
+
+
+Can height increase after 25?
+entails
+How can I increase my height after 21 also?	
+
+
+How do we prepare for UPSC?	
+entails 
+How do I prepare for civil service?
+	
