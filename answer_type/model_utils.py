@@ -119,14 +119,14 @@ class ATPBert(pl.LightningModule, ABC):
 			category_logits = torch.cat([x[f'{name}_category_logits'] for x in outputs], dim=0)
 			types_logits = torch.cat([x[f'{name}_types_logits'] for x in outputs], dim=0)
 			ids = [ex_id for ex_ids in outputs for ex_id in ex_ids[f'{name}_ids']]
-			print(category_logits.shape)
-			print(types_logits.shape)
-			print(len(ids))
-			predictions = {}
+			# predictions = {}
 			cat_id_map = {v: k for k, v in self.category_map.items()}
 			types_id_map = {v: k for k, v in self.types_map.items()}
 			types_threshold = 0.5
 			types_top_k = 10
+			all_ids = []
+			all_categories = []
+			all_types = []
 			for ex_id, ex_cat_logits, ex_types_logits in zip(ids, category_logits, types_logits):
 				category_pred_id = torch.argmax(ex_cat_logits).item()
 				category_pred = cat_id_map[category_pred_id]
@@ -141,12 +141,19 @@ class ATPBert(pl.LightningModule, ABC):
 				ex_types = sorted(ex_types, key=lambda x: x[0], reverse=True)
 				ex_types = ex_types[:types_top_k]
 				types_pred = [x[1] for x in ex_types]
-				predictions[ex_id] = {
-					'category': category_pred,
-					'types': types_pred
-				}
+				# predictions[ex_id] = {
+				# 	'category': category_pred,
+				# 	'types': types_pred
+				# }
+				all_ids.append(ex_id)
+				all_categories.append(category_pred)
+				all_types.append(types_pred)
 			self.write_prediction_dict(
-				predictions,
+				{
+					'id': all_ids,
+					'category': all_categories,
+					'types': all_types
+				},
 				filename='predictions.pt'
 			)
 
