@@ -119,6 +119,9 @@ class ATPBert(pl.LightningModule, ABC):
 			category_logits = torch.cat([x[f'{name}_category_logits'] for x in outputs], dim=0)
 			types_logits = torch.cat([x[f'{name}_types_logits'] for x in outputs], dim=0)
 			ids = [ex_id for ex_ids in outputs for ex_id in ex_ids[f'{name}_ids']]
+			print(category_logits.shape)
+			print(types_logits.shape)
+			print(len(ids))
 			predictions = {}
 			cat_id_map = {v: k for k, v in self.category_map.items()}
 			types_id_map = {v: k for k, v in self.types_map.items()}
