@@ -39,7 +39,7 @@ if __name__ == "__main__":
 		max_seq_len = 64
 		# 32
 		batch_size = 32
-		pre_model_name = 'bert-base-cased'
+		pre_model_name = 'bert-base-uncased'
 		model_class = ATPBertFromLanguageModel
 		epochs = 50
 
