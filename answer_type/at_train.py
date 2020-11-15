@@ -29,7 +29,7 @@ if __name__ == "__main__":
 		max_seq_len = 64
 		# 32
 		batch_size = 32
-		pre_model_name = 'bert-base-uncased'
+		pre_model_name = 'bert-base-cased'
 		model_class = ATPBertFromLanguageModel
 		epochs = 50
 
@@ -47,7 +47,7 @@ if __name__ == "__main__":
 	save_directory = 'models'
 	# torch_cache_dir = '/users/max/data/models/torch_cache'
 	torch_cache_dir = None
-	model_name = f'{dataset}-at-v3'
+	model_name = f'{dataset}-at-v4'
 	# learning_rate = 5e-5
 	learning_rate = 5e-4
 	lr_warmup = 0.1
