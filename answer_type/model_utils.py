@@ -128,7 +128,7 @@ class ATPBert(pl.LightningModule, ABC):
 			types_threshold = 0.5
 			types_top_k = 10
 			for ex_id, ex_cat_logits, ex_types_logits in zip(ids, category_logits, types_logits):
-				category_pred_id = ex_cat_logits.max()[0].item()
+				category_pred_id = torch.argmax(ex_cat_logits).item()
 				category_pred = cat_id_map[category_pred_id]
 				ex_types = []
 				for type_id, ex_type_logit in enumerate(ex_types_logits):
