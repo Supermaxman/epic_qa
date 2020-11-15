@@ -45,7 +45,7 @@ if __name__ == "__main__":
 
 		logging.info('Loading quora dataset...')
 		category_map, types_map = load_smart_maps(category_map_path, types_map_path)
-		eval_examples = load_quora_data(all_path)[:1000]
+		eval_examples = load_quora_data(all_path)
 	else:
 		raise ValueError(f'Unknown dataset: {dataset}')
 
