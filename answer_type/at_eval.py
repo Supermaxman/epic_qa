@@ -99,7 +99,6 @@ if __name__ == "__main__":
 	eval_data_loader = DataLoader(
 		eval_dataset,
 		batch_size=batch_size,
-		shuffle=True,
 		num_workers=num_workers,
 		collate_fn=BatchCollator(
 			tokenizer,
