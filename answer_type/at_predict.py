@@ -38,14 +38,14 @@ if __name__ == "__main__":
 		all_path = 'data/quora_duplicate_questions/quora_duplicate_questions.tsv'
 		max_seq_len = 64
 		# 32
-		batch_size = 32
+		batch_size = 128
 		pre_model_name = 'bert-base-uncased'
 		model_class = ATPBertFromLanguageModel
 		epochs = 50
 
 		logging.info('Loading quora dataset...')
 		category_map, types_map = load_smart_maps(category_map_path, types_map_path)
-		eval_examples = load_quora_data(all_path)
+		eval_examples = load_quora_data(all_path)[:1000]
 	else:
 		raise ValueError(f'Unknown dataset: {dataset}')
 
