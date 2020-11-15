@@ -216,8 +216,12 @@ if __name__ == "__main__":
 
 	if train_model:
 		logging.info('Training...')
-		trainer.fit(model, train_data_loader, val_data_loader)
-		logging.info('Saving checkpoint...')
-		model.to('cpu')
-		torch.save(model.state_dict(), checkpoint_path)
+		try:
+			trainer.fit(model, train_data_loader, val_data_loader)
+			logging.info('Saving checkpoint...')
+			model.to('cpu')
+			torch.save(model.state_dict(), checkpoint_path)
+		except Exception as e:
+			logging.exception('Exception during training', exc_info=e)
+
 

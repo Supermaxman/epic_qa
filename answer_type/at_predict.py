@@ -11,7 +11,7 @@ from pytorch_lightning import loggers as pl_loggers
 import torch
 
 from answer_type.model_utils import ATPBertFromLanguageModel
-from answer_type.data_utils import BatchCollator, ATPDataset, load_smart_data, split_data, load_smart_maps
+from answer_type.data_utils import PredictionBatchCollator, ATPDataset, load_quora_data, load_smart_maps
 
 if __name__ == "__main__":
 	parser = argparse.ArgumentParser()
@@ -23,7 +23,7 @@ if __name__ == "__main__":
 	dataset = args.dataset
 
 	save_directory = 'models'
-	model_name = f'{dataset}-at-v4'
+	model_name = f'{dataset}-at-v3'
 	save_directory = os.path.join(save_directory, model_name)
 
 	checkpoint_path = os.path.join(save_directory, 'pytorch_model.bin')
@@ -35,7 +35,7 @@ if __name__ == "__main__":
 	types_map_path = os.path.join(save_directory, 'types_map.json')
 
 	if dataset == 'smart-dbpedia':
-		all_path = 'data/smart/smarttask_dbpedia_train.json'
+		all_path = 'data/quora_duplicate_questions/quora_duplicate_questions.tsv'
 		max_seq_len = 64
 		# 32
 		batch_size = 32
@@ -43,14 +43,9 @@ if __name__ == "__main__":
 		model_class = ATPBertFromLanguageModel
 		epochs = 50
 
-		# do 80% train 10% dev 10% test
-		logging.info('Loading smart dataset...')
+		logging.info('Loading quora dataset...')
 		category_map, types_map = load_smart_maps(category_map_path, types_map_path)
-		examples, _, _ = load_smart_data(all_path, category_map, types_map)
-		# 80/20
-		_, other_examples = split_data(examples, ratio=0.8)
-		# 10/10
-		_, eval_examples = split_data(other_examples, ratio=0.5)
+		eval_examples, _, _ = load_quora_data(all_path)
 	else:
 		raise ValueError(f'Unknown dataset: {dataset}')
 
@@ -101,11 +96,10 @@ if __name__ == "__main__":
 		batch_size=batch_size,
 		shuffle=True,
 		num_workers=num_workers,
-		collate_fn=BatchCollator(
+		collate_fn=PredictionBatchCollator(
 			tokenizer,
 			max_seq_len,
-			use_tpus,
-			types_map
+			use_tpus
 		)
 	)
 
@@ -118,7 +112,8 @@ if __name__ == "__main__":
 		weight_decay=weight_decay,
 		category_map=category_map,
 		types_map=types_map,
-		torch_cache_dir=torch_cache_dir
+		torch_cache_dir=torch_cache_dir,
+		predict_mode=True
 	)
 	model.load_state_dict(torch.load(checkpoint_path))
 

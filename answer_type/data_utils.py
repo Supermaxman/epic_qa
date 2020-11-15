@@ -32,12 +32,47 @@ def split_data(data, ratio=0.8):
 	return train_data, dev_data
 
 
-def load_smart_data(data_path):
+def load_smart_maps(category_map_path, types_map_path):
+	with open(category_map_path, 'r') as f:
+		category_map = json.load(f)
+	with open(types_map_path, 'r') as f:
+		types_map = json.load(f)
+	return category_map, types_map
+
+
+def load_quora_data(data_path):
+	examples = []
+	with open(data_path, 'r') as f:
+		csv_reader = csv.reader(f, delimiter='\t')
+		for idx, row in enumerate(csv_reader):
+			if idx == 0:
+				continue
+			# id	qid1	qid2	question1	question2	is_duplicate
+			# A -> B
+			ex_id = row[0]
+			ex_question_a = row[3].strip()
+			ex_question_b = row[4].strip()
+			example_a = {
+				'id': f'{ex_id}|A',
+				'question': ex_question_a
+			}
+			examples.append(example_a)
+			example_b = {
+				'id': f'{ex_id}|B',
+				'question': ex_question_b
+			}
+			examples.append(example_b)
+	return examples
+
+
+def load_smart_data(data_path, category_map=None, types_map=None):
 	with open(data_path, 'r') as f:
 		data = json.load(f)
 	examples = []
-	category_map = {}
-	types_map = {}
+	if category_map is None:
+		category_map = {}
+	if types_map is None:
+		types_map = {}
 	for ex in data:
 		# A entails B (A -> B)
 		# A is often more specific, B is more general
@@ -113,3 +148,36 @@ class BatchCollator(object):
 
 		return batch
 
+
+class PredictionBatchCollator(object):
+	def __init__(self, tokenizer,  max_seq_len: int, force_max_seq_len: bool):
+		super().__init__()
+		self.tokenizer = tokenizer
+		self.max_seq_len = max_seq_len
+		self.force_max_seq_len = force_max_seq_len
+
+	def __call__(self, examples):
+		# creates text examples
+		sequences = []
+		ids = []
+		for ex in examples:
+			sequences.append(ex['question'])
+			ids.append(ex['id'])
+		# "input_ids": batch["input_ids"].to(device),
+		# "attention_mask": batch["attention_mask"].to(device),
+		tokenizer_batch = self.tokenizer.batch_encode_plus(
+			batch_text_or_text_pairs=sequences,
+			add_special_tokens=True,
+			padding='max_length' if self.force_max_seq_len else 'longest',
+			return_tensors='pt',
+			truncation=True,
+			max_length=self.max_seq_len
+		)
+		batch = {
+			'input_ids': tokenizer_batch['input_ids'],
+			'attention_mask': tokenizer_batch['attention_mask'],
+			'token_type_ids': tokenizer_batch['token_type_ids'],
+			'ids': ids
+		}
+
+		return batch
