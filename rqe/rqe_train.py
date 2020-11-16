@@ -28,6 +28,7 @@ if __name__ == "__main__":
 		# test_path = 'data/RQE_Data_AMIA2016/MEDIQA2019-Task2-RQE-TestSet-wLabels.xml'
 		max_seq_len = 96
 		batch_size = 16
+		model_type = 'rqe'
 		pre_model_name = 'nboost/pt-biobert-base-msmarco'
 		model_class = RQEBertFromSequenceClassification
 		epochs = 10
@@ -41,12 +42,12 @@ if __name__ == "__main__":
 		all_path = 'data/quora_duplicate_questions/quora_duplicate_questions.tsv'
 		max_seq_len = 64
 		batch_size = 32
-		pre_model_name = 'nboost/pt-bert-base-uncased-msmarco'
-		model_class = RQEBertFromSequenceClassification
-		# pre_model_name = 'bert-base-uncased'
-		# model_class = RQEBertFromLanguageModel
+		model_type = 'rqe'
+		# pre_model_name = 'nboost/pt-bert-base-uncased-msmarco'
+		# model_class = RQEBertFromSequenceClassification
+		pre_model_name = 'bert-base-cased'
+		model_class = RQEBertFromLanguageModel
 		epochs = 20
-
 		# do 80% train 10% dev 10% test
 		logging.info('Loading quora dataset...')
 		examples = load_quora_data(all_path)
@@ -61,7 +62,7 @@ if __name__ == "__main__":
 	save_directory = 'models'
 	# torch_cache_dir = '/users/max/data/models/torch_cache'
 	torch_cache_dir = None
-	model_name = f'{dataset}-rqe-v4'
+	model_name = f'{dataset}-{model_type}-{pre_model_name.replace("/", "-")}'
 	learning_rate = 5e-5
 	lr_warmup = 0.1
 	gradient_clip_val = 1.0
