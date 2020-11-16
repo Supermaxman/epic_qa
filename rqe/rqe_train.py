@@ -16,23 +16,50 @@ from rqe.data_utils import BatchCollator, RQEDataset, load_clinical_data, load_q
 
 if __name__ == "__main__":
 	parser = argparse.ArgumentParser()
-	parser.add_argument('--dataset', help='clinical-qe/quora', type=str, default='clinical-qe')
+	parser.add_argument('--dataset', help='clinical-qe/quora', type=str, default='quora')
+	parser.add_argument('--pre_model_name', type=str, default='nboost/pt-bert-base-uncased-msmarco')
+	parser.add_argument('--pre_model_type', help='lm/seq', type=str, default='lm')
+	parser.add_argument('--model_type', help='rqe', type=str, default='rqe')
+	parser.add_argument('--seed', help='random seed', type=int, default=0)
+	parser.add_argument('--batch_size', type=int, default=32)
+	parser.add_argument('--epochs', type=int, default=20)
+	# torch_cache_dir = '/users/max/data/models/torch_cache'
+	parser.add_argument('--torch_cache_dir', type=str, default=None)
+	parser.add_argument('--learning_rate', type=float, default=5e-5)
+	parser.add_argument('--lr_warmup', type=float, default=0.1)
+	parser.add_argument('--weight_decay', type=float, default=0.01)
+	parser.add_argument('--save_directory', type=str, default='models')
+
 	args = parser.parse_args()
 	# TODO parameterize below into config file for reproducibility
-	seed = 0
+	seed = args.seed
 	pl.seed_everything(seed)
-	dataset = args.dataset
+	dataset = args.dataset.lower()
+	model_type = args.model_type.lower()
+	pre_model_name = args.pre_model_name.lower()
+	pre_model_type = args.pre_model_type.lower()
+
+	torch_cache_dir = args.torch_cache_dir
+	root_save_directory = args.save_directory
+
+	batch_size = args.batch_size
+	epochs = args.epochs
+	learning_rate = args.learning_rate
+	lr_warmup = args.lr_warmup
+	weight_decay = args.weight_decay
+
+	# TODO model_type
+	if pre_model_type == 'seq':
+		model_class = RQEBertFromSequenceClassification
+	elif pre_model_type == 'lm':
+		model_class = RQEBertFromLanguageModel
+	else:
+		raise ValueError(f'Unknown pre_model_type: {pre_model_type}')
 	if dataset == 'clinical-qe':
 		train_path = 'data/RQE_Data_AMIA2016/RQE_Train_8588_AMIA2016.xml'
 		val_path = 'data/RQE_Data_AMIA2016/RQE_Test_302_pairs_AMIA2016.xml'
 		# test_path = 'data/RQE_Data_AMIA2016/MEDIQA2019-Task2-RQE-TestSet-wLabels.xml'
 		max_seq_len = 96
-		batch_size = 16
-		model_type = 'rqe'
-		pre_model_name = 'nboost/pt-biobert-base-msmarco'
-		model_class = RQEBertFromSequenceClassification
-		epochs = 10
-
 		# do 80% train 10% dev 10% test
 		logging.info('Loading clinical-qe dataset...')
 		train_examples = load_clinical_data(train_path)
@@ -41,13 +68,6 @@ if __name__ == "__main__":
 	elif dataset == 'quora':
 		all_path = 'data/quora_duplicate_questions/quora_duplicate_questions.tsv'
 		max_seq_len = 64
-		batch_size = 32
-		model_type = 'rqe'
-		# pre_model_name = 'nboost/pt-bert-base-uncased-msmarco'
-		# model_class = RQEBertFromSequenceClassification
-		pre_model_name = 'bert-base-cased'
-		model_class = RQEBertFromLanguageModel
-		epochs = 20
 		# do 80% train 10% dev 10% test
 		logging.info('Loading quora dataset...')
 		examples = load_quora_data(all_path)
@@ -59,34 +79,23 @@ if __name__ == "__main__":
 	else:
 		raise ValueError(f'Unknown dataset: {dataset}')
 
-	save_directory = 'models'
-	# torch_cache_dir = '/users/max/data/models/torch_cache'
-	torch_cache_dir = None
 	model_name = f'{dataset}-{model_type}-{pre_model_name.replace("/", "-")}'
-	learning_rate = 5e-5
-	lr_warmup = 0.1
-	gradient_clip_val = 1.0
-	weight_decay = 0.01
-	val_check_interval = 1.0
-	is_distributed = True
 	# export TPU_IP_ADDRESS=10.155.6.34
 	# export XRT_TPU_CONFIG="tpu_worker;0;$TPU_IP_ADDRESS:8470"
-
-	accumulate_grad_batches = 1
-	# gpus = [3, 4, 6, 7]
-	gpus = [0]
+	# TODO move to args
 	use_tpus = True
+	train_model = True
+	load_model = False
+	calc_seq_len = False
+	is_distributed = False
+
+	gpus = [0]
 	precision = 16 if use_tpus else 32
-	# precision = 32
 	tpu_cores = 8
 	num_workers = 4
 	deterministic = True
-	train_model = True
-	load_model = False
 
-	calc_seq_len = False
-
-	save_directory = os.path.join(save_directory, model_name)
+	save_directory = os.path.join(root_save_directory, model_name)
 
 	checkpoint_path = os.path.join(save_directory, 'pytorch_model.bin')
 
@@ -111,9 +120,7 @@ if __name__ == "__main__":
 	updates_epoch = len(train_examples) // (batch_size * num_batches_per_step)
 	updates_total = updates_epoch * epochs
 
-	callbacks = []
-	logging.info('Loading collator...')
-
+	logging.info('Loading tokenizer...')
 	tokenizer = BertTokenizer.from_pretrained(pre_model_name)
 	train_dataset = RQEDataset(train_examples)
 	val_dataset = RQEDataset(val_examples)
@@ -129,6 +136,7 @@ if __name__ == "__main__":
 			force_max_seq_len=use_tpus
 		)
 	)
+
 	if calc_seq_len:
 		data_loader = DataLoader(
 			train_dataset,
@@ -184,16 +192,13 @@ if __name__ == "__main__":
 	)
 
 	if use_tpus:
-		logging.warning('Gradient clipping slows down TPU training drastically, disabled for now.')
 		trainer = pl.Trainer(
 			logger=logger,
 			tpu_cores=tpu_cores,
 			default_root_dir=save_directory,
 			max_epochs=epochs,
 			precision=precision,
-			val_check_interval=val_check_interval,
-			deterministic=deterministic,
-			callbacks=callbacks
+			deterministic=deterministic
 		)
 	else:
 		if len(gpus) > 1:
@@ -206,11 +211,8 @@ if __name__ == "__main__":
 			default_root_dir=save_directory,
 			max_epochs=epochs,
 			precision=precision,
-			val_check_interval=val_check_interval,
 			distributed_backend=backend,
-			gradient_clip_val=gradient_clip_val,
-			deterministic=deterministic,
-			callbacks=callbacks
+			deterministic=deterministic
 		)
 
 	if train_model:
