@@ -22,10 +22,12 @@ if __name__ == "__main__":
 	parser.add_argument('--model_type', help='rqe', type=str, default='rqe')
 	parser.add_argument('--seed', help='random seed', type=int, default=0)
 	parser.add_argument('--batch_size', type=int, default=32)
-	parser.add_argument('--epochs', type=int, default=20)
+	# 20 -> 10
+	parser.add_argument('--epochs', type=int, default=10)
 	# torch_cache_dir = '/users/max/data/models/torch_cache'
 	parser.add_argument('--torch_cache_dir', type=str, default=None)
-	parser.add_argument('--learning_rate', type=float, default=5e-5)
+	# 5e-5 -> 5e-4
+	parser.add_argument('--learning_rate', type=float, default=5e-4)
 	parser.add_argument('--lr_warmup', type=float, default=0.1)
 	parser.add_argument('--weight_decay', type=float, default=0.01)
 	parser.add_argument('--save_directory', type=str, default='models')

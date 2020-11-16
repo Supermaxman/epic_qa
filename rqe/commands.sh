@@ -7,13 +7,6 @@ python -m rqe.rqe_train \
 
 python -m rqe.rqe_train \
   --dataset=quora \
-  --pre_model_name=bert-base-cased \
-  --pre_model_type=lm \
-  --learning_rate=5e-4 \
-  --epochs=10
-
-python -m rqe.rqe_train \
-  --dataset=quora \
   --pre_model_name=bert-base-uncased \
   --pre_model_type=lm
 
