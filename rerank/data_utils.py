@@ -6,6 +6,7 @@ import torch
 from torch.utils.data import Dataset
 from tqdm import tqdm
 from rerank.sample_utils import NegativeSampler
+import random
 
 
 class QuestionAnswerDataset(Dataset):
@@ -25,6 +26,7 @@ class QuestionAnswerDataset(Dataset):
 
 
 def split_data(data, train_ratio=0.8):
+	random.shuffle(data)
 	train_size = int(len(data) * train_ratio)
 	train_data = data[:train_size]
 	dev_data = data[train_size:]

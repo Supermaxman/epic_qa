@@ -6,6 +6,7 @@ import torch
 from torch.utils.data import Dataset
 from tqdm import tqdm
 import csv
+import random
 
 
 class RQEDataset(Dataset):
@@ -25,6 +26,7 @@ class RQEDataset(Dataset):
 
 
 def split_data(data, ratio=0.8):
+	random.shuffle(data)
 	train_size = int(len(data) * ratio)
 	train_data = data[:train_size]
 	dev_data = data[train_size:]
