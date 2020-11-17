@@ -77,10 +77,12 @@ def load_quora_data(data_path, at_predictions):
 			ex_id = row[0]
 			a_txt = row[3].strip()
 			a_id = f'{ex_id}|A'
-			a_category, a_types = at_predictions[a_id]
+			a_predictions = at_predictions[a_id]
+			a_category, a_types = a_predictions['category'], a_predictions['types']
 			b_txt = row[4].strip()
 			b_id = f'{ex_id}|B'
-			b_category, b_types = at_predictions[b_id]
+			b_predictions = at_predictions[b_id]
+			b_category, b_types = b_predictions['category'], b_predictions['types']
 			label = int(row[5])
 			example = {
 				'id': ex_id,
