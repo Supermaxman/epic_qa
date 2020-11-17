@@ -148,6 +148,7 @@ class AttentionPooling(nn.Module):
 		print(f'q={q.shape}')
 		print(f'k.transpose(-1, -2)={k.transpose(-1, -2).shape}')
 		attention_scores = torch.matmul(q, k.transpose(-1, -2))
+		print(f'attention_scores={attention_scores.shape}')
 		attention_scores = attention_scores / math.sqrt(self.hidden_size)
 		if attention_mask is not None:
 			# Apply the attention mask is (precomputed for all layers in BertModel forward() function)
