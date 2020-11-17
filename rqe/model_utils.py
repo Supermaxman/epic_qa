@@ -5,6 +5,7 @@ from torch import nn
 import torch
 import pytorch_lightning as pl
 from abc import ABC, abstractmethod
+import math
 
 
 class RQEBert(pl.LightningModule, ABC):
@@ -121,6 +122,47 @@ class RQEBert(pl.LightningModule, ABC):
 		return optimizer_params
 
 
+class AttentionPooling(nn.Module):
+	def __init__(self, hidden_size, dropout_prob):
+		super().__init__()
+		self.hidden_size = hidden_size
+		self.dropout_prob = dropout_prob
+		self.query = nn.Linear(hidden_size, hidden_size)
+		self.key = nn.Linear(hidden_size, hidden_size)
+		self.value = nn.Linear(hidden_size, hidden_size)
+		self.dropout = nn.Dropout(dropout_prob)
+
+	def forward(self, hidden_states, queries, attention_mask=None):
+
+		if attention_mask is None:
+			attention_mask = torch.ones(hidden_states.shape[:-1])
+		attention_mask = attention_mask.float()
+		attention_mask = (1.0 - attention_mask) * -10000.0
+		# [bsize, hidden_size]
+		q = self.query(queries)
+		# [bsize, seq_len, hidden_size]
+		k = self.key(hidden_states)
+		# [bsize, seq_len, hidden_size]
+		v = self.value(hidden_states)
+		# [bsize, hidden_size] x [bsize, hidden_size, seq_len] -> [bsize, seq_len]
+		attention_scores = torch.matmul(q, k.transpose(-1, -2))
+		attention_scores = attention_scores / math.sqrt(self.hidden_size)
+		if attention_mask is not None:
+			# Apply the attention mask is (precomputed for all layers in BertModel forward() function)
+			attention_scores = attention_scores + attention_mask
+
+		# [bsize, seq_len]
+		# Normalize the attention scores to probabilities.
+		attention_probs = nn.Softmax(dim=-1)(attention_scores)
+
+		# This is actually dropping out entire tokens to attend to, which might
+		# seem a bit unusual, but is taken from the original Transformer paper.
+		attention_probs = self.dropout(attention_probs)
+		# [bsize, seq_len] x [bsize, seq_len, hidden_size] -> [bsize, hidden_size]
+		context_layer = torch.matmul(attention_probs, v)
+		return context_layer
+
+
 class RQEATBertFromSequenceClassification(RQEBert):
 	def __init__(
 			self, pre_model_name, learning_rate, weight_decay, lr_warmup, updates_total, torch_cache_dir,
@@ -132,13 +174,21 @@ class RQEATBertFromSequenceClassification(RQEBert):
 		)
 		num_categories = len(category_map)
 		num_types = len(types_map)
-		self.category_embedding_dim = 16
+		self.category_embedding_dim = self.hidden_size
 		self.category_embeddings = nn.Embedding(
 			num_embeddings=num_categories,
 			embedding_dim=self.category_embedding_dim
 		)
+		self.a_pooling = AttentionPooling(
+			self.hidden_size,
+			self.bert.config.attention_probs_dropout_prob
+		)
+		self.b_pooling = AttentionPooling(
+			self.hidden_size,
+			self.bert.config.attention_probs_dropout_prob
+		)
 		self.classifier = nn.Linear(
-			self.bert.config.hidden_size + 2 * self.category_embedding_dim + 2 * num_types,
+			2 * self.bert.config.hidden_size + 2 * self.category_embedding_dim + 2 * num_types,
 			2
 		)
 		self.config = self.bert.config
@@ -166,9 +216,23 @@ class RQEATBertFromSequenceClassification(RQEBert):
 		b_types = batch['B_types']
 
 		# [bsize, hidden_size]
-		cls_embeddings = contextual_embeddings[:, 0]
-		# [bsize, hidden_size + 2 * cat_emb_size + 2 * num_types]
-		final_embedding = torch.cat((cls_embeddings, a_cat_embs, b_cat_embs, a_types, b_types), dim=1)
+		# pooled_embeddings = contextual_embeddings[:, 0]
+		# [bsize, hidden_size]
+		a_pooled_embeddings = self.a_pooling(
+			hidden_states=contextual_embeddings,
+			queries=a_cat_embs,
+			attention_mask=attention_mask
+		)
+		b_pooled_embeddings = self.b_pooling(
+			hidden_states=contextual_embeddings,
+			queries=b_cat_embs,
+			attention_mask=attention_mask
+		)
+		# [bsize, 2 * hidden_size]
+		pooled_embeddings = torch.cat((a_pooled_embeddings, b_pooled_embeddings), dim=1)
+
+		# [bsize, 2 *  hidden_size + 2 * cat_emb_size + 2 * num_types]
+		final_embedding = torch.cat((pooled_embeddings, a_cat_embs, b_cat_embs, a_types, b_types), dim=1)
 		logits = self.classifier(final_embedding)
 		scores = self.score_func(logits)
 		return logits, scores
