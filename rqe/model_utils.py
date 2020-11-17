@@ -174,17 +174,17 @@ class RQEATBertFromSequenceClassification(RQEBert):
 		)
 		num_categories = len(category_map)
 		num_types = len(types_map)
-		self.category_embedding_dim = self.hidden_size
+		self.category_embedding_dim = self.bert.config.hidden_size
 		self.category_embeddings = nn.Embedding(
 			num_embeddings=num_categories,
 			embedding_dim=self.category_embedding_dim
 		)
 		self.a_pooling = AttentionPooling(
-			self.hidden_size,
+			self.bert.config.hidden_size,
 			self.bert.config.attention_probs_dropout_prob
 		)
 		self.b_pooling = AttentionPooling(
-			self.hidden_size,
+			self.bert.config.hidden_size,
 			self.bert.config.attention_probs_dropout_prob
 		)
 		self.classifier = nn.Linear(
