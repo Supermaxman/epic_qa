@@ -152,10 +152,10 @@ class BatchCollator(object):
 			'token_type_ids': tokenizer_batch['token_type_ids'],
 			'labels': labels,
 			'ids': ids,
-			'a_categories': a_categories,
-			'b_categories': b_categories,
-			'a_types': a_types,
-			'b_types': b_types,
+			'A_categories': a_categories,
+			'B_categories': b_categories,
+			'A_types': a_types,
+			'B_types': b_types,
 		}
 
 		return batch

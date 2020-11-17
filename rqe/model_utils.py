@@ -167,7 +167,7 @@ class RQEATBertFromSequenceClassification(RQEBert):
 
 		# [bsize, hidden_size]
 		cls_embeddings = contextual_embeddings[:, 0]
-		# [bsize, hidden_size + 2 * cat_emb_size]
+		# [bsize, hidden_size + 2 * cat_emb_size + 2 * num_types]
 		final_embedding = torch.cat((cls_embeddings, a_cat_embs, b_cat_embs, a_types, b_types), dim=1)
 		logits = self.classifier(final_embedding)
 		scores = self.score_func(logits)
