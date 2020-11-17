@@ -165,6 +165,7 @@ class AttentionPooling(nn.Module):
 		print(f'v={v.shape}')
 		context_layer = torch.matmul(attention_probs, v)
 		print(f'context_layer={context_layer.shape}')
+		exit()
 		return context_layer
 
 
