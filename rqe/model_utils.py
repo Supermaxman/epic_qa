@@ -230,7 +230,11 @@ class RQEATBertFromSequenceClassification(RQEBert):
 		)
 		# [bsize, 2 * hidden_size]
 		pooled_embeddings = torch.cat((a_pooled_embeddings, b_pooled_embeddings), dim=1)
-
+		print(pooled_embeddings.shape)
+		print(a_cat_embs.shape)
+		print(b_cat_embs.shape)
+		print(a_types.shape)
+		print(b_types.shape)
 		# [bsize, 2 *  hidden_size + 2 * cat_emb_size + 2 * num_types]
 		final_embedding = torch.cat((pooled_embeddings, a_cat_embs, b_cat_embs, a_types, b_types), dim=1)
 		logits = self.classifier(final_embedding)
