@@ -145,7 +145,9 @@ if __name__ == "__main__":
 		collate_fn=BatchCollator(
 			tokenizer,
 			max_seq_len,
-			force_max_seq_len=use_tpus
+			force_max_seq_len=use_tpus,
+			category_map=category_map,
+			types_map=types_map
 		)
 	)
 
@@ -158,7 +160,9 @@ if __name__ == "__main__":
 			collate_fn=BatchCollator(
 				tokenizer,
 				max_seq_len,
-				force_max_seq_len=False
+				force_max_seq_len=False,
+				category_map=category_map,
+				types_map=types_map
 			)
 		)
 		import numpy as np
@@ -179,7 +183,9 @@ if __name__ == "__main__":
 		collate_fn=BatchCollator(
 			tokenizer,
 			max_seq_len,
-			force_max_seq_len=use_tpus
+			force_max_seq_len=use_tpus,
+			category_map=category_map,
+			types_map=types_map
 		)
 	)
 	logging.info('Loading model...')
