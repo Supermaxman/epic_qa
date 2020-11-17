@@ -51,7 +51,21 @@ def load_clinical_data(data_path):
 	return examples
 
 
-def load_quora_data(data_path):
+def load_smart_maps(category_map_path, types_map_path):
+	with open(category_map_path, 'r') as f:
+		category_map = json.load(f)
+	with open(types_map_path, 'r') as f:
+		types_map = json.load(f)
+	return category_map, types_map
+
+
+def load_at_predictions(predictions_path):
+	pred_list = torch.load(predictions_path)
+	predictions = {pred['id']: pred for pred in pred_list}
+	return predictions
+
+
+def load_quora_data(data_path, at_predictions):
 	examples = []
 	with open(data_path, 'r') as f:
 		csv_reader = csv.reader(f, delimiter='\t')
@@ -60,32 +74,61 @@ def load_quora_data(data_path):
 				continue
 			# id	qid1	qid2	question1	question2	is_duplicate
 			# A -> B
+			ex_id = row[0]
+			a_txt = row[3].strip()
+			a_id = f'{ex_id}|A'
+			a_category, a_types = at_predictions[a_id]
+			b_txt = row[4].strip()
+			b_id = f'{ex_id}|B'
+			b_category, b_types = at_predictions[b_id]
+			label = int(row[5])
 			example = {
-				'id': row[0],
-				'A': row[3].strip(),
-				'B': row[4].strip(),
-				'label': int(row[5])
+				'id': ex_id,
+				'A': a_txt,
+				'A_category': a_category,
+				'A_types': a_types,
+				'B': b_txt,
+				'B_category': b_category,
+				'B_types': b_types,
+				'label': label
 			}
 			examples.append(example)
 	return examples
 
 
 class BatchCollator(object):
-	def __init__(self, tokenizer,  max_seq_len: int, force_max_seq_len: bool):
+	def __init__(self, tokenizer,  max_seq_len: int, force_max_seq_len: bool, category_map, types_map):
 		super().__init__()
 		self.tokenizer = tokenizer
 		self.max_seq_len = max_seq_len
 		self.force_max_seq_len = force_max_seq_len
+		self.category_map = category_map
+		self.types_map = types_map
 
 	def __call__(self, examples):
 		# creates text examples
 		sequences = []
 		labels = []
 		ids = []
+		a_categories = []
+		b_categories = []
+		a_types = []
+		b_types = []
 		for ex in examples:
 			sequences.append((ex['A'], ex['B']))
 			labels.append(ex['label'])
 			ids.append(ex['id'])
+			a_categories.append(self.category_map[ex['A_category']])
+			b_categories.append(self.category_map[ex['B_category']])
+			a_type = torch.zeros(len(self.types_map), dtype=torch.float)
+			b_type = torch.zeros(len(self.types_map), dtype=torch.float)
+			for ex_t in ex['A_types']:
+				a_type[self.types_map[ex_t]] = 1.0
+			a_types.append(a_type)
+			for ex_t in ex['B_types']:
+				b_type[self.types_map[ex_t]] = 1.0
+			b_types.append(b_type)
+
 		# "input_ids": batch["input_ids"].to(device),
 		# "attention_mask": batch["attention_mask"].to(device),
 		tokenizer_batch = self.tokenizer.batch_encode_plus(
@@ -97,12 +140,20 @@ class BatchCollator(object):
 			max_length=self.max_seq_len
 		)
 		labels = torch.tensor(labels, dtype=torch.long)
+		a_categories = torch.tensor(a_categories, dtype=torch.long)
+		b_categories = torch.tensor(b_categories, dtype=torch.long)
+		a_types = torch.stack(a_types, dim=0)
+		b_types = torch.stack(b_types, dim=0)
 		batch = {
 			'input_ids': tokenizer_batch['input_ids'],
 			'attention_mask': tokenizer_batch['attention_mask'],
 			'token_type_ids': tokenizer_batch['token_type_ids'],
 			'labels': labels,
-			'ids': ids
+			'ids': ids,
+			'a_categories': a_categories,
+			'b_categories': b_categories,
+			'a_types': a_types,
+			'b_types': b_types,
 		}
 
 		return batch

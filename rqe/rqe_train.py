@@ -10,16 +10,18 @@ from pytorch_lightning import loggers as pl_loggers
 # note: do NOT import torch before pytorch_lightning, really breaks TPUs
 import torch
 
-from rqe.model_utils import RQEBertFromSequenceClassification, RQEBertFromLanguageModel
-from rqe.data_utils import BatchCollator, RQEDataset, load_clinical_data, load_quora_data, split_data
+from rqe.model_utils import RQEBertFromSequenceClassification, RQEBertFromLanguageModel, \
+	RQEATBertFromSequenceClassification
+from rqe.data_utils import BatchCollator, RQEDataset, load_clinical_data, load_quora_data, split_data, \
+	load_smart_maps, load_at_predictions
 
 
 if __name__ == "__main__":
 	parser = argparse.ArgumentParser()
 	parser.add_argument('--dataset', help='clinical-qe/quora', type=str, default='quora')
 	parser.add_argument('--pre_model_name', type=str, default='nboost/pt-bert-base-uncased-msmarco')
-	parser.add_argument('--pre_model_type', help='lm/seq', type=str, default='lm')
-	parser.add_argument('--model_type', help='rqe', type=str, default='rqe')
+	parser.add_argument('--at_model', type=str, default='models/smart-dbpedia-at-v3')
+	parser.add_argument('--model_type', help='seq/lm/seq-at', type=str, default='seq')
 	parser.add_argument('--seed', help='random seed', type=int, default=0)
 	parser.add_argument('--batch_size', type=int, default=32)
 	# 20 -> 10
@@ -39,7 +41,7 @@ if __name__ == "__main__":
 	dataset = args.dataset.lower()
 	model_type = args.model_type.lower()
 	pre_model_name = args.pre_model_name.lower()
-	pre_model_type = args.pre_model_type.lower()
+	at_model = args.at_model.lower()
 
 	torch_cache_dir = args.torch_cache_dir
 	root_save_directory = args.save_directory
@@ -51,12 +53,14 @@ if __name__ == "__main__":
 	weight_decay = args.weight_decay
 
 	# TODO model_type
-	if pre_model_type == 'seq':
+	if model_type == 'seq':
 		model_class = RQEBertFromSequenceClassification
-	elif pre_model_type == 'lm':
+	elif model_type == 'lm':
 		model_class = RQEBertFromLanguageModel
+	elif model_type == 'seq-at':
+		model_class = RQEATBertFromSequenceClassification
 	else:
-		raise ValueError(f'Unknown pre_model_type: {pre_model_type}')
+		raise ValueError(f'Unknown model_type: {model_type}')
 	if dataset == 'clinical-qe':
 		train_path = 'data/RQE_Data_AMIA2016/RQE_Train_8588_AMIA2016.xml'
 		val_path = 'data/RQE_Data_AMIA2016/RQE_Test_302_pairs_AMIA2016.xml'
@@ -66,13 +70,19 @@ if __name__ == "__main__":
 		logging.info('Loading clinical-qe dataset...')
 		train_examples = load_clinical_data(train_path)
 		val_examples = load_clinical_data(val_path)
-
+		category_map = None
+		types_map = None
 	elif dataset == 'quora':
 		all_path = 'data/quora_duplicate_questions/quora_duplicate_questions.tsv'
 		max_seq_len = 64
 		# do 80% train 10% dev 10% test
 		logging.info('Loading quora dataset...')
-		examples = load_quora_data(all_path)
+		category_map_path = os.path.join(at_model, 'category_map.json')
+		types_map_path = os.path.join(at_model, 'types_map.json')
+		at_predictions_path = os.path.join(at_model, 'predictions.pt')
+		category_map, types_map = load_smart_maps(category_map_path, types_map_path)
+		at_predictions = load_at_predictions(at_predictions_path)
+		examples = load_quora_data(all_path, at_predictions)
 		# 80/20
 		train_examples, other_examples = split_data(examples, ratio=0.8)
 		# 10/10
@@ -173,14 +183,26 @@ if __name__ == "__main__":
 		)
 	)
 	logging.info('Loading model...')
-	model = model_class(
-		pre_model_name=pre_model_name,
-		learning_rate=learning_rate,
-		lr_warmup=lr_warmup,
-		updates_total=updates_total,
-		weight_decay=weight_decay,
-		torch_cache_dir=torch_cache_dir
-	)
+	if 'at' in model_type:
+		model = model_class(
+			pre_model_name=pre_model_name,
+			learning_rate=learning_rate,
+			lr_warmup=lr_warmup,
+			updates_total=updates_total,
+			weight_decay=weight_decay,
+			torch_cache_dir=torch_cache_dir,
+			category_map=category_map,
+			types_map=types_map
+		)
+	else:
+		model = model_class(
+			pre_model_name=pre_model_name,
+			learning_rate=learning_rate,
+			lr_warmup=lr_warmup,
+			updates_total=updates_total,
+			weight_decay=weight_decay,
+			torch_cache_dir=torch_cache_dir
+		)
 	if load_model:
 		model.load_state_dict(torch.load(checkpoint_path))
 	else:

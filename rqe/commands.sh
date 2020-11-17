@@ -3,19 +3,24 @@
 python -m rqe.rqe_train \
   --dataset=quora \
   --pre_model_name=bert-base-cased \
-  --pre_model_type=lm
+  --model_type=lm
 
 python -m rqe.rqe_train \
   --dataset=quora \
   --pre_model_name=bert-base-uncased \
-  --pre_model_type=lm
+  --model_type=lm
 
 python -m rqe.rqe_train \
   --dataset=quora \
   --pre_model_name=nboost/pt-bert-base-uncased-msmarco \
-  --pre_model_type=seq
+  --model_type=seq
 
 python -m rqe.rqe_train \
   --dataset=quora \
-  --pre_model_name=nboost/pt-bert-large-msmarco \
-  --pre_model_type=seq
+  --pre_model_name=sentence-transformers/bert-base-nli-mean-tokens \
+  --model_type=lm
+
+python -m rqe.rqe_train \
+  --dataset=quora \
+  --pre_model_name=nboost/pt-bert-base-uncased-msmarco \
+  --model_type=seq-at

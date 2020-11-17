@@ -21,7 +21,7 @@ class RQEBert(pl.LightningModule, ABC):
 		self.save_hyperparameters()
 
 	@abstractmethod
-	def forward(self, input_ids, attention_mask, token_type_ids):
+	def forward(self, input_ids, attention_mask, token_type_ids, batch):
 		pass
 
 	def _loss(self, logits, labels):
@@ -54,6 +54,7 @@ class RQEBert(pl.LightningModule, ABC):
 			input_ids=batch['input_ids'],
 			attention_mask=batch['attention_mask'],
 			token_type_ids=batch['token_type_ids'],
+			batch=batch
 		)
 		labels = batch['labels']
 		loss = self._loss(
@@ -120,6 +121,59 @@ class RQEBert(pl.LightningModule, ABC):
 		return optimizer_params
 
 
+class RQEATBertFromSequenceClassification(RQEBert):
+	def __init__(
+			self, pre_model_name, learning_rate, weight_decay, lr_warmup, updates_total, torch_cache_dir,
+			category_map, types_map):
+		super().__init__(pre_model_name, learning_rate, weight_decay, lr_warmup, updates_total, torch_cache_dir)
+		self.bert = BertModel.from_pretrained(
+			pre_model_name,
+			cache_dir=torch_cache_dir
+		)
+		num_categories = len(category_map)
+		num_types = len(types_map)
+		self.category_embedding_dim = 16
+		self.category_embeddings = nn.Embedding(
+			num_embeddings=num_categories,
+			embedding_dim=self.category_embedding_dim
+		)
+		self.classifier = nn.Linear(
+			self.bert.config.hidden_size + 2 * self.category_embedding_dim + 2 * num_types,
+			2
+		)
+		self.config = self.bert.config
+		self.category_map = category_map
+		self.types_map = types_map
+
+	def forward(self, input_ids, attention_mask, token_type_ids, batch):
+		# [batch_size, 2]
+		contextual_embeddings = self.bert(
+			input_ids,
+			attention_mask=attention_mask,
+			token_type_ids=token_type_ids
+		)[0]
+		# [bsize] as category int
+		a_categories = batch['A_categories']
+		# [bsize, cat_emb_size]
+		a_cat_embs = self.category_embeddings(a_categories)
+		# [bsize]
+		b_categories = batch['B_categories']
+		# [bsize, cat_emb_size]
+		b_cat_embs = self.category_embeddings(b_categories)
+		# [bsize, nrof_types] as float binary 0/1
+		a_types = batch['A_types']
+		# [bsize, nrof_types]
+		b_types = batch['B_types']
+
+		# [bsize, hidden_size]
+		cls_embeddings = contextual_embeddings[:, 0]
+		# [bsize, hidden_size + 2 * cat_emb_size]
+		final_embedding = torch.cat((cls_embeddings, a_cat_embs, b_cat_embs, a_types, b_types), dim=1)
+		logits = self.classifier(final_embedding)
+		scores = self.score_func(logits)
+		return logits, scores
+
+
 class RQEBertFromSequenceClassification(RQEBert):
 	def __init__(self, pre_model_name, learning_rate, weight_decay, lr_warmup, updates_total, torch_cache_dir=None):
 		super().__init__(pre_model_name, learning_rate, weight_decay, lr_warmup, updates_total, torch_cache_dir)
@@ -129,7 +183,7 @@ class RQEBertFromSequenceClassification(RQEBert):
 		)
 		self.config = self.bert.config
 
-	def forward(self, input_ids, attention_mask, token_type_ids):
+	def forward(self, input_ids, attention_mask, token_type_ids, batch):
 		# [batch_size, 2]
 		logits = self.bert(
 			input_ids,
@@ -153,7 +207,7 @@ class RQEBertFromLanguageModel(RQEBert):
 		)
 		self.config = self.bert.config
 
-	def forward(self, input_ids, attention_mask, token_type_ids):
+	def forward(self, input_ids, attention_mask, token_type_ids, batch):
 		cls_embeddings = self.bert(
 			input_ids,
 			attention_mask=attention_mask,
