@@ -139,7 +139,7 @@ class AttentionPooling(nn.Module):
 		attention_mask = attention_mask.float()
 		attention_mask = (1.0 - attention_mask) * -10000.0
 		# [bsize, hidden_size]
-		q = self.query(queries)
+		q = self.query(queries).view(-1, 1, self.hidden_size)
 		# [bsize, seq_len, hidden_size]
 		k = self.key(hidden_states)
 		# [bsize, seq_len, hidden_size]
