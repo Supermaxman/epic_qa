@@ -145,10 +145,7 @@ class AttentionPooling(nn.Module):
 		# [bsize, seq_len, hidden_size]
 		v = self.value(hidden_states)
 		# [bsize, 1, hidden_size] x [bsize, hidden_size, seq_len] -> [bsize, seq_len]
-		print(f'q={q.shape}')
-		print(f'k.transpose(-1, -2)={k.transpose(-1, -2).shape}')
 		attention_scores = torch.matmul(q, k.transpose(-1, -2)).view(-1, k.shape[1])
-		print(f'attention_scores={attention_scores.shape}')
 		attention_scores = attention_scores / math.sqrt(self.hidden_size)
 		if attention_mask is not None:
 			# Apply the attention mask is (precomputed for all layers in BertModel forward() function)
@@ -157,16 +154,12 @@ class AttentionPooling(nn.Module):
 		# [bsize, seq_len]
 		# Normalize the attention scores to probabilities.
 		attention_probs = nn.Softmax(dim=-1)(attention_scores)
-		print(f'attention_probs={attention_probs.shape}')
 		# This is actually dropping out entire tokens to attend to, which might
 		# seem a bit unusual, but is taken from the original Transformer paper.
 		attention_probs = self.dropout(attention_probs)
 		# [bsize, 1, seq_len] x [bsize, seq_len, hidden_size] -> [bsize, hidden_size]
 		attention_probs = attention_probs.view(-1, 1, k.shape[1])
-		print(f'v={v.shape}')
 		context_layer = torch.matmul(attention_probs, v).view(-1, self.hidden_size)
-		print(f'context_layer={context_layer.shape}')
-		exit()
 		return context_layer
 
 
@@ -237,7 +230,6 @@ class RQEATBertFromSequenceClassification(RQEBert):
 		)
 		# [bsize, 2 * hidden_size]
 		pooled_embeddings = torch.cat((a_pooled_embeddings, b_pooled_embeddings), dim=1)
-		print(f'pooled_embeddings={pooled_embeddings.shape}')
 		# [bsize, 2 *  hidden_size + 2 * cat_emb_size + 2 * num_types]
 		final_embedding = torch.cat((pooled_embeddings, a_cat_embs, b_cat_embs, a_types, b_types), dim=1)
 		logits = self.classifier(final_embedding)
