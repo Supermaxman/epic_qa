@@ -20,6 +20,8 @@ python -m rqe.rqe_train \
   --pre_model_name=sentence-transformers/bert-base-nli-mean-tokens \
   --model_type=lm
 
+# version_3 has info concatenated with cls
+# version_ has attention pooling for each category + concat
 python -m rqe.rqe_train \
   --dataset=quora \
   --pre_model_name=nboost/pt-bert-base-uncased-msmarco \

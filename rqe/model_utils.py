@@ -144,10 +144,10 @@ class AttentionPooling(nn.Module):
 		k = self.key(hidden_states)
 		# [bsize, seq_len, hidden_size]
 		v = self.value(hidden_states)
-		# [bsize, hidden_size] x [bsize, hidden_size, seq_len] -> [bsize, seq_len]
+		# [bsize, 1, hidden_size] x [bsize, hidden_size, seq_len] -> [bsize, seq_len]
 		print(f'q={q.shape}')
 		print(f'k.transpose(-1, -2)={k.transpose(-1, -2).shape}')
-		attention_scores = torch.matmul(q, k.transpose(-1, -2)).unsqueeze(dim=1)
+		attention_scores = torch.matmul(q, k.transpose(-1, -2)).reshape(-1, k.shape[1])
 		print(f'attention_scores={attention_scores.shape}')
 		attention_scores = attention_scores / math.sqrt(self.hidden_size)
 		if attention_mask is not None:
@@ -161,9 +161,10 @@ class AttentionPooling(nn.Module):
 		# This is actually dropping out entire tokens to attend to, which might
 		# seem a bit unusual, but is taken from the original Transformer paper.
 		attention_probs = self.dropout(attention_probs)
-		# [bsize, seq_len] x [bsize, seq_len, hidden_size] -> [bsize, hidden_size]
+		# [bsize, 1, seq_len] x [bsize, seq_len, hidden_size] -> [bsize, hidden_size]
+		attention_probs = attention_probs.view(-1, 1, k.shape[1])
 		print(f'v={v.shape}')
-		context_layer = torch.matmul(attention_probs, v)
+		context_layer = torch.matmul(attention_probs, v).reshape(-1, self.hidden_size)
 		print(f'context_layer={context_layer.shape}')
 		exit()
 		return context_layer
