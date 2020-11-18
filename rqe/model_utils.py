@@ -188,7 +188,8 @@ class RQEATBertFromSequenceClassification(RQEBert):
 			self.bert.config.attention_probs_dropout_prob
 		)
 		self.classifier = nn.Linear(
-			2 * self.bert.config.hidden_size + 2 * self.category_embedding_dim + 2 * num_types,
+			# 2 * self.bert.config.hidden_size + 2 * self.category_embedding_dim + 2 * num_types,
+			2 * self.bert.config.hidden_size,
 			2
 		)
 		self.config = self.bert.config
@@ -214,6 +215,8 @@ class RQEATBertFromSequenceClassification(RQEBert):
 		a_types = batch['A_types']
 		# [bsize, nrof_types]
 		b_types = batch['B_types']
+		a_mask = batch['A_mask']
+		b_mask = batch['B_mask']
 
 		# [bsize, hidden_size]
 		# pooled_embeddings = contextual_embeddings[:, 0]
@@ -221,17 +224,18 @@ class RQEATBertFromSequenceClassification(RQEBert):
 		a_pooled_embeddings = self.a_pooling(
 			hidden_states=contextual_embeddings,
 			queries=a_cat_embs,
-			attention_mask=attention_mask
+			attention_mask=a_mask
 		)
 		b_pooled_embeddings = self.b_pooling(
 			hidden_states=contextual_embeddings,
 			queries=b_cat_embs,
-			attention_mask=attention_mask
+			attention_mask=b_mask
 		)
 		# [bsize, 2 * hidden_size]
 		pooled_embeddings = torch.cat((a_pooled_embeddings, b_pooled_embeddings), dim=1)
 		# [bsize, 2 *  hidden_size + 2 * cat_emb_size + 2 * num_types]
-		final_embedding = torch.cat((pooled_embeddings, a_cat_embs, b_cat_embs, a_types, b_types), dim=1)
+		# final_embedding = torch.cat((pooled_embeddings, a_cat_embs, b_cat_embs, a_types, b_types), dim=1)
+		final_embedding = pooled_embeddings
 		logits = self.classifier(final_embedding)
 		scores = self.score_func(logits)
 		return logits, scores

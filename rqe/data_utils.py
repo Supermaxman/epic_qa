@@ -146,16 +146,26 @@ class BatchCollator(object):
 		b_categories = torch.tensor(b_categories, dtype=torch.long)
 		a_types = torch.stack(a_types, dim=0)
 		b_types = torch.stack(b_types, dim=0)
+
+		input_ids = tokenizer_batch['input_ids']
+		attention_mask = tokenizer_batch['attention_mask']
+		type_ids = tokenizer_batch['token_type_ids']
+
+		a_mask = (type_ids.eq(0).bool() & attention_mask.bool()).long()
+		b_mask = (type_ids.eq(1).bool() & attention_mask.bool()).long()
+
 		batch = {
-			'input_ids': tokenizer_batch['input_ids'],
-			'attention_mask': tokenizer_batch['attention_mask'],
-			'token_type_ids': tokenizer_batch['token_type_ids'],
+			'input_ids': input_ids,
+			'attention_mask': attention_mask,
+			'token_type_ids': type_ids,
 			'labels': labels,
 			'ids': ids,
 			'A_categories': a_categories,
 			'B_categories': b_categories,
 			'A_types': a_types,
 			'B_types': b_types,
+			'A_mask': a_mask,
+			'B_mask': b_mask,
 		}
 
 		return batch

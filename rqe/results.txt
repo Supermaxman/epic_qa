@@ -1,4 +1,7 @@
-quora dataset accuracy:
-Abacha & Demner-Fushman                 0.8362
-quora-rqe-v3    (bert-base)             0.
-quora-rqe-v2    (msmarco-rerank)        0.8520
+# baselines from https://bmcbioinformatics.biomedcentral.com/articles/10.1186/s12859-019-3119-4
+# Logistic Regression + Features    0.6779
+# NN                                0.8134
+# NN + GloVe embeddings             0.8362
+# # # # # # # # # # # # # # # #
+# bert-base                         0.8894
+# bert-base-msmarco                 0.8955
