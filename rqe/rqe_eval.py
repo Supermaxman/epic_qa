@@ -10,76 +10,104 @@ from pytorch_lightning import loggers as pl_loggers
 # note: do NOT import torch before pytorch_lightning, really breaks TPUs
 import torch
 
-from rqe.model_utils import RQEBertFromSequenceClassification, RQEBertFromLanguageModel
-from rqe.data_utils import BatchCollator, RQEDataset, load_clinical_data, load_quora_data, split_data
+from rqe.model_utils import RQEBertFromSequenceClassification, RQEBertFromLanguageModel, \
+	RQEATBertFromSequenceClassification
+from rqe.data_utils import BatchCollator, RQEDataset, load_clinical_data, load_quora_data, split_data, \
+	load_smart_maps, load_at_predictions
 
 
 if __name__ == "__main__":
 	parser = argparse.ArgumentParser()
-	parser.add_argument('--dataset', help='clinical-qe/quora', type=str, default='clinical-qe')
+	parser.add_argument('--dataset', help='clinical-qe/quora', type=str, default='quora')
+	parser.add_argument('--pre_model_name', type=str, default='nboost/pt-bert-base-uncased-msmarco')
+	parser.add_argument('--at_model', type=str, default='models/smart-dbpedia-at-v3')
+	parser.add_argument('--model_type', help='seq/lm/seq-at', type=str, default='seq')
+	parser.add_argument('--seed', help='random seed', type=int, default=0)
+	parser.add_argument('--batch_size', type=int, default=32)
+	# 20 -> 10
+	parser.add_argument('--epochs', type=int, default=10)
+	# torch_cache_dir = '/users/max/data/models/torch_cache'
+	parser.add_argument('--torch_cache_dir', type=str, default=None)
+	# 5e-5 -> 5e-4
+	parser.add_argument('--learning_rate', type=float, default=5e-4)
+	parser.add_argument('--lr_warmup', type=float, default=0.1)
+	parser.add_argument('--weight_decay', type=float, default=0.01)
+	parser.add_argument('--save_directory', type=str, default='models')
+
 	args = parser.parse_args()
-
-	seed = 0
+	# TODO parameterize below into config file for reproducibility
+	seed = args.seed
 	pl.seed_everything(seed)
-	dataset = args.dataset
-	if dataset == 'clinical-qe':
-		# eval_path = 'data/RQE_Data_AMIA2016/RQE_Test_302_pairs_AMIA2016.xml'
-		eval_path = 'data/RQE_Data_AMIA2016/MEDIQA2019-Task2-RQE-TestSet-wLabels.xml'
-		max_seq_len = 96
-		batch_size = 16
-		pre_model_name = 'nboost/pt-biobert-base-msmarco'
+	dataset = args.dataset.lower()
+	model_type = args.model_type.lower()
+	pre_model_name = args.pre_model_name.lower()
+	at_model = args.at_model.lower()
+
+	torch_cache_dir = args.torch_cache_dir
+	root_save_directory = args.save_directory
+
+	batch_size = args.batch_size
+	epochs = args.epochs
+	learning_rate = args.learning_rate
+	lr_warmup = args.lr_warmup
+	weight_decay = args.weight_decay
+
+	# TODO model_type
+	if model_type == 'seq':
 		model_class = RQEBertFromSequenceClassification
-		epochs = 10
-
+	elif model_type == 'lm':
+		model_class = RQEBertFromLanguageModel
+	elif model_type == 'seq-at':
+		model_class = RQEATBertFromSequenceClassification
+	else:
+		raise ValueError(f'Unknown model_type: {model_type}')
+	if dataset == 'clinical-qe':
+		train_path = 'data/RQE_Data_AMIA2016/RQE_Train_8588_AMIA2016.xml'
+		val_path = 'data/RQE_Data_AMIA2016/RQE_Test_302_pairs_AMIA2016.xml'
+		# test_path = 'data/RQE_Data_AMIA2016/MEDIQA2019-Task2-RQE-TestSet-wLabels.xml'
+		max_seq_len = 96
+		# do 80% train 10% dev 10% test
 		logging.info('Loading clinical-qe dataset...')
-		eval_examples = load_clinical_data(eval_path)
-
+		train_examples = load_clinical_data(train_path)
+		val_examples = load_clinical_data(val_path)
+		category_map = None
+		types_map = None
 	elif dataset == 'quora':
 		all_path = 'data/quora_duplicate_questions/quora_duplicate_questions.tsv'
 		max_seq_len = 64
-		batch_size = 64
-		pre_model_name = 'nboost/pt-bert-base-uncased-msmarco'
-		model_class = RQEBertFromSequenceClassification
-		# pre_model_name = 'bert-base-uncased'
-		# model_class = RQEBertFromLanguageModel
-		epochs = 20
-
 		# do 80% train 10% dev 10% test
 		logging.info('Loading quora dataset...')
-		examples = load_quora_data(all_path)
+		category_map_path = os.path.join(at_model, 'category_map.json')
+		types_map_path = os.path.join(at_model, 'types_map.json')
+		at_predictions_path = os.path.join(at_model, 'predictions.pt')
+		category_map, types_map = load_smart_maps(category_map_path, types_map_path)
+		at_predictions = load_at_predictions(at_predictions_path)
+		examples = load_quora_data(all_path, at_predictions)
 		# 80/20
 		_, other_examples = split_data(examples, ratio=0.8)
 		# 10/10
 		_, eval_examples = split_data(other_examples, ratio=0.5)
+
 	else:
 		raise ValueError(f'Unknown dataset: {dataset}')
 
-	save_directory = 'models'
-	torch_cache_dir = '/users/max/data/models/torch_cache'
-	model_name = f'{dataset}-rqe-v2'
-	learning_rate = 5e-5
-	lr_warmup = 0.1
-	gradient_clip_val = 1.0
-	weight_decay = 0.01
-	val_check_interval = 1.0
-	is_distributed = False
+	model_name = f'{dataset}-{model_type}-{pre_model_name.replace("/", "-")}'
 	# export TPU_IP_ADDRESS=10.155.6.34
 	# export XRT_TPU_CONFIG="tpu_worker;0;$TPU_IP_ADDRESS:8470"
+	# TODO move to args
+	use_tpus = True
+	train_model = True
+	load_model = False
+	calc_seq_len = False
+	is_distributed = False
 
-	accumulate_grad_batches = 1
-	# gpus = [3, 4, 6, 7]
 	gpus = [0]
-	use_tpus = False
 	precision = 16 if use_tpus else 32
-	# precision = 32
 	tpu_cores = 8
-	num_workers = 1
+	num_workers = 4
 	deterministic = True
-	load_model = True
-	test_eval = True
-	predict = False
 
-	save_directory = os.path.join(save_directory, model_name)
+	save_directory = os.path.join(root_save_directory, model_name)
 
 	checkpoint_path = os.path.join(save_directory, 'pytorch_model.bin')
 
@@ -100,9 +128,11 @@ if __name__ == "__main__":
 			logging.StreamHandler()]
 	)
 
-	callbacks = []
-	logging.info('Loading collator...')
+	num_batches_per_step = (len(gpus) if not use_tpus else tpu_cores)
+	updates_epoch = 0
+	updates_total = updates_epoch * epochs
 
+	logging.info('Loading tokenizer...')
 	tokenizer = BertTokenizer.from_pretrained(pre_model_name)
 	eval_dataset = RQEDataset(eval_examples)
 
@@ -113,19 +143,33 @@ if __name__ == "__main__":
 		collate_fn=BatchCollator(
 			tokenizer,
 			max_seq_len,
-			force_max_seq_len=use_tpus
+			force_max_seq_len=use_tpus,
+			category_map=category_map,
+			types_map=types_map
 		)
 	)
-
 	logging.info('Loading model...')
-	model = model_class(
-		pre_model_name=pre_model_name,
-		learning_rate=learning_rate,
-		lr_warmup=lr_warmup,
-		updates_total=0,
-		weight_decay=weight_decay,
-		torch_cache_dir=torch_cache_dir
-	)
+	if 'at' in model_type:
+		model = model_class(
+			pre_model_name=pre_model_name,
+			learning_rate=learning_rate,
+			lr_warmup=lr_warmup,
+			updates_total=updates_total,
+			weight_decay=weight_decay,
+			torch_cache_dir=torch_cache_dir,
+			category_map=category_map,
+			types_map=types_map
+		)
+	else:
+		model = model_class(
+			pre_model_name=pre_model_name,
+			learning_rate=learning_rate,
+			lr_warmup=lr_warmup,
+			updates_total=updates_total,
+			weight_decay=weight_decay,
+			torch_cache_dir=torch_cache_dir
+		)
+
 	model.load_state_dict(torch.load(checkpoint_path))
 
 	logger = pl_loggers.TensorBoardLogger(
@@ -135,16 +179,13 @@ if __name__ == "__main__":
 	)
 
 	if use_tpus:
-		logging.warning('Gradient clipping slows down TPU training drastically, disabled for now.')
 		trainer = pl.Trainer(
 			logger=logger,
 			tpu_cores=tpu_cores,
 			default_root_dir=save_directory,
 			max_epochs=epochs,
 			precision=precision,
-			val_check_interval=val_check_interval,
-			deterministic=deterministic,
-			callbacks=callbacks
+			deterministic=deterministic
 		)
 	else:
 		if len(gpus) > 1:
@@ -157,12 +198,9 @@ if __name__ == "__main__":
 			default_root_dir=save_directory,
 			max_epochs=epochs,
 			precision=precision,
-			val_check_interval=val_check_interval,
 			distributed_backend=backend,
-			gradient_clip_val=gradient_clip_val,
-			deterministic=deterministic,
-			callbacks=callbacks
+			deterministic=deterministic
 		)
 
-	logging.info('Evaluating...')
 	trainer.test(model, eval_data_loader)
+
