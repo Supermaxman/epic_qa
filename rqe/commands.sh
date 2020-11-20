@@ -27,6 +27,7 @@ python -m rqe.rqe_train \
   --pre_model_name=nboost/pt-bert-base-uncased-msmarco \
   --model_type=seq-at
 
+# version_
 python -m rqe.rqe_train \
   --dataset=quora \
   --pre_model_name=nboost/pt-bert-base-uncased-msmarco \
