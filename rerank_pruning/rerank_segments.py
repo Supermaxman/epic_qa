@@ -214,7 +214,8 @@ def rerank_and_save_multiple():
             query_id = i + 1
             print(f'Re-ranking Q{query_id}...')
             result = rerank(query_id)
-            for seg in result.top_segments:
-                f.write(f'{query_id}\tQ0\t{seg.context}:{seg.start}-{seg.end}\t{seg.score}\tpruned_consumer_biobert_msmarco_multi_sentence\n')
+            for idx, seg in enumerate(result.top_segments):
+                rank = idx + 1
+                f.write(f'{query_id}\tQ0\t{seg.context}-{seg.start}-{seg.end}\t{rank}\t{seg.score}\tpruned_consumer_biobert_msmarco_multi_sentence\n')
 
 rerank_and_save_multiple()
