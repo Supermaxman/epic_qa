@@ -118,7 +118,7 @@ class RerankResult:
         self.num_segments_processed = num_segments_processed
 
     def __str__(self):
-        value = f'Segments processed: {self.num_segments_processed}\nRanking:\n'
+        value = ''
         for segment in self.top_segments:
             value += f'    {str(segment)}\n'
         return value
@@ -217,4 +217,4 @@ def rerank_and_save_multiple():
         rerank_and_save_single(i + 1)
 
 
-rerank_and_save_single(1)
+rerank_and_save_multiple()
