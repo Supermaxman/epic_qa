@@ -16,7 +16,7 @@ class Segment:
         return self.score < other.score
 
     def __str__(self):
-        return f'{self.context}:{self.start}-{self.end}: {self.score}'
+        return f'{self.context}:{self.start}-{self.end}\t{self.score}'
 
     @staticmethod
     def read_segments(filename):
@@ -120,7 +120,7 @@ class RerankResult:
     def __str__(self):
         value = ''
         for segment in self.top_segments:
-            value += f'    {str(segment)}\n'
+            value += f'{str(segment)}\n'
         return value
 
 
@@ -200,21 +200,21 @@ def rerank_pruned(score_index: ScoreIndex, limit):
     return RerankResult(sorted_scores, num_segments_processed)
 
 
-def rerank_and_save_single(query):
+def rerank(query):
     segments = Segment.read_segments(f'sorted_scores_{query}.csv')
     score_index = ScoreIndex.group_by_ngram_and_context(segments, 3)
-    naive_result = rerank_naive(score_index, limit=10)
-    pruned_result = rerank_pruned(score_index, limit=10)
+    # naive_result = rerank_naive(score_index, limit=10)
+    pruned_result = rerank_pruned(score_index, limit=1000)
 
-    with open(f'reranked_results_{query}.txt', 'w') as f:
-        f.write(f'Naive re-ranking:\n{naive_result}\n')
-        f.write(f'Pruned re-ranking:\n{pruned_result}\n')
-
+    return pruned_result
 
 def rerank_and_save_multiple():
-    for i in range(42):
-        print(f'Re-ranking Q{i + 1}...')
-        rerank_and_save_single(i + 1)
-
+    with open(f'pruned_consumer_biobert_msmarco_multi_sentence', 'w') as f:
+        for i in range(42):
+            query_id = i + 1
+            print(f'Re-ranking Q{query_id}...')
+            result = rerank(query_id)
+            for seg in result.top_segments:
+                f.write(f'{query_id}\tQ0\t{seg.context}:{seg.start}-{seg.end}\t{seg.score}\tpruned_consumer_biobert_msmarco_multi_sentence\n')
 
 rerank_and_save_multiple()
