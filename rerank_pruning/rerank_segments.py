@@ -216,12 +216,14 @@ def rerank_prune(segments, t, n):
 
 
 def read_segments(filename):
-    query_segments = defaultdict(list)
+    query_segments = {}
     with open(filename) as file:
         for line in file:
             columns = line.split()
             segment_query = columns[0]
             location = columns[2].split('-')
+            if segment_query not in query_segments:
+                query_segments[segment_query] = []
             query_segments[segment_query].append(
                 Segment(
                     context=f'{location[0]}-{location[1]}',

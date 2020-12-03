@@ -9,7 +9,8 @@ export DATASET=consumer
 python -m rerank_pruning.rerank_segments \
  --pred_path models/${MODEL_NAME}/${SCORE_RUN_NAME}.pred \
  --output_path models/${MODEL_NAME}/${RUN_NAME}_PRUNED.pred \
- --threshold 0.0
+ --threshold 0.0 \
+ --top_n_gram 1
 
 python -m rerank.format_eval \
   --pred_path models/${MODEL_NAME}/${RUN_NAME}_PRUNED.pred \
