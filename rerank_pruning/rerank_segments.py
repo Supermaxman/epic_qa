@@ -26,20 +26,6 @@ class Segment:
     def __str__(self):
         return f'{self.context}:{self.start}-{self.end}\t{self.score}'
 
-    @staticmethod
-    def read_segments(filename):
-        segments = []
-        with open(filename) as file:
-            for line in file:
-                columns = line.split(',')
-                segments.append(Segment(
-                    context=columns[0],
-                    start=int(columns[1]),
-                    end=int(columns[2]),
-                    score=float(columns[3])
-                ))
-        return segments
-
 
 class Context:
     def __init__(self, name, scores, ngram_length):
