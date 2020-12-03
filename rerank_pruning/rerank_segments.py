@@ -174,11 +174,11 @@ def rerank_pruned(score_index: ScoreIndex, limit, t):
                 if pruned_1 and pruned_2:
                     try:
                         score_index.set_pruned(context_index, start, start + ngram_index, True)
-                    except e:
+                    except Exception as e:
                         print(f'{context_index}, {start}, {start + ngram_index}')
                         print(f'  - {context_index}, {start}, {start + ngram_index - 1}')
                         print(f'  - {context_index}, {start+1}, {start + ngram_index}')
-                      raise e
+                        raise e
                     continue
 
                 # Include segment in the batch and calculate score.
