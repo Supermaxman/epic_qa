@@ -182,7 +182,6 @@ def rerank_pruned(score_index: ScoreIndex, limit, t):
                         print(f'{context_index}, {start}, {start + ngram_index}')
                         print(f'  - {context_index}, {start}, {start + ngram_index - 1}')
                         print(f'  - {context_index}, {start+1}, {start + ngram_index}')
-                        raise e
                     continue
 
                 # Include segment in the batch and calculate score.
