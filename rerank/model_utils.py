@@ -232,6 +232,14 @@ class RerankBert(pl.LightningModule):
 			return result
 		else:
 			logits = self._forward_step(batch, batch_nb)
+			self.write_prediction_dict(
+				{
+					'id': batch['id'],
+					'question_id': batch['question_id'],
+					'pos_score': logits[:, 1].item(),
+					'neg_score': logits[:, 0].item(),
+				}
+			)
 			result = {
 				f'{name}_id': batch['id'],
 				f'{name}_question_id': batch['question_id'],
@@ -249,26 +257,7 @@ class RerankBert(pl.LightningModule):
 			self.log(f'{name}_loss', loss)
 			self.log(f'{name}_accuracy', accuracy)
 		else:
-			logits = torch.cat([x[f'{name}_logits'] for x in outputs], dim=0)
-			ids = [ex_id for ex_ids in outputs for ex_id in ex_ids[f'{name}_id']]
-			question_ids = [ex_id for ex_ids in outputs for ex_id in ex_ids[f'{name}_question_id']]
-			# predictions = {}
-
-			all_ids = []
-			all_question_ids = []
-			all_logits = []
-			for ex_id, ex_question_id, ex_logits in zip(ids, question_ids, logits):
-
-				all_ids.append(ex_id)
-				all_question_ids.append(ex_question_id)
-				all_logits.append(ex_logits)
-			self.write_prediction_dict(
-				{
-					'id': all_ids,
-					'question_id': all_question_ids,
-					'logits': all_logits
-				}
-			)
+			pass
 
 	def validation_epoch_end(self, outputs):
 		self._eval_epoch_end(outputs, 'val')

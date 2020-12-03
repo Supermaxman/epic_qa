@@ -8,7 +8,9 @@ python -m rerank.rerank \
   --model_name pt-biobert-base-msmarco
 
 python  -m rerank.format_eval \
-   --run_path models/pt-biobert-base-msmarco/predictions.pt \
-   --output_path models/pt-biobert-base-msmarco/HLTRI_RERANK_1.txt \
+  --run_path models/pt-biobert-base-msmarco/predictions.pt \
+  --output_path models/pt-biobert-base-msmarco/HLTRI_RERANK_1.txt \
 
 
+python rerank/epic_eval.py \
+  --

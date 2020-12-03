@@ -174,34 +174,3 @@ if __name__ == '__main__':
 		trainer.test(model, eval_data_loader)
 	except Exception as e:
 		logging.exception('Exception during evaluating', exc_info=e)
-
-# print(f'Running reranking on passages and writing results to {run_path}...')
-	# pass_scores = defaultdict(list)
-	# for query_id, query in tqdm(enumerate(queries, start=1), total=len(queries)):
-	#
-	# 	with torch.no_grad():
-	# 		# score_layer = torch.nn.Softmax(dim=-1)
-	# 		for batch in tqdm(dataloader, total=len(dataloader)):
-	# 			logits = model(
-	# 				input_ids=batch['input_ids'].to(device),
-	# 				token_type_ids=batch['token_type_ids'].to(device),
-	# 				attention_mask=batch['attention_mask'].to(device)
-	# 			)[0]
-	# 			# scores = score_layer(logits)
-	# 			# positive probability
-	# 			scores = logits[:, 1].cpu().numpy()
-	#
-	# 			# make larger score mean better answer
-	# 			pass_scores[query_id].extend(zip(batch['id'], scores))
-	#
-	# 	# sort large to small
-	# 	pass_scores[query_id] = list(sorted(pass_scores[query_id], key=lambda x: x[1], reverse=True))
-	#
-	#
-	# print(f'Saving results...')
-	# with open(run_path, 'w') as fo:
-	# 	for query_id, passages in pass_scores.items():
-	# 		for rank, (doc_pass_sent_id, score) in enumerate(passages, start=1):
-	# 			line = f'{query_id}\tQ0\t{doc_pass_sent_id}\t{rank}\t{score:.8f}\t{run_name}\n'
-	# 			fo.write(line)
-	# print('Done!')
