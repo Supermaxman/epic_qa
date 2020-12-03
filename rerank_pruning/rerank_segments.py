@@ -27,7 +27,7 @@ class Segment:
         return False
 
     def __gt__(self, other):
-        return not self < other
+        return not self.__le__(other)
 
     def __str__(self):
         return f'{self.context}:{self.start}-{self.end}\t{self.score}'
