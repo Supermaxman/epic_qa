@@ -249,7 +249,7 @@ if __name__ == '__main__':
     print(list(rerank_scores.keys()))
     with open(output_path, 'w') as f:
         for question_id, query_segments in rerank_scores.items():
-            query_segments.sort(key=compare_segment)
+            query_segments.sort()
             print(f'{question_id}: {len(query_segments)}')
 
             result = rerank_prune(query_segments, t=args.threshold, n=args.top_n_gram)
