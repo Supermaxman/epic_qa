@@ -134,7 +134,8 @@ if __name__ == '__main__':
 		updates_total=0,
 		weight_decay=0.01,
 		torch_cache_dir=torch_cache_dir,
-		predict_mode=True
+		predict_mode=True,
+		predict_path=save_directory
 	)
 
 	logger = pl_loggers.TensorBoardLogger(
@@ -175,6 +176,3 @@ if __name__ == '__main__':
 	except Exception as e:
 		logging.exception('Exception during evaluating', exc_info=e)
 
-	predictions_path = os.path.join(save_directory, 'predictions.pt')
-	os.rename('predictions.pt', predictions_path)
-	logging.info(f'Predictions saved at {predictions_path}')

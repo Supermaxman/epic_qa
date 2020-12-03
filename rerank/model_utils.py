@@ -156,7 +156,7 @@ class QuestionAnsweringSampledBert(pl.LightningModule):
 class RerankBert(pl.LightningModule):
 	def __init__(
 			self, pre_model_name, learning_rate, weight_decay, lr_warmup, updates_total,
-			torch_cache_dir, predict_mode=False):
+			torch_cache_dir, predict_mode=False, predict_path=None):
 		super().__init__()
 		self.pre_model_name = pre_model_name
 		self.torch_cache_dir = torch_cache_dir
@@ -165,6 +165,7 @@ class RerankBert(pl.LightningModule):
 		self.lr_warmup = lr_warmup
 		self.updates_total = updates_total
 		self.predict_mode = predict_mode
+		self.predict_path = predict_path
 		self.bert = AutoModelForSequenceClassification.from_pretrained(
 			pre_model_name,
 			cache_dir=torch_cache_dir
@@ -235,15 +236,7 @@ class RerankBert(pl.LightningModule):
 		else:
 			logits = self._forward_step(batch, batch_nb)
 			logits = logits.detach()
-			try:
-				device_id = dist.get_rank()
-			except AssertionError:
-				if 'XRT_SHARD_ORDINAL' in os.environ:
-					device_id = int(os.environ['XRT_SHARD_ORDINAL'])
-				else:
-					device_id = 0
-
-			# device_id = self.trainer.
+			device_id = get_device_id()
 			self.write_prediction_dict(
 				{
 					'id': batch['id'],
@@ -251,7 +244,7 @@ class RerankBert(pl.LightningModule):
 					'pos_score': logits[:, 1].tolist(),
 					'neg_score': logits[:, 0].tolist(),
 				},
-				filename=f'predictions-{device_id}.pt'
+				filename=os.path.join(self.predict_path, f'predictions-{device_id}.pt')
 			)
 			result = {
 				f'{name}_id': batch['id'],
@@ -302,3 +295,14 @@ class RerankBert(pl.LightningModule):
 			{'params': [p for n, p in param_optimizer if any(nd in n for nd in no_decay)], 'weight_decay': 0.0}]
 
 		return optimizer_params
+
+
+def get_device_id():
+	try:
+		device_id = dist.get_rank()
+	except AssertionError:
+		if 'XRT_SHARD_ORDINAL' in os.environ:
+			device_id = int(os.environ['XRT_SHARD_ORDINAL'])
+		else:
+			device_id = 0
+	return device_id

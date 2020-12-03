@@ -63,16 +63,16 @@ def read_scores(run_path):
 if __name__ == '__main__':
 
 	parser = argparse.ArgumentParser()
-	parser.add_argument('-r', '--run_path', required=True)
+	parser.add_argument('-p', '--pred_path', required=True)
 	parser.add_argument('-o', '--output_path', required=True)
 
 	args = parser.parse_args()
 	# 'runs/consumer/pruned_biobert_msmarco_multi_sentence'
-	run_path = args.run_path
+	pred_path = args.pred_path
 	output_path = args.output_path
 	output_name = output_path.split('/')[-1].replace('.txt', '')
 
-	rerank_scores = read_scores(run_path)
+	rerank_scores = read_scores(pred_path)
 	with open(output_path, 'w') as f:
 		for question_id, question_scores in rerank_scores.items():
 			write_results(question_id, question_scores, output_name, f, top_k=1000)

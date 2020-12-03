@@ -1,10 +1,15 @@
 import torch
 import argparse
 from collections import defaultdict
+import os
 
 
-def load_predictions(predictions_path):
-	pred_list = torch.load(predictions_path)
+def load_predictions(model_path):
+	pred_list = []
+	for file_name in os.listdir(model_path):
+		if file_name.endswith('.pt'):
+			preds = torch.load(os.path.join(model_path, file_name))
+			pred_list.extend(preds)
 	question_scores = defaultdict(list)
 	# # {query_id}\tQ0\t{doc_pass_id}\t{rank}\t{score:.4f}\t{run_name}
 	for prediction in pred_list:
@@ -30,13 +35,13 @@ def save_predictions(question_scores, output_path, run_name):
 
 if __name__ == '__main__':
 	parser = argparse.ArgumentParser()
-	parser.add_argument('-r', '--run_path', required=True)
+	parser.add_argument('-m', '--model_path', required=True)
 	parser.add_argument('-o', '--output_path', required=True)
 	args = parser.parse_args()
 
-	run_path = args.run_path
+	model_path = args.model_path
 	output_path = args.output_path
 	output_name = output_path.split('/')[-1].replace('.txt', '')
 
-	question_scores = load_predictions(run_path)
+	question_scores = load_predictions(model_path)
 	save_predictions(question_scores, output_path, output_name)
