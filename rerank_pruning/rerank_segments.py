@@ -2,6 +2,17 @@ from collections import OrderedDict, defaultdict
 import argparse
 
 
+def compare_segment(self, other):
+    if self.context < other.context:
+        return True
+    elif self.context == other.context:
+        if self.start < other.start:
+            return True
+        elif self.start == other.start:
+            return self.end < other.end
+    return False
+
+
 class Segment:
     def __init__(self, context, start, end, score):
         self.context = context
@@ -13,15 +24,6 @@ class Segment:
     def length(self):
         return self.end - self.start + 1
 
-    def __lt__(self, other):
-        if self.context < other.context:
-            return True
-        elif self.context == other.context:
-            if self.start < other.start:
-                return True
-            elif self.start == other.start:
-                return self.end < other.end
-        return False
 
     def __str__(self):
         return f'{self.context}:{self.start}-{self.end}\t{self.score}'
@@ -170,7 +172,13 @@ def rerank_pruned(score_index: ScoreIndex, limit, t):
                 pruned_1 = score_index.pruned_at(context_index, start, start + ngram_index - 1)
                 pruned_2 = score_index.pruned_at(context_index, start + 1, start + ngram_index)
                 if pruned_1 and pruned_2:
-                    score_index.set_pruned(context_index, start, start + ngram_index, True)
+                    try:
+                        score_index.set_pruned(context_index, start, start + ngram_index, True)
+                    except e:
+                        print(f'{context_index}, {start}, {start + ngram_index}')
+                        print(f'  - {context_index}, {start}, {start + ngram_index - 1}')
+                        print(f'  - {context_index}, {start+1}, {start + ngram_index}')
+                      raise e
                     continue
 
                 # Include segment in the batch and calculate score.
@@ -237,7 +245,7 @@ if __name__ == '__main__':
     print(list(rerank_scores.keys()))
     with open(output_path, 'w') as f:
         for question_id, query_segments in rerank_scores.items():
-            query_segments.sort()
+            query_segments.sort(key=compare_segment)
             print(f'{question_id}: {len(query_segments)}')
 
             result = rerank_prune(query_segments, t=args.threshold, n=args.top_n_gram)
