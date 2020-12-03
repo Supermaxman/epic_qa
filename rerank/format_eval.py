@@ -63,17 +63,10 @@ def read_scores(run_path):
 if __name__ == '__main__':
 
 	parser = argparse.ArgumentParser()
-	parser.add_argument('-q', '--query_path', required=True)
-	parser.add_argument('-c', '--collection_path', required=True)
 	parser.add_argument('-r', '--run_path', required=True)
 	parser.add_argument('-o', '--output_path', required=True)
 
 	args = parser.parse_args()
-	# 'data/consumer/consumer_questions_prelim.json'
-	with open(args.query_path) as f:
-		queries = json.load(f)
-	# 'data/consumer/version_2_split'
-	collection_path = args.collection_path
 	# 'runs/consumer/pruned_biobert_msmarco_multi_sentence'
 	run_path = args.run_path
 	output_path = args.output_path
@@ -81,13 +74,8 @@ if __name__ == '__main__':
 
 	rerank_scores = read_scores(run_path)
 	with open(output_path, 'w') as f:
-		for query in queries:
-			question_id = query['question_id']
-			if question_id in rerank_scores:
-				question_scores = rerank_scores[question_id]
-				write_results(question_id, question_scores, output_name, f, top_k=1000)
-			else:
-				print(f'No scores found for question: {question_id}')
+		for question_id, question_scores in rerank_scores.items():
+			write_results(question_id, question_scores, output_name, f, top_k=1000)
 
 
 
