@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 export RUN_NAME=HLTRI_RERANK_PRUNE_3
-export SCORE_RUN_NAME=HLTRI_RERANK_PRUNE_2
+export SCORE_RUN_NAME=HLTRI_RERANK_2
 export MODEL_NAME=pt-biobert-base-msmarco-multi-sentence
 export PRE_MODEL_NAME=nboost/pt-biobert-base-msmarco
 export DATASET=consumer
