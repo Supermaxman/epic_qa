@@ -236,8 +236,8 @@ class RerankBert(pl.LightningModule):
 				{
 					'id': batch['id'],
 					'question_id': batch['question_id'],
-					'pos_score': logits[:, 1],
-					'neg_score': logits[:, 0],
+					'pos_score': logits[:, 1].detach().tolist(),
+					'neg_score': logits[:, 0].detach().tolist(),
 				}
 			)
 			result = {
