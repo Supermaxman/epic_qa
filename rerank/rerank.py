@@ -134,9 +134,9 @@ if __name__ == '__main__':
 
 		data_loader = DataLoader(
 			eval_dataset,
-			batch_size=batch_size,
+			batch_size=1,
 			shuffle=False,
-			num_workers=num_workers,
+			num_workers=1,
 			collate_fn=PredictionBatchCollator(
 				tokenizer,
 				max_seq_len,
