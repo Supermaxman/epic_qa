@@ -4,13 +4,13 @@ import argparse
 
 def compare_segment(item1, item2):
     if item1.context < item2.context:
-        return True
+        return -1
     elif item1.context == item2.context:
         if item1.start < item2.start:
-            return True
+            return -1
         elif item1.start == item2.start:
-            return item1.end < item2.end
-    return False
+            return -1 if item1.end < item2.end else 1
+    return 1
 
 
 class Segment:
