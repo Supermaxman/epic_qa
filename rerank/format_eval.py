@@ -36,7 +36,6 @@ def write_results(question_id, question_scores, run_name, f, top_k=1000, multipl
 
 def read_scores(run_path):
 	rerank_scores = defaultdict(list)
-	# TODO open pickle format by output
 	with open(run_path) as f:
 		for line in f:
 			# {query_id}\tQ0\t{doc_pass_id}\t{rank}\t{score:.4f}\t{run_name}

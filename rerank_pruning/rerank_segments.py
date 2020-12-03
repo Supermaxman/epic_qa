@@ -1,4 +1,5 @@
-from collections import OrderedDict
+from collections import OrderedDict, defaultdict
+import argparse
 
 
 class Segment:
@@ -154,13 +155,13 @@ def rerank_naive(score_index: ScoreIndex, limit):
     return RerankResult(sorted_scores, num_segments_processed)
 
 
-def rerank_pruned(score_index: ScoreIndex, limit):
+def rerank_pruned(score_index: ScoreIndex, limit, t):
     num_segments_processed = 0
 
     # Calculate and prune uni-grams
     for context_index in range(score_index.num_contexts):
         for start in range(score_index.num_scores_at(context_index)):
-            if score_index.score_at(context_index, start, start) < 0.0:
+            if score_index.score_at(context_index, start, start) < t:
                 score_index.set_pruned(context_index, start, start, True)
             num_segments_processed += 1
 
@@ -200,22 +201,71 @@ def rerank_pruned(score_index: ScoreIndex, limit):
     return RerankResult(sorted_scores, num_segments_processed)
 
 
-def rerank(query):
-    segments = Segment.read_segments(f'sorted_scores_{query}.csv')
-    score_index = ScoreIndex.group_by_ngram_and_context(segments, 3)
+def rerank_prune(segments, t, n):
+    score_index = ScoreIndex.group_by_ngram_and_context(segments, n)
     # naive_result = rerank_naive(score_index, limit=10)
-    pruned_result = rerank_pruned(score_index, limit=1000)
+    pruned_result = rerank_pruned(score_index, limit=1000, t=t)
 
     return pruned_result
 
-def rerank_and_save_multiple():
-    with open(f'pruned_consumer_biobert_msmarco_multi_sentence', 'w') as f:
-        for i in range(42):
-            query_id = i + 1
-            print(f'Re-ranking Q{query_id}...')
-            result = rerank(query_id)
+
+def read_scores(run_path):
+    rerank_scores = defaultdict(list)
+    with open(run_path) as f:
+        for line in f:
+            # {query_id}\tQ0\t{doc_pass_id}\t{rank}\t{score:.4f}\t{run_name}
+            line = line.strip().split()
+            if len(line) == 6:
+                question_id, _, doc_pass_sent_id, rank, score, _ = line
+                ids = doc_pass_sent_id.split('-')
+                doc_id, pass_id = ids[0], ids[1]
+                pass_id = int(pass_id)
+                if len(ids) == 3:
+                    sent_start_id, sent_end_id = ids[2], ids[2]
+                elif len(ids) == 4:
+                    sent_start_id, sent_end_id = ids[2], ids[3]
+                else:
+                    sent_start_id, sent_end_id = ids[2], ids[4]
+                sent_start_id = int(sent_start_id)
+                sent_end_id = int(sent_end_id)
+                pass_id = int(pass_id)
+                score = float(score)
+                rerank_scores[question_id].append((doc_id, pass_id, sent_start_id, sent_end_id, score))
+    return rerank_scores
+
+
+if __name__ == '__main__':
+    parser = argparse.ArgumentParser()
+    parser.add_argument('-p', '--pred_path', required=True)
+    parser.add_argument('-o', '--output_path', required=True)
+    parser.add_argument('-n', '--top_n_gram', default=3, type=int)
+    parser.add_argument('-t', '--threshold', default=0.0, type=float)
+    args = parser.parse_args()
+
+    pred_path = args.pred_path
+    output_path = args.output_path
+    output_name = output_path.split('/')[-1].replace('.pred', '')
+
+    rerank_scores = read_scores(pred_path)
+    with open(output_path, 'w') as f:
+        for question_id, query_scores in rerank_scores.items():
+            segments = []
+            for doc_id, pass_id, sent_start_id, sent_end_id, score in query_scores:
+                seg = Segment(
+                    context=f'{doc_id}-{pass_id}',
+                    start=sent_start_id,
+                    end=sent_end_id,
+                    score=score
+                )
+                segments.append(seg)
+            segments.sort()
+            result = rerank_prune(segments, t=args.threshold, n=args.top_n_gram)
             for idx, seg in enumerate(result.top_segments):
                 rank = idx + 1
-                f.write(f'{query_id}\tQ0\t{seg.context}-{seg.start}-{seg.end}\t{rank}\t{seg.score}\tpruned_consumer_biobert_msmarco_multi_sentence\n')
-
-rerank_and_save_multiple()
+                f.write(
+                    f'{question_id}\t'
+                    f'Q0\t'
+                    f'{seg.context}-{seg.start}-{seg.end}\t'
+                    f'{rank}\t'
+                    f'{seg.score}\t'
+                    f'{output_name}\n')

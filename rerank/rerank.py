@@ -25,6 +25,7 @@ if __name__ == '__main__':
 	parser.add_argument('-ng', '--n_gram_max', default=3, type=int)
 	parser.add_argument('-se', '--seed', default=0, type=int)
 	parser.add_argument('-cd', '--torch_cache_dir', default=None)
+	parser.add_argument('-cs', '--calc_seq_len', default=False, action='store_true')
 
 	args = parser.parse_args()
 	seed = args.seed
@@ -125,6 +126,19 @@ if __name__ == '__main__':
 			use_tpus
 		)
 	)
+
+	if calc_seq_len:
+		import numpy as np
+		from tqdm import tqdm
+
+		logging.info('Calculating seq len stats...')
+		seq_lens = []
+		for batch in tqdm(eval_data_loader):
+			seq_len = batch['input_ids'].shape[-1]
+			seq_lens.append(seq_len)
+		p = np.percentile(seq_lens, 95)
+		logging.info(f'95-percentile: {p}')
+		exit()
 
 	logging.info('Loading model...')
 	model = RerankBert(
