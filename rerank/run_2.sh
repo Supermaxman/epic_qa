@@ -11,8 +11,7 @@ python -m rerank.rerank \
   --pre_model_name ${PRE_MODEL_NAME} \
   --model_name ${MODEL_NAME} \
   --multi_sentence \
-  --max_seq_len 512 \
-  --calc_seq_len
+  --max_seq_len 128
 
 python -m rerank.format_preds \
   --model_path models/${MODEL_NAME} \
