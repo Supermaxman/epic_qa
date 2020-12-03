@@ -173,16 +173,18 @@ def rerank_pruned(score_index: ScoreIndex, limit, t):
             for start in range(score_index.num_scores_at(context_index) - ngram_index):
                 # Skip if all sub-segments are pruned.
                 # Since we memoize prune flags, we only need to get two values.
-                pruned_1 = score_index.pruned_at(context_index, start, start + ngram_index - 1)
-                pruned_2 = score_index.pruned_at(context_index, start + 1, start + ngram_index)
-                if pruned_1 and pruned_2:
-                    try:
-                        score_index.set_pruned(context_index, start, start + ngram_index, True)
-                    except Exception as e:
-                        print(f'{context_index}, {start}, {start + ngram_index}')
-                        print(f'  - {context_index}, {start}, {start + ngram_index - 1}')
-                        print(f'  - {context_index}, {start+1}, {start + ngram_index}')
-                    continue
+                try:
+                    pruned_1 = score_index.pruned_at(context_index, start, start + ngram_index - 1)
+                    pruned_2 = score_index.pruned_at(context_index, start + 1, start + ngram_index)
+                    if pruned_1 and pruned_2:
+                        try:
+                            score_index.set_pruned(context_index, start, start + ngram_index, True)
+                        except:
+                            pass
+                        continue
+                except Exception as e:
+                    pass
+
 
                 # Include segment in the batch and calculate score.
                 ngram_score = score_index.score_at(context_index, start, start + ngram_index)
