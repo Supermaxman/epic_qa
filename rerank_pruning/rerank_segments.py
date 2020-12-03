@@ -2,15 +2,7 @@ from collections import OrderedDict, defaultdict
 import argparse
 
 
-def compare_segment(item1, item2):
-    if item1.context < item2.context:
-        return -1
-    elif item1.context == item2.context:
-        if item1.start < item2.start:
-            return -1
-        elif item1.start == item2.start:
-            return -1 if item1.end < item2.end else 1
-    return 1
+
 
 
 class Segment:
@@ -23,6 +15,19 @@ class Segment:
     @property
     def length(self):
         return self.end - self.start + 1
+
+    def __le__(self, other):
+        if self.context < other.context:
+            return True
+        elif self.context == other.context:
+            if self.start < other.start:
+                return True
+            elif self.start == other.start:
+                return self.end < other.end
+        return False
+
+    def __gt__(self, other):
+        return not self < other
 
     def __str__(self):
         return f'{self.context}:{self.start}-{self.end}\t{self.score}'
