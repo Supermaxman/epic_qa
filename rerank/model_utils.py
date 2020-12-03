@@ -6,6 +6,8 @@ from torch import nn
 import torch
 import pytorch_lightning as pl
 from abc import ABC, abstractmethod
+import torch.distributed as dist
+import os
 
 
 class QuestionAnsweringSampledBert(pl.LightningModule):
@@ -233,6 +235,14 @@ class RerankBert(pl.LightningModule):
 		else:
 			logits = self._forward_step(batch, batch_nb)
 			logits = logits.detach()
+			try:
+				device_id = dist.get_rank()
+			except AssertionError:
+				if 'XRT_SHARD_ORDINAL' in os.environ:
+					device_id = int(os.environ['XRT_SHARD_ORDINAL'])
+				else:
+					device_id = 0
+
 			# device_id = self.trainer.
 			self.write_prediction_dict(
 				{
@@ -241,7 +251,7 @@ class RerankBert(pl.LightningModule):
 					'pos_score': logits[:, 1].tolist(),
 					'neg_score': logits[:, 0].tolist(),
 				},
-				filename=f'predictions.pt'
+				filename=f'predictions-{device_id}.pt'
 			)
 			result = {
 				f'{name}_id': batch['id'],
