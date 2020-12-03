@@ -72,7 +72,7 @@ class QueryPassageDataset(Dataset):
 										'p_id': ex_first['p_id'],
 										's_id': f'{ex_first["s_id"]}-{ex_last["s_id"]}',
 										'text': ' '.join([ex['text'] for ex in ex_list]),
-										'query': ex_first['query']
+										'query': ex_first['question']
 									}
 									self.examples.append(example)
 
