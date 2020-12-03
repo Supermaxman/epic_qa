@@ -135,7 +135,7 @@ if __name__ == '__main__':
 		data_loader = DataLoader(
 			eval_dataset,
 			batch_size=1,
-			shuffle=False,
+			shuffle=True,
 			num_workers=1,
 			collate_fn=PredictionBatchCollator(
 				tokenizer,
@@ -145,9 +145,11 @@ if __name__ == '__main__':
 		)
 		logging.info('Calculating seq len stats...')
 		seq_lens = []
-		for batch in tqdm(data_loader):
+		for idx, batch in tqdm(enumerate(data_loader)):
 			seq_len = batch['input_ids'].shape[-1]
 			seq_lens.append(seq_len)
+			if idx > 1000:
+				break
 		p = np.percentile(seq_lens, 95)
 		logging.info(f'95-percentile: {p}')
 		exit()
