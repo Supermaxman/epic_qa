@@ -9,7 +9,7 @@ python -m rerank.rerank \
 
 python -m rerank.format_preds \
   --run_path models/pt-biobert-base-msmarco/predictions.pt \
-  --models/pt-biobert-base-msmarco/HLTRI_RERANK_1.pred
+  --output_path models/pt-biobert-base-msmarco/HLTRI_RERANK_1.pred
 
 python -m rerank.format_eval \
   --run_path models/pt-biobert-base-msmarco/HLTRI_RERANK_1.pred \

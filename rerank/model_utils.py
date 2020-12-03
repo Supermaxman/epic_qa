@@ -233,13 +233,15 @@ class RerankBert(pl.LightningModule):
 		else:
 			logits = self._forward_step(batch, batch_nb)
 			logits = logits.detach()
+			# device_id = self.trainer.
 			self.write_prediction_dict(
 				{
 					'id': batch['id'],
 					'question_id': batch['question_id'],
 					'pos_score': logits[:, 1].tolist(),
 					'neg_score': logits[:, 0].tolist(),
-				}
+				},
+				filename=f'predictions.pt'
 			)
 			result = {
 				f'{name}_id': batch['id'],
