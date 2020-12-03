@@ -566,3 +566,10 @@ python rerank_labels_sentence.py \
   --batch_size 32 \
   --max_length 512 \
   --multi_sentence
+
+
+python runs/epic_eval.py \
+  --judgement_file data/prelim_judgments.json \
+  --submission_file runs/consumer/pruned_biobert_msmarco_multi_sentence \
+  --task consumer
+

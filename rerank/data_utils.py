@@ -25,6 +25,69 @@ class QuestionAnswerDataset(Dataset):
 		return ex
 
 
+def find_ngrams(input_list, n):
+	return zip(*[input_list[i:] for i in range(n)])
+
+
+class QueryPassageDataset(Dataset):
+	def __init__(self, root_dir, queries, multi_sentence, n_gram_max):
+		self.root_dir = root_dir
+		self.file_names = os.listdir(root_dir)
+		self.examples = []
+		self.queries = queries
+		self.multi_sentence = multi_sentence
+		self.n_gram_max = n_gram_max
+		for d_name in self.file_names:
+			if not d_name.endswith('.json'):
+				continue
+			d_id = d_name.replace('.json', '')
+			file_path = os.path.join(self.root_dir, d_name)
+			with open(file_path) as f:
+				doc = json.load(f)
+				for query in queries:
+					for p_id, passage in enumerate(doc['contexts']):
+						context_examples = []
+						for s_id, sentence in enumerate(passage['sentences']):
+							example = {
+								'id': f'{d_id}-{p_id}-{s_id}-{s_id}',
+								'question_id': query['question_id'],
+								'd_id': d_id,
+								'p_id': p_id,
+								's_id': s_id,
+								'text': passage['text'][sentence['start']:sentence['end']],
+								'query': query
+							}
+							self.examples.append(example)
+							context_examples.append(example)
+						if self.multi_sentence:
+							# generate sentence n-grams from 2 to n_gram_max of contiguous sentence spans
+							for k in range(2, self.n_gram_max+1):
+								for ex_list in find_ngrams(context_examples, n=k):
+									ex_first = ex_list[0]
+									ex_last = ex_list[-1]
+									example = {
+										'id': f'{ex_first["d_id"]}-{ex_first["p_id"]}-{ex_first["s_id"]}-{ex_last["s_id"]}',
+										'question_id': ex_first['question_id'],
+										'd_id': ex_first['d_id'],
+										'p_id': ex_first['p_id'],
+										's_id': f'{ex_first["s_id"]}-{ex_last["s_id"]}',
+										'text': ' '.join([ex['text'] for ex in ex_list]),
+										'query': ex_first['query']
+									}
+									self.examples.append(example)
+
+	def __len__(self):
+		return len(self.examples)
+
+	def __getitem__(self, idx):
+		if torch.is_tensor(idx):
+			idx = idx.tolist()
+
+		example = self.examples[idx]
+
+		return example
+
+
 def split_data(data, train_ratio=0.8):
 	random.shuffle(data)
 	train_size = int(len(data) * train_ratio)
@@ -140,6 +203,43 @@ class SampleCollator(object):
 			'token_type_ids': tokenizer_batch['token_type_ids'],
 			'labels': labels,
 			'sample_size': sample_size
+		}
+
+		return batch
+
+
+class PredictionBatchCollator(object):
+	def __init__(self, tokenizer,  max_seq_len: int, force_max_seq_len: bool):
+		super().__init__()
+		self.tokenizer = tokenizer
+		self.max_seq_len = max_seq_len
+		self.force_max_seq_len = force_max_seq_len
+
+	def __call__(self, examples):
+		# creates text examples
+		ids = []
+		question_ids = []
+		sequences = []
+		for ex in examples:
+			ids.append(ex['id'])
+			question_ids.append(ex['question_id'])
+			sequences.append((ex['query'], ex['text']))
+		# "input_ids": batch["input_ids"].to(device),
+		# "attention_mask": batch["attention_mask"].to(device),
+		tokenizer_batch = self.tokenizer.batch_encode_plus(
+			batch_text_or_text_pairs=sequences,
+			add_special_tokens=True,
+			padding='max_length' if self.force_max_seq_len else 'longest',
+			return_tensors='pt',
+			truncation='only_second',
+			max_length=self.max_seq_len
+		)
+		batch = {
+			'id': ids,
+			'question_id': question_ids,
+			'input_ids': tokenizer_batch['input_ids'],
+			'attention_mask': tokenizer_batch['attention_mask'],
+			'token_type_ids': tokenizer_batch['token_type_ids'],
 		}
 
 		return batch
