@@ -214,30 +214,22 @@ def rerank_prune(segments, t, n):
 
     return pruned_result
 
-
-def read_scores(run_path):
-    rerank_scores = defaultdict(list)
-    with open(run_path) as f:
-        for line in f:
-            # {query_id}\tQ0\t{doc_pass_id}\t{rank}\t{score:.4f}\t{run_name}
-            line = line.strip().split()
-            if len(line) == 6:
-                question_id, _, doc_pass_sent_id, rank, score, _ = line
-                ids = doc_pass_sent_id.split('-')
-                doc_id, pass_id = ids[0], ids[1]
-                pass_id = int(pass_id)
-                if len(ids) == 3:
-                    sent_start_id, sent_end_id = ids[2], ids[2]
-                elif len(ids) == 4:
-                    sent_start_id, sent_end_id = ids[2], ids[3]
-                else:
-                    sent_start_id, sent_end_id = ids[2], ids[4]
-                sent_start_id = int(sent_start_id)
-                sent_end_id = int(sent_end_id)
-                pass_id = int(pass_id)
-                score = float(score)
-                rerank_scores[question_id].append((doc_id, pass_id, sent_start_id, sent_end_id, score))
-    return rerank_scores
+def read_segments(filename):
+    query_segments = defaultdict(list)
+    with open(filename) as file:
+        for line in file:
+            columns = line.split()
+            segment_query = columns[0]
+            location = columns[2].split('-')
+            rerank_scores[segment_query].append(
+                Segment(
+                    context=f'{location[0]}-{location[1]}',
+                    start=int(location[2]),
+                    end=int(location[3]),
+                    score=float(columns[4])
+                )
+            )
+    return query_segments
 
 
 if __name__ == '__main__':
@@ -252,20 +244,11 @@ if __name__ == '__main__':
     output_path = args.output_path
     output_name = output_path.split('/')[-1].replace('.pred', '')
 
-    rerank_scores = read_scores(pred_path)
+    rerank_scores = read_segments(pred_path)
     with open(output_path, 'w') as f:
-        for question_id, query_scores in rerank_scores.items():
-            segments = []
-            for doc_id, pass_id, sent_start_id, sent_end_id, score in query_scores:
-                seg = Segment(
-                    context=f'{doc_id}-{pass_id}',
-                    start=sent_start_id,
-                    end=sent_end_id,
-                    score=score
-                )
-                segments.append(seg)
-            segments.sort()
-            result = rerank_prune(segments, t=args.threshold, n=args.top_n_gram)
+        for question_id, query_segments in rerank_scores.items():
+            query_segments.sort()
+            result = rerank_prune(query_segments, t=args.threshold, n=args.top_n_gram)
             for idx, seg in enumerate(result.top_segments):
                 rank = idx + 1
                 f.write(
