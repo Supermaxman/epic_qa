@@ -55,7 +55,7 @@ class QueryPassageDataset(Dataset):
 								'p_id': p_id,
 								's_id': s_id,
 								'text': passage['text'][sentence['start']:sentence['end']],
-								'query': query
+								'query': query['question']
 							}
 							self.examples.append(example)
 							context_examples.append(example)
