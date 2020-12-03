@@ -174,3 +174,7 @@ if __name__ == '__main__':
 		trainer.test(model, eval_data_loader)
 	except Exception as e:
 		logging.exception('Exception during evaluating', exc_info=e)
+
+	predictions_path = os.path.join(save_directory, 'predictions.pt')
+	os.rename('predictions.pt', predictions_path)
+	logging.info(f'Predictions saved at {predictions_path}')
