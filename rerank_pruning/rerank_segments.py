@@ -14,7 +14,14 @@ class Segment:
         return self.end - self.start + 1
 
     def __lt__(self, other):
-        return self.score < other.score
+        if self.context < other.context:
+            return True
+        elif self.context == other.context:
+            if self.start < other.start:
+                return True
+            elif self.start == other.start:
+                return self.end < other.end
+        return False
 
     def __str__(self):
         return f'{self.context}:{self.start}-{self.end}\t{self.score}'
@@ -138,8 +145,7 @@ def sort_scores(score_index: ScoreIndex, limit=None):
                         end=i + context.ngram_length - 1,
                         score=context.scores[i]
                     ))
-
-    segments.sort()
+    segments.sort(key=lambda x: x.score)
     segments.reverse()
     if limit:
         segments = segments[:limit]
