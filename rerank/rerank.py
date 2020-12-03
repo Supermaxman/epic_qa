@@ -49,6 +49,7 @@ if __name__ == '__main__':
 	multi_sentence = args.multi_sentence
 	n_gram_max = args.n_gram_max
 	torch_cache_dir = args.torch_cache_dir
+	calc_seq_len = args.calc_seq_len
 
 	is_distributed = False
 	# export TPU_IP_ADDRESS=10.155.6.34
