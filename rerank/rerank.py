@@ -131,9 +131,20 @@ if __name__ == '__main__':
 		import numpy as np
 		from tqdm import tqdm
 
+		data_loader = DataLoader(
+			eval_dataset,
+			batch_size=batch_size,
+			shuffle=False,
+			num_workers=num_workers,
+			collate_fn=PredictionBatchCollator(
+				tokenizer,
+				max_seq_len,
+				False
+			)
+		)
 		logging.info('Calculating seq len stats...')
 		seq_lens = []
-		for batch in tqdm(eval_data_loader):
+		for batch in tqdm(data_loader):
 			seq_len = batch['input_ids'].shape[-1]
 			seq_lens.append(seq_len)
 		p = np.percentile(seq_lens, 95)
