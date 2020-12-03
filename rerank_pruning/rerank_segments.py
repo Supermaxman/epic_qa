@@ -1,8 +1,4 @@
-from collections import OrderedDict, defaultdict
-import argparse
-
-
-
+from collections import OrderedDict
 
 
 class Segment:
@@ -16,21 +12,25 @@ class Segment:
     def length(self):
         return self.end - self.start + 1
 
-    def __le__(self, other):
-        if self.context < other.context:
-            return True
-        elif self.context == other.context:
-            if self.start < other.start:
-                return True
-            elif self.start == other.start:
-                return self.end < other.end
-        return False
-
-    def __gt__(self, other):
-        return not self.__le__(other)
+    def __lt__(self, other):
+        return self.score < other.score
 
     def __str__(self):
         return f'{self.context}:{self.start}-{self.end}\t{self.score}'
+
+    @staticmethod
+    def read_segments(filename):
+        segments = []
+        with open(filename) as file:
+            for line in file:
+                columns = line.split(',')
+                segments.append(Segment(
+                    context=columns[0],
+                    start=int(columns[1]),
+                    end=int(columns[2]),
+                    score=float(columns[3])
+                ))
+        return segments
 
 
 class Context:
@@ -137,7 +137,8 @@ def sort_scores(score_index: ScoreIndex, limit=None):
                         end=i + context.ngram_length - 1,
                         score=context.scores[i]
                     ))
-    segments.sort(key=lambda x: x.score)
+
+    segments.sort()
     segments.reverse()
     if limit:
         segments = segments[:limit]
@@ -153,13 +154,13 @@ def rerank_naive(score_index: ScoreIndex, limit):
     return RerankResult(sorted_scores, num_segments_processed)
 
 
-def rerank_pruned(score_index: ScoreIndex, limit, t):
+def rerank_pruned(score_index: ScoreIndex, limit):
     num_segments_processed = 0
 
     # Calculate and prune uni-grams
     for context_index in range(score_index.num_contexts):
         for start in range(score_index.num_scores_at(context_index)):
-            if score_index.score_at(context_index, start, start) < t:
+            if score_index.score_at(context_index, start, start) < 0.0:
                 score_index.set_pruned(context_index, start, start, True)
             num_segments_processed += 1
 
@@ -173,18 +174,11 @@ def rerank_pruned(score_index: ScoreIndex, limit, t):
             for start in range(score_index.num_scores_at(context_index) - ngram_index):
                 # Skip if all sub-segments are pruned.
                 # Since we memoize prune flags, we only need to get two values.
-                try:
-                    pruned_1 = score_index.pruned_at(context_index, start, start + ngram_index - 1)
-                    pruned_2 = score_index.pruned_at(context_index, start + 1, start + ngram_index)
-                    if pruned_1 and pruned_2:
-                        try:
-                            score_index.set_pruned(context_index, start, start + ngram_index, True)
-                        except:
-                            pass
-                        continue
-                except Exception as e:
-                    pass
-
+                pruned_1 = score_index.pruned_at(context_index, start, start + ngram_index - 1)
+                pruned_2 = score_index.pruned_at(context_index, start + 1, start + ngram_index)
+                if pruned_1 and pruned_2:
+                    score_index.set_pruned(context_index, start, start + ngram_index, True)
+                    continue
 
                 # Include segment in the batch and calculate score.
                 ngram_score = score_index.score_at(context_index, start, start + ngram_index)
@@ -206,60 +200,23 @@ def rerank_pruned(score_index: ScoreIndex, limit, t):
     return RerankResult(sorted_scores, num_segments_processed)
 
 
-def rerank_prune(segments, t, n):
-    score_index = ScoreIndex.group_by_ngram_and_context(segments, n)
+def rerank(query):
+    segments = Segment.read_segments(f'sorted_scores_{query}.csv')
+    score_index = ScoreIndex.group_by_ngram_and_context(segments, 3)
     # naive_result = rerank_naive(score_index, limit=10)
-    pruned_result = rerank_pruned(score_index, limit=1000, t=t)
+    pruned_result = rerank_pruned(score_index, limit=1000)
 
     return pruned_result
 
 
-def read_segments(filename):
-    query_segments = {}
-    with open(filename) as file:
-        for line in file:
-            columns = line.split()
-            segment_query = columns[0]
-            location = columns[2].split('-')
-            if segment_query not in query_segments:
-                query_segments[segment_query] = []
-            query_segments[segment_query].append(
-                Segment(
-                    context=f'{location[0]}-{location[1]}',
-                    start=int(location[2]),
-                    end=int(location[3]),
-                    score=float(columns[4])
-                )
-            )
-    return query_segments
-
-
-if __name__ == '__main__':
-    parser = argparse.ArgumentParser()
-    parser.add_argument('-p', '--pred_path', required=True)
-    parser.add_argument('-o', '--output_path', required=True)
-    parser.add_argument('-n', '--top_n_gram', default=3, type=int)
-    parser.add_argument('-t', '--threshold', default=0.0, type=float)
-    args = parser.parse_args()
-
-    pred_path = args.pred_path
-    output_path = args.output_path
-    output_name = output_path.split('/')[-1].replace('.pred', '')
-
-    rerank_scores = read_segments(pred_path)
-    print(list(rerank_scores.keys()))
-    with open(output_path, 'w') as f:
-        for question_id, query_segments in rerank_scores.items():
-            query_segments.sort()
-            print(f'{question_id}: {len(query_segments)}')
-
-            result = rerank_prune(query_segments, t=args.threshold, n=args.top_n_gram)
+def rerank_and_save_multiple():
+    with open(f'pruned_consumer_biobert_msmarco_multi_sentence', 'w') as f:
+        for i in range(42):
+            query_id = i + 1
+            print(f'Re-ranking Q{query_id}...')
+            result = rerank(query_id)
             for idx, seg in enumerate(result.top_segments):
                 rank = idx + 1
-                f.write(
-                    f'{question_id}\t'
-                    f'Q0\t'
-                    f'{seg.context}-{seg.start}-{seg.end}\t'
-                    f'{rank}\t'
-                    f'{seg.score}\t'
-                    f'{output_name}\n')
+                f.write(f'{query_id}\tQ0\t{seg.context}-{seg.start}-{seg.end}\t{rank}\t{seg.score}\tpruned_consumer_biobert_msmarco_multi_sentence\n')
+
+rerank_and_save_multiple()
