@@ -234,9 +234,17 @@ if __name__ == '__main__':
     output_name = output_path.split('/')[-1].replace('.pred', '')
 
     rerank_scores = read_segments(pred_path)
+    print(list(rerank_scores.keys()))
     with open(output_path, 'w') as f:
         for question_id, query_segments in rerank_scores.items():
             query_segments.sort()
+            print(f'{question_id}: {len(query_segments)}')
+            for segment in query_segments[:100]:
+                print(segment)
+            print(f'Min score: {min(query_segments, key=lambda x: x.score)}')
+            print(f'Max score: {max(query_segments, key=lambda x: x.score)}')
+            print(f'Min length: {min(query_segments, key=lambda x: x.length)}')
+            print(f'Max length: {max(query_segments, key=lambda x: x.length)}')
             result = rerank_prune(query_segments, t=args.threshold, n=args.top_n_gram)
             for idx, seg in enumerate(result.top_segments):
                 rank = idx + 1
