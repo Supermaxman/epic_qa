@@ -1,12 +1,13 @@
 #!/usr/bin/env bash
 
 export RUN_NAME=HLTRI_RERANK_PRUNE_4
+export SCORE_RUN_NAME=HLTRI_RERANK_PRUNE_2
 export MODEL_NAME=pt-biobert-base-msmarco-multi-sentence
 export PRE_MODEL_NAME=nboost/pt-biobert-base-msmarco
 export DATASET=consumer
 
 python -m rerank_pruning.rerank_segments \
- --pred_path models/${MODEL_NAME}/${RUN_NAME}.pred \
+ --pred_path models/${MODEL_NAME}/${SCORE_RUN_NAME}.pred \
  --output_path models/${MODEL_NAME}/${RUN_NAME}_PRUNED.pred \
  --threshold 0.5
 
