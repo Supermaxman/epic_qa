@@ -9,7 +9,8 @@ python -m rerank.rerank \
   --collection_path data/epic_qa_prelim/${DATASET}/data \
   --label_path data/epic_qa_prelim/prelim_judgments_corrected.json \
   --pre_model_name ${PRE_MODEL_NAME} \
-  --model_name ${MODEL_NAME}
+  --model_name ${MODEL_NAME} \
+  --multi_sentence
 
 python -m rerank.format_preds \
   --model_path models/${MODEL_NAME} \
