@@ -7,6 +7,7 @@ from torch.utils.data import Dataset
 from tqdm import tqdm
 import csv
 import random
+from collections import defaultdict
 
 
 class RQEDataset(Dataset):
@@ -170,3 +171,94 @@ class BatchCollator(object):
 
 		return batch
 
+
+class PredictionBatchCollator(object):
+	def __init__(self, tokenizer,  max_seq_len: int, force_max_seq_len: bool):
+		super().__init__()
+		self.tokenizer = tokenizer
+		self.max_seq_len = max_seq_len
+		self.force_max_seq_len = force_max_seq_len
+
+	def __call__(self, examples):
+		# creates text examples
+		ids = []
+		question_ids = []
+		sample_ids = []
+		sequences = []
+		for ex in examples:
+			ids.append(ex['id'])
+			question_ids.append(ex['question_id'])
+			sample_ids.append(ex['sample_id'])
+			sequences.append((ex['sample'], ex['query']))
+		# "input_ids": batch["input_ids"].to(device),
+		# "attention_mask": batch["attention_mask"].to(device),
+		tokenizer_batch = self.tokenizer.batch_encode_plus(
+			batch_text_or_text_pairs=sequences,
+			add_special_tokens=True,
+			padding='max_length' if self.force_max_seq_len else 'longest',
+			return_tensors='pt',
+			truncation='only_second',
+			max_length=self.max_seq_len
+		)
+		batch = {
+			'id': ids,
+			'question_id': question_ids,
+			'sample_id': sample_ids,
+			'input_ids': tokenizer_batch['input_ids'],
+			'attention_mask': tokenizer_batch['attention_mask'],
+			'token_type_ids': tokenizer_batch['token_type_ids'],
+		}
+
+		return batch
+
+
+class RQEPredictionDataset(Dataset):
+	def __init__(self, expand_path, input_path, queries):
+		self.expand_path = expand_path
+		self.input_path = input_path
+		self.query_lookup = {query['question_id']: query for query in queries}
+
+		self.answer_samples = {}
+		with open(self.expand_path, 'r') as f:
+			for line in f:
+				line = line.strip()
+				if line:
+					line_list = line.split()
+					answer_id = line_list[0]
+					samples = line_list[1:]
+					self.answer_samples[answer_id] = samples
+
+		self.query_answers = defaultdict(list)
+		with open(self.input_path, 'r') as f:
+			for line in f:
+				line = line.strip()
+				if line:
+					q_id, _, answer_id, rank, score, run_name = line.split()
+					self.query_answers[q_id].append(answer_id)
+
+		self.examples = []
+		for question_id, answer_ids in self.query_answers.items():
+			query = self.query_lookup[question_id]
+			query_text = query['question']
+			for answer_id in answer_ids:
+				answer_samples = self.answer_samples[answer_id]
+				for sample_id, sample in enumerate(answer_samples):
+					example = {
+						'id': answer_id,
+						'question_id': question_id,
+						'sample_id':  sample_id,
+						'sample': sample,
+						'query': query_text
+					}
+					self.examples.append(example)
+
+	def __len__(self):
+		return len(self.examples)
+
+	def __getitem__(self, idx):
+		if torch.is_tensor(idx):
+			idx = idx.tolist()
+
+		example = self.examples[idx]
+
+		return example

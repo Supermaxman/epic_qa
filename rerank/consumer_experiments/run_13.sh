@@ -14,8 +14,6 @@ python -m expand_query.expand \
  --collection_path data/${COLLECTION}/${DATASET}/data \
  --pre_model_name ${PRE_MODEL_NAME} \
  --model_name ${EXP_MODEL_NAME} \
- --max_seq_len 96 \
- --max_output_length 32 \
  --top_k 10 \
  --num_samples 10
 
@@ -24,11 +22,16 @@ python -m expand_query.format_expand \
   --output_path models/${EXP_MODEL_NAME}/${RUN_NAME}.exp
 
 python -m rqe.rqe \
-  --pred_path models/${EXP_MODEL_NAME}/${RUN_NAME}.exp \
+  --input_path models/${SCORE_MODEL_NAME}/${SCORE_RUN_NAME}.txt \
+  --expand_path models/${EXP_MODEL_NAME}/${RUN_NAME}.exp \
   --query_path data/${COLLECTION}/${DATASET}/questions.json \
   --label_path data/${COLLECTION}/prelim_judgments_corrected.json \
-  --output_path models/${RQE_MODEL_NAME}/${RUN_NAME}.rqe \
-  --max_length 128
+  --model_name models/${RQE_MODEL_NAME}
+
+python -m rqe.rqe_format \
+  --model_path models/${RQE_MODEL_NAME} \
+  --output_path models/${RQE_MODEL_NAME}/${RUN_NAME}.rqe
+
 
 python -m rqe.format_eval \
   --pred_path models/${RQE_MODEL_NAME}/${RUN_NAME}.rqe \
