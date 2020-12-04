@@ -57,6 +57,7 @@ def read_run(answer_query_path, expand_path, scores_path):
 			line = line.strip()
 			if line:
 				question_id, _, answer_id, rank, score, _ = line.split()
+				score = float(score)
 				query_samples = query_answer_sample_probs[(question_id, answer_id)]
 				rerank_scores[question_id].append((answer_id, score, query_samples))
 	return rerank_scores
