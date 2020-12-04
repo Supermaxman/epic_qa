@@ -13,13 +13,16 @@ def load_predictions(model_path):
 			pred_list.extend(preds)
 	query_answer_sample_probs = defaultdict(list)
 	# # {query_id}\tQ0\t{doc_pass_id}\t{rank}\t{score:.4f}\t{run_name}
+	probs = []
 	for prediction in tqdm(pred_list):
 		answer_id = prediction['id']
 		question_id = prediction['question_id']
 		sample_id = prediction['sample_id']
 		entail_prob = prediction['entail_prob']
 		query_answer_sample_probs[(question_id, answer_id)].append((sample_id, entail_prob))
-
+		probs.append(entail_prob)
+	print(f'min={min(probs)}')
+	print(f'max={max(probs)}')
 	return query_answer_sample_probs
 
 
