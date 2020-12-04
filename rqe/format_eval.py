@@ -21,7 +21,7 @@ def write_results(rerank_scores, output_path, output_name, threshold):
 				sample_score = nugget_count / len(unique_samples)
 				new_q_scores.append((answer_id, answer_score, sample_score))
 
-			new_q_scores = list(sorted(new_q_scores, key=lambda x: x[sample_score]))
+			new_q_scores = list(sorted(new_q_scores, key=lambda x: x[2]))
 			rank = 1
 			for answer_id, answer_score, sample_score in new_q_scores:
 				f.write(f'{question_id}\tQ0\t{answer_id}\t{rank}\t{sample_score}\t{output_name}\n')
