@@ -35,7 +35,7 @@ class QueryPassageDataset(Dataset):
 		assert not (document_qrels is not None and passage_qrels is not None), 'Cannot specify both doc and pass qrels!'
 		if document_qrels is not None:
 			file_names = set()
-			for question_id, question_files in passage_qrels.items():
+			for question_id, question_files in document_qrels.items():
 				for doc_id in question_files:
 					file_names.add(f'{doc_id}.json')
 			self.file_names = list(file_names)
@@ -52,8 +52,6 @@ class QueryPassageDataset(Dataset):
 		self.queries = queries
 		self.multi_sentence = multi_sentence
 		self.n_gram_max = n_gram_max
-		self.document_qrels = document_qrels
-		self.passage_qrels = passage_qrels
 
 		for d_name in self.file_names:
 			if not d_name.endswith('.json'):
