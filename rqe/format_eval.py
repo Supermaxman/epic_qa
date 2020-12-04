@@ -45,7 +45,7 @@ def read_run(answer_query_path, expand_path, scores_path):
 		for line in f:
 			line = line.strip()
 			if line:
-				question_id, answer_id, sample_id, entail_prob = line.split('\t')
+				question_id, answer_id, sample_id, entail_prob = line.split()
 				sample_id = int(sample_id)
 				entail_prob = float(entail_prob)
 				sample_text = answer_queries[answer_id][sample_id]
@@ -56,7 +56,7 @@ def read_run(answer_query_path, expand_path, scores_path):
 		for line in f:
 			line = line.strip()
 			if line:
-				question_id, _, answer_id, rank, score, _ = line.split('\t')
+				question_id, _, answer_id, rank, score, _ = line.split()
 				score = float(score)
 				query_samples = query_answer_sample_probs[(question_id, answer_id)]
 				rerank_scores[question_id].append((answer_id, score, query_samples))
