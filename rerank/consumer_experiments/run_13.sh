@@ -28,7 +28,7 @@ python -m rqe.rqe \
   --expand_path models/${EXP_MODEL_NAME}/${RUN_NAME}.exp \
   --query_path data/${COLLECTION}/${DATASET}/questions.json \
   --label_path data/${COLLECTION}/prelim_judgments_corrected.json \
-  --model_name ${RQE_MODEL_NAME}
+  --model_name models/${RQE_MODEL_NAME}
 
 python -m rqe.rqe_format \
   --model_path models/${RQE_MODEL_NAME} \

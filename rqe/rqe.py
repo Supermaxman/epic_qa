@@ -27,7 +27,6 @@ if __name__ == '__main__':
 	seed = args.seed
 	pl.seed_everything(seed)
 
-	save_directory = args.save_directory
 	model_name = args.model_name
 	pre_model_name = model_name
 	save_directory = model_name
