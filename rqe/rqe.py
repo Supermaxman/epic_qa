@@ -19,7 +19,7 @@ if __name__ == '__main__':
 	parser.add_argument('-q', '--query_path', required=True)
 	parser.add_argument('-l', '--label_path', default='data/prelim_judgments.json')
 	parser.add_argument('-mn', '--model_name', default='models/quora-seq-at-nboost-pt-bert-base-uncased-msmarco')
-	parser.add_argument('-pm', '--pre_model_name', default='nboost/pt-biobert-base-msmarco')
+	parser.add_argument('-pm', '--pre_model_name', default='nboost/pt-bert-base-uncased-msmarco')
 	parser.add_argument('-bs', '--batch_size', default=64, type=int)
 	parser.add_argument('-ml', '--max_seq_len', default=128, type=int)
 	parser.add_argument('-se', '--seed', default=0, type=int)
