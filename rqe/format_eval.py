@@ -1,7 +1,4 @@
 from collections import defaultdict
-import json
-import os
-import sys
 import argparse
 
 
@@ -19,13 +16,13 @@ def write_results(rerank_scores, output_path, output_name, threshold):
 					if entail_prob > threshold:
 						nugget_count += 1
 				sample_score = nugget_count / len(unique_samples)
-				full_score = (1.0 + sample_score) * answer_score
+				full_score = (sample_score) * answer_score
 				new_q_scores.append((answer_id, answer_score, sample_score, full_score))
 
 			new_q_scores = list(sorted(new_q_scores, key=lambda x: x[-1], reverse=True))
 			rank = 1
 			for answer_id, answer_score, sample_score, full_score in new_q_scores:
-				f.write(f'{question_id}\tQ0\t{answer_id}\t{rank}\t{answer_score:.8f}\t{output_name}\n')
+				f.write(f'{question_id}\tQ0\t{answer_id}\t{rank}\t{full_score:.8f}\t{output_name}\n')
 				rank += 1
 
 
