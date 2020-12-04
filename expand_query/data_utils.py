@@ -68,11 +68,13 @@ class PredictionBatchCollator(object):
 		for ex in examples:
 			ids.append(ex['id'])
 			text = ex['text']
-			sequences.append(f'{text} </s>')
+			# sequences.append(f'{text} </s>')
+			sequences.append(text)
 		# "input_ids": batch["input_ids"].to(device),
 		# "attention_mask": batch["attention_mask"].to(device),
 		tokenizer_batch = self.tokenizer.batch_encode_plus(
 			batch_text_or_text_pairs=sequences,
+			add_special_tokens=True,
 			padding='max_length' if self.force_max_seq_len else 'longest',
 			return_tensors='pt',
 			truncation=True,

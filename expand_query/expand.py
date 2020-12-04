@@ -22,9 +22,9 @@ if __name__ == '__main__':
   parser.add_argument('-ml', '--max_seq_len', default=96, type=int)
   parser.add_argument('-se', '--seed', default=0, type=int)
   parser.add_argument('-cd', '--torch_cache_dir', default=None)
-  parser.add_argument('-mo', '--max_output_length', default=64)
-  parser.add_argument('-k', '--top_k', default=10)
-  parser.add_argument('-s', '--num_samples', default=10)
+  parser.add_argument('-mo', '--max_output_length', default=64, type=int)
+  parser.add_argument('-k', '--top_k', default=10, type=int)
+  parser.add_argument('-s', '--num_samples', default=10, type=int)
 
   args = parser.parse_args()
   seed = args.seed
