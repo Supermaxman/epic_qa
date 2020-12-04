@@ -24,8 +24,6 @@ def load_predictions(model_path, tokenizer):
 				sample_ids.tolist(),
 				skip_special_tokens=True
 			)
-			print(f'{sample_txt}')
-			input()
 			samples.append(sample_txt)
 		answer_queries[answer_id] = samples
 
