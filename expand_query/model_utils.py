@@ -37,7 +37,6 @@ class T5QueryGenerator(pl.LightningModule):
 			input_ids=input_ids,
 			attention_mask=attention_mask,
 			max_length=self.max_output_length,
-			min_length=self.max_output_length,
 			do_sample=True,
 			top_k=self.top_k,
 			num_return_sequences=self.num_samples,
@@ -70,11 +69,10 @@ class T5QueryGenerator(pl.LightningModule):
 		else:
 			batch_size = len(batch['id'])
 			outputs = self._forward_step(batch, batch_nb)
-			outputs = outputs.view(batch_size, self.num_samples, self.max_output_length)
+
+			outputs = outputs.view(batch_size, self.num_samples, -1)
 			# [bsize, num_samples, max_output_length]
-			outputs = outputs.detach()
-			outputs = outputs.cpu()
-			outputs = outputs.numpy()
+			outputs = outputs.detach().cpu().numpy()
 			# list of [num_samples, max_output_length]
 			outputs = [x for x in outputs]
 			device_id = get_device_id()
