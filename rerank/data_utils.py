@@ -33,12 +33,15 @@ def find_ngrams(input_list, n):
 class QueryPassageDataset(Dataset):
 	def __init__(self, root_dir, queries, multi_sentence, n_gram_max, document_qrels=None, passage_qrels=None):
 		self.root_dir = root_dir
+		self.query_lookup = {query['question_id']: query for query in queries}
 		assert not (document_qrels is not None and passage_qrels is not None), 'Cannot specify both doc and pass qrels!'
 		if document_qrels is not None:
 			file_names = set()
 			self.query_docs = defaultdict(set)
 			self.query_doc_pass = None
 			for question_id, question_files in document_qrels.items():
+				if question_id not in self.query_lookup:
+					continue
 				for doc_id in question_files:
 					file_names.add(f'{doc_id}.json')
 					self.query_docs[doc_id].add(question_id)
@@ -64,7 +67,7 @@ class QueryPassageDataset(Dataset):
 		self.queries = queries
 		self.multi_sentence = multi_sentence
 		self.n_gram_max = n_gram_max
-		query_lookup = {query['question_id']: query for query in queries}
+
 		for d_name in self.file_names:
 			if not d_name.endswith('.json'):
 				continue
@@ -75,7 +78,7 @@ class QueryPassageDataset(Dataset):
 				if self.query_docs is None:
 					doc_queries = queries
 				else:
-					doc_queries = [query_lookup[q_id] for q_id in self.query_docs[d_id]]
+					doc_queries = [self.query_lookup[q_id] for q_id in self.query_docs[d_id]]
 				for query in doc_queries:
 					question_id = query['question_id']
 					if self.query_doc_pass is None:
