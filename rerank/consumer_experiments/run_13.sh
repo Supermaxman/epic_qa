@@ -34,9 +34,10 @@ python -m rqe.format_rqe \
   --model_path models/${RQE_MODEL_NAME} \
   --output_path models/${RQE_MODEL_NAME}/${RUN_NAME}.rqe
 
-
 python -m rqe.format_eval \
-  --pred_path models/${RQE_MODEL_NAME}/${RUN_NAME}.rqe \
+  --answer_query_path models/${EXP_MODEL_NAME}/${RUN_NAME}.exp \
+  --expand_path models/${RQE_MODEL_NAME}/${RUN_NAME}.rqe \
+  --scores_path models/${SCORE_MODEL_NAME}/${SCORE_RUN_NAME}.txt \
   --output_path models/${RQE_MODEL_NAME}/${RUN_NAME}.txt
 
 python rerank/epic_eval.py \

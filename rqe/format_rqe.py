@@ -12,7 +12,6 @@ def load_predictions(model_path):
 			preds = torch.load(os.path.join(model_path, file_name))
 			pred_list.extend(preds)
 	query_answer_sample_probs = defaultdict(list)
-	# # {query_id}\tQ0\t{doc_pass_id}\t{rank}\t{score:.4f}\t{run_name}
 	probs = []
 	for prediction in tqdm(pred_list):
 		answer_id = prediction['id']
