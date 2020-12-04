@@ -25,7 +25,7 @@ def write_results(rerank_scores, output_path, output_name, threshold):
 			new_q_scores = list(sorted(new_q_scores, key=lambda x: x[-1], reverse=True))
 			rank = 1
 			for answer_id, answer_score, sample_score, full_score in new_q_scores:
-				f.write(f'{question_id}\tQ0\t{answer_id}\t{rank}\t{full_score}\t{output_name}\n')
+				f.write(f'{question_id}\tQ0\t{answer_id}\t{rank}\t{answer_score:.8f}\t{output_name}\n')
 				rank += 1
 
 
