@@ -18,7 +18,7 @@ if __name__ == '__main__':
   parser.add_argument('-tn', '--tokenizer_name', default='t5-base')
   parser.add_argument('-mn', '--model_name', default='docT5query-base')
   parser.add_argument('-sd', '--save_directory', default='models')
-  parser.add_argument('-bs', '--batch_size', default=128, type=int)
+  parser.add_argument('-bs', '--batch_size', default=16, type=int)
   parser.add_argument('-ml', '--max_seq_len', default=96, type=int)
   parser.add_argument('-se', '--seed', default=0, type=int)
   parser.add_argument('-cd', '--torch_cache_dir', default=None)
