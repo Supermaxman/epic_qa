@@ -5,12 +5,21 @@ export SEARCH_RUN=passage-baseline
 export MODEL_NAME=pt-biobert-base-msmarco-expert-${SEARCH_RUN}
 export PRE_MODEL_NAME=nboost/pt-biobert-base-msmarco
 export DATASET=expert
+export INDEX_NAME=passage_index
+export COLLECTION=epic_qa_prelim
+
+python search/search_pass_index.py \
+  --index_path data/${COLLECTION}/${DATASET}/indices/${INDEX_NAME} \
+  --query_path data/${COLLECTION}/${DATASET}/questions.json \
+  --label_path data/${COLLECTION}/prelim_judgments_corrected.json \
+  --output_path data/${COLLECTION}/${DATASET}/search/${SEARCH_RUN} \
+  --top_k 1000
 
 python -m rerank.rerank \
-  --query_path data/epic_qa_prelim/${DATASET}/questions.json \
-  --collection_path data/epic_qa_prelim/${DATASET}/data \
-  --passage_search_run data/epic_qa_prelim/${DATASET}/search/${SEARCH_RUN} \
-  --label_path data/epic_qa_prelim/prelim_judgments_corrected.json \
+  --query_path data/${COLLECTION}/${DATASET}/questions.json \
+  --collection_path data/${COLLECTION}/${DATASET}/data \
+  --passage_search_run data/${COLLECTION}/${DATASET}/search/${SEARCH_RUN} \
+  --label_path data/${COLLECTION}/prelim_judgments_corrected.json \
   --pre_model_name ${PRE_MODEL_NAME} \
   --model_name ${MODEL_NAME}
 
@@ -23,7 +32,7 @@ python -m rerank.format_eval \
   --output_path models/${MODEL_NAME}/${RUN_NAME}.txt
 
 python rerank/epic_eval.py \
-  data/epic_qa_prelim/prelim_judgments_corrected.json \
+  data/${COLLECTION}/prelim_judgments_corrected.json \
   models/${MODEL_NAME}/${RUN_NAME}.txt \
   rerank/.${DATASET}_ideal_ranking_scores.tsv \
   --task ${DATASET}
