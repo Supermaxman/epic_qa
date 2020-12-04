@@ -30,7 +30,7 @@ python -m rqe.rqe \
   --label_path data/${COLLECTION}/prelim_judgments_corrected.json \
   --model_name models/${RQE_MODEL_NAME}
 
-python -m rqe.rqe_format \
+python -m rqe.format_rqe \
   --model_path models/${RQE_MODEL_NAME} \
   --output_path models/${RQE_MODEL_NAME}/${RUN_NAME}.rqe
 
