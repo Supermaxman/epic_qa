@@ -15,7 +15,7 @@ python -m expand_query.expand \
  --pre_model_name ${PRE_MODEL_NAME} \
  --model_name ${EXP_MODEL_NAME} \
  --max_seq_len 96 \
- --max_output_length 64 \
+ --max_output_length 32 \
  --top_k 10 \
  --num_samples 10
 
