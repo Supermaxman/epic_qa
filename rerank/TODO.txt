@@ -1,0 +1,18 @@
+TODO
+IR - necessary for a system on larger final eval
+1.	expand doc qrels to passage qrels
+2. 	allow passage qrels in dataset creation
+3.	run indexer on expert corpus
+4. 	get various BM25 passage runs
+5.	run rerank using doc qrels expanded and using BM25 passage searches on corpus
+Novelty - need for SIGIR paper
+1. 	Run full document expansion on sentences (or maybe BM25 passages, determine efficiency) using TPUS and
+	CACHE results, may take a while. Do on consumer prelim first for quick results
+2.	Run query entailment model on expanded questions on consumer set,
+	CACHE results and analyze. Look for ways to infer nuggets
+3.	Look over other papers Dr. H sent and consider architecture changes and some fine-tuning with prelim dataset.
+	Create prelim split for experiments, 80/20 over sentences with nuggets
+	Consider interesting architectures, only focus on sentence-level since passage-level is likely too inefficient
+
+
+

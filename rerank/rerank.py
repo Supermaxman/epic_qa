@@ -1,6 +1,7 @@
 import json
 import argparse
 import os
+from collections import defaultdict
 import pytorch_lightning as pl
 from transformers import AutoTokenizer
 from torch.utils.data import DataLoader
@@ -94,18 +95,18 @@ if __name__ == '__main__':
 				continue
 			else:
 				queries.append(query)
-
-	# TODO allow for use of search qrels
-	# qrels = defaultdict(list)
-	# with open(search_run, 'r') as f:
-	# 	for line in f:
-	# 		line = line.strip().split()
-	# 		if line:
-	# 			query_id, _, doc_id, dq_rank = line
-	# 			query_id = int(query_id)
-	# 			dq_rank = int(dq_rank)
-	# 			if dq_rank > 0:
-	# 				qrels[query_id].append(doc_id)
+	# TODO implement proper
+	if search_run is not None:
+		qrels = defaultdict(list)
+		with open(search_run, 'r') as f:
+			for line in f:
+				line = line.strip().split()
+				if line:
+					query_id, _, doc_id, dq_rank = line
+					query_id = int(query_id)
+					dq_rank = int(dq_rank)
+					if dq_rank > 0:
+						qrels[query_id].append(doc_id)
 
 	logging.info(f'Loading tokenizer: {tokenizer_name}')
 	tokenizer = AutoTokenizer.from_pretrained(tokenizer_name)
