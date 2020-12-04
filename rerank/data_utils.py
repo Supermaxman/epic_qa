@@ -56,6 +56,7 @@ class QueryPassageDataset(Dataset):
 					continue
 				for doc_pass_id in question_files:
 					doc_id, pass_id = doc_pass_id.split('-')
+					pass_id = int(pass_id)
 					file_names.add(f'{doc_id}.json')
 					self.query_docs[doc_id].add(question_id)
 					self.query_doc_pass[question_id][doc_id].add(pass_id)
