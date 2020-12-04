@@ -97,7 +97,7 @@ if __name__ == '__main__':
 				continue
 			else:
 				queries.append(query)
-	# TODO implement proper
+
 	document_qrels = None
 	if document_search_run is not None:
 		document_qrels = defaultdict(list)
@@ -107,7 +107,7 @@ if __name__ == '__main__':
 				if line:
 					query_id, _, doc_id, dq_rank = line
 					query_id = int(query_id)
-					question_id = queries[query_id]['question_id']
+					question_id = queries[query_id-1]['question_id']
 					dq_rank = int(dq_rank)
 					if dq_rank > 0:
 						document_qrels[question_id].append(doc_id)
@@ -120,9 +120,7 @@ if __name__ == '__main__':
 				line = line.strip().split()
 				if line:
 					question_id, _, doc_pass_id, dq_rank, dq_score, dq_run = line
-					dq_rank = int(dq_rank)
-					if dq_rank > 0:
-						passage_qrels[question_id].append(doc_pass_id)
+					passage_qrels[question_id].append(doc_pass_id)
 
 	logging.info(f'Loading tokenizer: {tokenizer_name}')
 	tokenizer = AutoTokenizer.from_pretrained(tokenizer_name)
