@@ -52,6 +52,8 @@ class QueryPassageDataset(Dataset):
 			self.query_docs = defaultdict(set)
 			self.query_doc_pass = defaultdict(lambda: defaultdict(set))
 			for question_id, question_files in passage_qrels.items():
+				if question_id not in self.query_lookup:
+					continue
 				for doc_pass_id in question_files:
 					doc_id, pass_id = doc_pass_id.split('-')
 					file_names.add(f'{doc_id}.json')
