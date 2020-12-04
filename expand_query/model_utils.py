@@ -39,7 +39,8 @@ class T5QueryGenerator(pl.LightningModule):
 			max_length=self.max_output_length,
 			do_sample=True,
 			top_k=self.top_k,
-			num_return_sequences=self.num_samples
+			num_return_sequences=self.num_samples,
+			early_stopping=False,
 		)
 		return outputs
 
