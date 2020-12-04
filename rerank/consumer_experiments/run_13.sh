@@ -38,7 +38,8 @@ python -m rqe.format_eval \
   --answer_query_path models/${EXP_MODEL_NAME}/${RUN_NAME}.exp \
   --expand_path models/${RQE_MODEL_NAME}/${RUN_NAME}.rqe \
   --scores_path models/${SCORE_MODEL_NAME}/${SCORE_RUN_NAME}.txt \
-  --output_path models/${RQE_MODEL_NAME}/${RUN_NAME}.txt
+  --output_path models/${RQE_MODEL_NAME}/${RUN_NAME}.txt \
+  --threshold 0.5
 
 python rerank/epic_eval.py \
   data/${COLLECTION}/prelim_judgments_corrected.json \
