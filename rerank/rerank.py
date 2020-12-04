@@ -90,9 +90,13 @@ if __name__ == '__main__':
 				keep_ids.add(question_id)
 
 	queries = []
+	query_id_to_question_id = {}
+	query_id = 1
 	with open(query_path) as f:
 		all_queries = json.load(f)
 		for query in all_queries:
+			query_id_to_question_id[query_id] = query['question_id']
+			query_id += 1
 			if keep_ids is not None and query['question_id'] not in keep_ids:
 				continue
 			else:
@@ -107,7 +111,7 @@ if __name__ == '__main__':
 				if line:
 					query_id, _, doc_id, dq_rank = line
 					query_id = int(query_id)
-					question_id = queries[query_id-1]['question_id']
+					question_id = query_id_to_question_id[query_id]
 					dq_rank = int(dq_rank)
 					if dq_rank > 0:
 						document_qrels[question_id].append(doc_id)
