@@ -7,6 +7,7 @@ from torch.utils.data import Dataset
 from tqdm import tqdm
 from rerank.sample_utils import NegativeSampler
 import random
+from collections import defaultdict
 
 
 class QuestionAnswerDataset(Dataset):
@@ -35,24 +36,35 @@ class QueryPassageDataset(Dataset):
 		assert not (document_qrels is not None and passage_qrels is not None), 'Cannot specify both doc and pass qrels!'
 		if document_qrels is not None:
 			file_names = set()
+			self.query_docs = defaultdict(set)
+			self.query_doc_pass = None
 			for question_id, question_files in document_qrels.items():
 				for doc_id in question_files:
 					file_names.add(f'{doc_id}.json')
+					self.query_docs[doc_id].add(question_id)
 			self.file_names = list(file_names)
+
 		elif passage_qrels is not None:
 			file_names = set()
+			self.query_docs = defaultdict(set)
+			self.query_doc_pass = defaultdict(lambda: defaultdict(set))
 			for question_id, question_files in passage_qrels.items():
 				for doc_pass_id in question_files:
 					doc_id, pass_id = doc_pass_id.split('-')
 					file_names.add(f'{doc_id}.json')
+					self.query_docs[doc_id].add(question_id)
+					self.query_doc_pass[question_id][doc_id].add(pass_id)
 			self.file_names = list(file_names)
+
 		else:
 			self.file_names = os.listdir(root_dir)
+			self.query_docs = None
+			self.query_doc_pass = None
 		self.examples = []
 		self.queries = queries
 		self.multi_sentence = multi_sentence
 		self.n_gram_max = n_gram_max
-
+		query_lookup = {query['question_id']: query for query in queries}
 		for d_name in self.file_names:
 			if not d_name.endswith('.json'):
 				continue
@@ -60,17 +72,23 @@ class QueryPassageDataset(Dataset):
 			file_path = os.path.join(self.root_dir, d_name)
 			with open(file_path) as f:
 				doc = json.load(f)
-				for query in queries:
-					if document_qrels is not None and d_id not in document_qrels[query['question_id']]:
-						continue
-					for p_id, passage in enumerate(doc['contexts']):
-						if passage_qrels is not None and f'{d_id}-{p_id}' not in passage_qrels[query['question_id']]:
-							continue
+				if self.query_docs is None:
+					doc_queries = queries
+				else:
+					doc_queries = [query_lookup[q_id] for q_id in self.query_docs[d_id]]
+				for query in doc_queries:
+					question_id = query['question_id']
+					if self.query_doc_pass is None:
+						doc_contexts = enumerate(doc['contexts'])
+					else:
+						doc_contexts = [(p_id, doc['contexts'][p_id]) for p_id in self.query_doc_pass[question_id][d_id]]
+
+					for p_id, passage in doc_contexts:
 						context_examples = []
 						for s_id, sentence in enumerate(passage['sentences']):
 							example = {
 								'id': f'{d_id}-{p_id}-{s_id}-{s_id}',
-								'question_id': query['question_id'],
+								'question_id': question_id,
 								'd_id': d_id,
 								'p_id': p_id,
 								's_id': s_id,
