@@ -26,7 +26,7 @@ def load_predictions(model_path):
 def save_predictions(query_answer_sample_probs, output_path):
 	with open(output_path, 'w') as f:
 		for (question_id, answer_id), qas_probs in query_answer_sample_probs.items():
-			for (sample_id, entail_prob) in qas_probs.items():
+			for sample_id, entail_prob in qas_probs:
 				f.write(f'{question_id}\t{answer_id}\t{sample_id}\t{entail_prob:.8f}\n')
 
 
