@@ -32,8 +32,8 @@ def load_predictions(model_path, tokenizer):
 
 def save_predictions(answer_queries, output_path):
 	with open(output_path, 'w') as f:
-		for answer_id, answer_queries in answer_queries.items():
-			aq_text = '\t'.join(answer_queries)
+		for answer_id, answer_qs in answer_queries.items():
+			aq_text = '\t'.join(answer_qs)
 			f.write(f'{answer_id}\t{aq_text}\n')
 
 

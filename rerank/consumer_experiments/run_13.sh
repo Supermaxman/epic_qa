@@ -9,6 +9,7 @@ export PRE_MODEL_NAME=models/docT5query-base/model.ckpt-1004000
 export DATASET=consumer
 export COLLECTION=epic_qa_prelim
 
+# needs to be run on GPU, TPUs do not like generator
 python -m expand_query.expand \
  --input_path models/${SCORE_MODEL_NAME}/${SCORE_RUN_NAME}.txt \
  --collection_path data/${COLLECTION}/${DATASET}/data \
@@ -17,6 +18,7 @@ python -m expand_query.expand \
  --top_k 10 \
  --num_samples 10
 
+# kinda slow, need to speed up eventually
 python -m expand_query.format_expand \
   --model_path models/${EXP_MODEL_NAME} \
   --output_path models/${EXP_MODEL_NAME}/${RUN_NAME}.exp
