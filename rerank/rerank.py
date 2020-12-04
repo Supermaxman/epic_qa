@@ -104,7 +104,7 @@ if __name__ == '__main__':
 
 	document_qrels = None
 	if document_search_run is not None:
-		document_qrels = defaultdict(list)
+		document_qrels = defaultdict(set)
 		with open(document_search_run, 'r') as f:
 			for line in f:
 				line = line.strip().split()
@@ -114,17 +114,17 @@ if __name__ == '__main__':
 					question_id = query_id_to_question_id[query_id]
 					dq_rank = int(dq_rank)
 					if dq_rank > 0:
-						document_qrels[question_id].append(doc_id)
+						document_qrels[question_id].add(doc_id)
 
 	passage_qrels = None
 	if passage_search_run is not None:
-		passage_qrels = defaultdict(list)
+		passage_qrels = defaultdict(set)
 		with open(passage_search_run, 'r') as f:
 			for line in f:
 				line = line.strip().split()
 				if line:
 					question_id, _, doc_pass_id, dq_rank, dq_score, dq_run = line
-					passage_qrels[question_id].append(doc_pass_id)
+					passage_qrels[question_id].add(doc_pass_id)
 
 	logging.info(f'Loading tokenizer: {tokenizer_name}')
 	tokenizer = AutoTokenizer.from_pretrained(tokenizer_name)
