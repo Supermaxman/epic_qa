@@ -223,7 +223,7 @@ class RQEPredictionDataset(Dataset):
 			for line in f:
 				line = line.strip()
 				if line:
-					line_list = line.split()
+					line_list = line.split('\t')
 					answer_id = line_list[0]
 					samples = line_list[1:]
 					self.answer_samples[answer_id] = samples
