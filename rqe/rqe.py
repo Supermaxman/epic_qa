@@ -9,6 +9,7 @@ from rqe.model_utils import RQEPredictionBert
 from rqe.data_utils import RQEPredictionDataset, PredictionBatchCollator
 import logging
 from pytorch_lightning import loggers as pl_loggers
+import torch
 
 
 if __name__ == '__main__':
@@ -28,6 +29,7 @@ if __name__ == '__main__':
 	pl.seed_everything(seed)
 
 	model_name = args.model_name
+	checkpoint_path = os.path.join(model_name, 'pytorch_model.bin')
 	pre_model_name = model_name
 	save_directory = model_name
 
@@ -116,6 +118,7 @@ if __name__ == '__main__':
 		predict_mode=True,
 		predict_path=save_directory
 	)
+	model.load_state_dict(torch.load(checkpoint_path))
 
 	logger = pl_loggers.TensorBoardLogger(
 		save_dir=save_directory,
