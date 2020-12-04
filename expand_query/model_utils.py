@@ -9,7 +9,7 @@ from transformers import T5Config, T5ForConditionalGeneration
 class T5QueryGenerator(pl.LightningModule):
 	def __init__(
 			self, pre_model_name, learning_rate, weight_decay, lr_warmup, updates_total,
-			max_output_length, top_k, num_samples, tokenizer,
+			max_output_length, top_k, num_samples,
 			torch_cache_dir, predict_mode=False, predict_path=None):
 		super().__init__()
 		self.pre_model_name = pre_model_name
@@ -24,7 +24,6 @@ class T5QueryGenerator(pl.LightningModule):
 		self.predict_mode = predict_mode
 		self.predict_path = predict_path
 		self.config = T5Config.from_pretrained('t5-base')
-		self.tokenizer = tokenizer
 		self.t5 = T5ForConditionalGeneration.from_pretrained(
 			pre_model_name,
 			from_tf=True,

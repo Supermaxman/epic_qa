@@ -101,7 +101,6 @@ if __name__ == '__main__':
     max_output_length=max_output_length,
     top_k=top_k,
     num_samples=num_samples,
-    tokenizer=tokenizer,
     torch_cache_dir=torch_cache_dir,
     predict_mode=True,
     predict_path=save_directory
