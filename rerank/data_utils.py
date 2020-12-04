@@ -32,7 +32,22 @@ def find_ngrams(input_list, n):
 class QueryPassageDataset(Dataset):
 	def __init__(self, root_dir, queries, multi_sentence, n_gram_max, document_qrels=None, passage_qrels=None):
 		self.root_dir = root_dir
-		self.file_names = os.listdir(root_dir)
+		assert not (document_qrels is not None and passage_qrels is not None), 'Cannot specify both doc and pass qrels!'
+		if document_qrels is not None:
+			file_names = set()
+			for question_id, question_files in passage_qrels.items():
+				for doc_id in question_files:
+					file_names.add(f'{doc_id}.json')
+			self.file_names = list(file_names)
+		elif passage_qrels is not None:
+			file_names = set()
+			for question_id, question_files in passage_qrels.items():
+				for doc_pass_id in question_files:
+					doc_id, pass_id = doc_pass_id.split('-')
+					file_names.add(f'{doc_id}.json')
+			self.file_names = list(file_names)
+		else:
+			self.file_names = os.listdir(root_dir)
 		self.examples = []
 		self.queries = queries
 		self.multi_sentence = multi_sentence
