@@ -69,7 +69,7 @@ class T5QueryGenerator(pl.LightningModule):
 		else:
 			outputs = self._forward_step(batch, batch_nb)
 			# [bsize, num_samples, max_output_length]
-			outputs = outputs.detach().numpy()
+			outputs = outputs.detach().cpu().numpy()
 			print(f'{outputs.shape}')
 			# list of [num_samples, max_output_length]
 			outputs = [x for x in outputs]
