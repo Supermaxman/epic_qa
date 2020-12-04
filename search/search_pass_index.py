@@ -42,7 +42,7 @@ with open(query_path) as f:
 			queries.append(query)
 
 searcher = SimpleSearcher(index_path)
-searcher.set_bm25(args.bm25_k1, args.bm25_b)
+# searcher.set_bm25(args.bm25_k1, args.bm25_b)
 print(f'Running search and writing results to {output_path}...')
 
 with open(output_path, 'w') as fo:
