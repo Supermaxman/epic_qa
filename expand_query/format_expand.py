@@ -23,7 +23,7 @@ def load_predictions(model_path, tokenizer):
 		answer_queries[answer_id] = samples
 
 	for answer_id, answer_queries in answer_queries.items():
-
+		pass
 
 	return sorted_scores
 
