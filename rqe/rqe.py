@@ -106,12 +106,8 @@ if __name__ == '__main__':
 	)
 
 	logging.info('Loading model...')
-	model = RQEPredictionBert(
-		pre_model_name=pre_model_name,
-		learning_rate=5e-5,
-		lr_warmup=0.1,
-		updates_total=0,
-		weight_decay=0.01,
+	model = RQEPredictionBert.load_from_checkpoint(
+		pre_model_name,
 		torch_cache_dir=torch_cache_dir,
 		predict_mode=True,
 		predict_path=save_directory
