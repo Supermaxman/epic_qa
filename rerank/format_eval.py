@@ -15,7 +15,7 @@ def format_answer_span_id(doc_id, pass_id, sent_start_id, sent_end_id):
 	return f'{start_id}:{end_id}'
 
 
-def write_results(question_id, question_scores, run_name, f, top_k=1000, multiple_per_doc=True, allow_overlap=False):
+def write_results(question_id, question_scores, run_name, f, top_k=1000, multiple_per_doc=True, allow_overlap=False, threshold=None):
 	num_top = 0
 	rel_idx = 0
 	seen_docs = set()
@@ -23,8 +23,9 @@ def write_results(question_id, question_scores, run_name, f, top_k=1000, multipl
 	while num_top < top_k and rel_idx < len(question_scores):
 		doc_id, pass_id, sent_start_id, sent_end_id, score = question_scores[rel_idx]
 		sent_ids = [(doc_id, pass_id, sent_id) for sent_id in range(sent_start_id, sent_end_id + 1)]
-		if (multiple_per_doc or doc_id not in seen_docs) and (
-				allow_overlap or all([x not in seen_sentences for x in sent_ids])):
+		if (multiple_per_doc or doc_id not in seen_docs) \
+				and (allow_overlap or all([x not in seen_sentences for x in sent_ids]))\
+				and (threshold is None or score > threshold):
 			answer_id = format_answer_span_id(doc_id, pass_id, sent_start_id, sent_end_id)
 			f.write(f'{question_id}\tQ0\t{answer_id}\t{num_top + 1}\t{score}\t{run_name}\n')
 			num_top += 1
@@ -67,6 +68,7 @@ if __name__ == '__main__':
 	parser.add_argument('-k', '--top_k', default=1000, type=int)
 	parser.add_argument('-sd', '--single_per_doc', default=False, action='store_true')
 	parser.add_argument('-ao', '--allow_overlap', default=False, action='store_true')
+	parser.add_argument('-t', '--threshold', default=None, type=float)
 
 	args = parser.parse_args()
 	# 'runs/consumer/pruned_biobert_msmarco_multi_sentence'
@@ -77,6 +79,7 @@ if __name__ == '__main__':
 	allow_overlap = args.allow_overlap
 	single_per_doc = args.single_per_doc
 	top_k = args.top_k
+	threshold = args.threshold
 
 	rerank_scores = read_scores(pred_path)
 	with open(output_path, 'w') as f:
@@ -88,7 +91,8 @@ if __name__ == '__main__':
 				f,
 				top_k=top_k,
 				multiple_per_doc=not single_per_doc,
-				allow_overlap=allow_overlap
+				allow_overlap=allow_overlap,
+				threshold=threshold
 			)
 
 
