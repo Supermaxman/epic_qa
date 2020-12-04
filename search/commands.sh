@@ -23,8 +23,8 @@ python -m pyserini.index \
 
 mkdir data/${COLLECTION}/${DATASET}/search
 
-python search_pass_index.py \
+python search/search_pass_index.py \
   --index_path data/${COLLECTION}/${DATASET}/indices/${INDEX_NAME} \
-  --query_path data/${COLLECTION}/${DATASET}/queries.json \
+  --query_path data/${COLLECTION}/${DATASET}/questions.json \
   --output_path data/${COLLECTION}/${DATASET}/search/${SEARCH_RUN} \
   --top_k 2000

@@ -30,13 +30,16 @@ def find_ngrams(input_list, n):
 
 
 class QueryPassageDataset(Dataset):
-	def __init__(self, root_dir, queries, multi_sentence, n_gram_max):
+	def __init__(self, root_dir, queries, multi_sentence, n_gram_max, document_qrels=None, passage_qrels=None):
 		self.root_dir = root_dir
 		self.file_names = os.listdir(root_dir)
 		self.examples = []
 		self.queries = queries
 		self.multi_sentence = multi_sentence
 		self.n_gram_max = n_gram_max
+		self.document_qrels = document_qrels
+		self.passage_qrels = passage_qrels
+
 		for d_name in self.file_names:
 			if not d_name.endswith('.json'):
 				continue
@@ -45,7 +48,11 @@ class QueryPassageDataset(Dataset):
 			with open(file_path) as f:
 				doc = json.load(f)
 				for query in queries:
+					if document_qrels is not None and d_id not in document_qrels[query['question_id']]:
+						continue
 					for p_id, passage in enumerate(doc['contexts']):
+						if passage_qrels is not None and f'{d_id}-{p_id}' not in passage_qrels[query['question_id']]:
+							continue
 						context_examples = []
 						for s_id, sentence in enumerate(passage['sentences']):
 							example = {

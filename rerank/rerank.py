@@ -15,7 +15,8 @@ if __name__ == '__main__':
 	parser = argparse.ArgumentParser()
 	parser.add_argument('-q', '--query_path', required=True)
 	parser.add_argument('-c', '--collection_path', required=True)
-	parser.add_argument('-s', '--search_run', default=None)
+	parser.add_argument('-ps', '--passage_search_run', default=None)
+	parser.add_argument('-ds', '--document_search_run', default=None)
 	parser.add_argument('-l', '--label_path', default='data/prelim_judgments.json')
 	parser.add_argument('-pm', '--pre_model_name', default='nboost/pt-biobert-base-msmarco')
 	parser.add_argument('-mn', '--model_name', default='pt-biobert-base-msmarco')
@@ -41,7 +42,8 @@ if __name__ == '__main__':
 
 	collection_path = args.collection_path
 	label_path = args.label_path
-	search_run = args.search_run
+	passage_search_run = args.passage_search_run
+	document_search_run = args.document_search_run
 	query_path = args.query_path
 	pre_model_name = args.pre_model_name
 	tokenizer_name = pre_model_name
@@ -96,17 +98,31 @@ if __name__ == '__main__':
 			else:
 				queries.append(query)
 	# TODO implement proper
-	if search_run is not None:
-		qrels = defaultdict(list)
-		with open(search_run, 'r') as f:
+	document_qrels = None
+	if document_search_run is not None:
+		document_qrels = defaultdict(list)
+		with open(document_search_run, 'r') as f:
 			for line in f:
 				line = line.strip().split()
 				if line:
 					query_id, _, doc_id, dq_rank = line
 					query_id = int(query_id)
+					question_id = queries[query_id]['question_id']
 					dq_rank = int(dq_rank)
 					if dq_rank > 0:
-						qrels[query_id].append(doc_id)
+						document_qrels[question_id].append(doc_id)
+
+	passage_qrels = None
+	if passage_search_run is not None:
+		passage_qrels = defaultdict(list)
+		with open(passage_search_run, 'r') as f:
+			for line in f:
+				line = line.strip().split()
+				if line:
+					question_id, _, doc_pass_id, dq_rank, dq_score, dq_run = line
+					dq_rank = int(dq_rank)
+					if dq_rank > 0:
+						passage_qrels[question_id].append(doc_pass_id)
 
 	logging.info(f'Loading tokenizer: {tokenizer_name}')
 	tokenizer = AutoTokenizer.from_pretrained(tokenizer_name)
@@ -115,7 +131,9 @@ if __name__ == '__main__':
 		collection_path,
 		queries,
 		multi_sentence,
-		n_gram_max
+		n_gram_max,
+		document_qrels,
+		passage_qrels
 	)
 	eval_data_loader = DataLoader(
 		eval_dataset,

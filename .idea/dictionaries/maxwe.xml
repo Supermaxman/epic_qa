@@ -6,6 +6,7 @@
       <w>logits</w>
       <w>ngrams</w>
       <w>probs</w>
+      <w>qrels</w>
       <w>rerank</w>
       <w>warmup</w>
     </words>
