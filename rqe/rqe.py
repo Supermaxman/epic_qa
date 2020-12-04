@@ -35,7 +35,6 @@ if __name__ == '__main__':
 	expand_path = args.expand_path
 	query_path = args.query_path
 	label_path = args.label_path
-	output_path = args.output_path
 	tokenizer_name = model_name
 	batch_size = args.batch_size
 	max_seq_len = args.max_seq_len
