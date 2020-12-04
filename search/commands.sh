@@ -3,6 +3,7 @@
 export INDEX_NAME=passage_index
 export DATASET=expert
 export COLLECTION=epic_qa_prelim
+export SEARCH_RUN=passage-baseline
 
 python search/convert_passages_to_json.py \
   --collection_path data/${COLLECTION}/${DATASET}/data \
@@ -20,8 +21,10 @@ python -m pyserini.index \
   -storeDocvectors \
   -storeRaw
 
-python search_index.py \
-  --doc_type expert \
-  --index baseline_pass \
-  --query expert_questions_prelim.json \
-  --run_name baseline_pass_doc
+mkdir data/${COLLECTION}/${DATASET}/search
+
+python search_pass_index.py \
+  --index_path data/${COLLECTION}/${DATASET}/indices/${INDEX_NAME} \
+  --query_path data/${COLLECTION}/${DATASET}/queries.json \
+  --output_path data/${COLLECTION}/${DATASET}/search/${SEARCH_RUN} \
+  --top_k 2000
