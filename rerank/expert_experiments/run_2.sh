@@ -13,7 +13,7 @@ python search/search_pass_index.py \
   --query_path data/${COLLECTION}/${DATASET}/questions.json \
   --label_path data/${COLLECTION}/prelim_judgments_corrected.json \
   --output_path data/${COLLECTION}/${DATASET}/search/${SEARCH_RUN} \
-  --top_k 500
+  --top_k 1000
 
 python -m rerank.rerank \
   --query_path data/${COLLECTION}/${DATASET}/questions.json \
