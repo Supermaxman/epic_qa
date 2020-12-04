@@ -21,7 +21,7 @@ python -m expand_query.expand \
 
 python -m expand_query.format_expand \
   --model_path models/${EXP_MODEL_NAME} \
-  --output_path models/${EXP_MODEL_NAME}/${RUN_NAME}.exp \
+  --output_path models/${EXP_MODEL_NAME}/${RUN_NAME}.exp
 
 python -m rqe.rqe \
   --pred_path models/${EXP_MODEL_NAME}/${RUN_NAME}.exp \
