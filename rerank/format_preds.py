@@ -41,7 +41,7 @@ if __name__ == '__main__':
 
 	model_path = args.model_path
 	output_path = args.output_path
-	output_name = output_path.split('/')[-1].replace('.txt', '')
+	output_name = output_path.split('/')[-1].replace('.txt', '').replace('.pred', '')
 
 	question_scores = load_predictions(model_path)
 	save_predictions(question_scores, output_path, output_name)
