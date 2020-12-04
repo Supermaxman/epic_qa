@@ -15,7 +15,8 @@ def load_predictions(model_path):
 	for prediction in pred_list:
 		doc_pass_id = prediction['id']
 		question_id = prediction['question_id']
-		score = prediction['pos_score']
+		# score = prediction['pos_score']
+		score = prediction['pos_score'] - prediction['neg_score']
 		question_scores[question_id].append((doc_pass_id, score))
 
 	sorted_scores = {}

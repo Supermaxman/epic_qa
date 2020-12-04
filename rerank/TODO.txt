@@ -1,10 +1,12 @@
-TODO
+
 IR - necessary for a system on larger final eval
-1.	expand doc qrels to passage qrels
-2. 	allow passage qrels in dataset creation
-3.	run indexer on expert corpus
-4. 	get various BM25 passage runs
-5.	run rerank using doc qrels expanded and using BM25 passage searches on corpus
+DONE 1.	expand doc qrels to passage qrels
+DONE 2. 	allow passage qrels in dataset creation
+DONE 3.	run indexer on expert corpus
+DONE 4. 	get various BM25 passage runs
+DONE 5.	run rerank using doc qrels expanded and using BM25 passage searches on corpus
+Results are worse by a little from golden document annotations, but still good enough
+
 Novelty - need for SIGIR paper
 1. 	Run full document expansion on sentences (or maybe BM25 passages, determine efficiency) using TPUS and
 	CACHE results, may take a while. Do on consumer prelim first for quick results
