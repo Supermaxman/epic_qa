@@ -18,7 +18,7 @@ if __name__ == '__main__':
   parser.add_argument('-tn', '--tokenizer_name', default='t5-base')
   parser.add_argument('-mn', '--model_name', default='docT5query-base')
   parser.add_argument('-sd', '--save_directory', default='models')
-  parser.add_argument('-bs', '--batch_size', default=16, type=int)
+  parser.add_argument('-bs', '--batch_size', default=8, type=int)
   parser.add_argument('-ml', '--max_seq_len', default=96, type=int)
   parser.add_argument('-se', '--seed', default=0, type=int)
   parser.add_argument('-cd', '--torch_cache_dir', default=None)
@@ -53,8 +53,8 @@ if __name__ == '__main__':
   # export XRT_TPU_CONFIG="tpu_worker;0;$TPU_IP_ADDRESS:8470"
   gpus = [0]
   use_tpus = True
-  precision = 16 if use_tpus else 32
-  # precision = 32
+  # precision = 16 if use_tpus else 32
+  precision = 32
   tpu_cores = 8
   num_workers = 4
   deterministic = True
