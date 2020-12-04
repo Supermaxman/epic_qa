@@ -68,9 +68,15 @@ class T5QueryGenerator(pl.LightningModule):
 			raise NotImplementedError()
 		else:
 			outputs = self._forward_step(batch, batch_nb)
-			# [bsize, num_samples, max_output_length]
-			outputs = outputs.detach().cpu().numpy()
 			print(f'{outputs.shape}')
+			# [bsize, num_samples, max_output_length]
+			outputs = outputs.detach()
+			print(f'{outputs.shape}')
+			outputs = outputs.cpu()
+			print(f'{outputs.shape}')
+			outputs = outputs.numpy()
+			print(f'{outputs.shape}')
+			print()
 			# list of [num_samples, max_output_length]
 			outputs = [x for x in outputs]
 			device_id = get_device_id()
