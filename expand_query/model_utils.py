@@ -67,20 +67,16 @@ class T5QueryGenerator(pl.LightningModule):
 		if not self.predict_mode:
 			raise NotImplementedError()
 		else:
+			batch_size = len(batch['id'])
 			outputs = self._forward_step(batch, batch_nb)
-			print(f'{outputs.shape}')
+			outputs = outputs.view(batch_size, self.num_samples, self.max_output_length)
 			# [bsize, num_samples, max_output_length]
 			outputs = outputs.detach()
-			print(f'{outputs.shape}')
 			outputs = outputs.cpu()
-			print(f'{outputs.shape}')
 			outputs = outputs.numpy()
-			print(f'{outputs.shape}')
-			print()
 			# list of [num_samples, max_output_length]
 			outputs = [x for x in outputs]
 			device_id = get_device_id()
-
 
 			self.write_prediction_dict(
 				{
