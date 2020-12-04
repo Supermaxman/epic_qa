@@ -1,28 +1,41 @@
 #!/usr/bin/env bash
 
-export RUN_NAME=HLTRI_RERANK_13
-export MODEL_NAME=pt-biobert-base-msmarco-expanded
-export PRE_MODEL_NAME=nboost/pt-biobert-base-msmarco
+export RUN_NAME=HLTRI_RERANK_EXPANDED_13
+export SCORE_RUN_NAME=HLTRI_RERANK_1
+export SCORE_MODEL_NAME=pt-biobert-base-msmarco
+export EXP_MODEL_NAME=docT5query-base
+export RQE_MODEL_NAME=quora-seq-nboost-pt-bert-base-uncased-msmarco
+export PRE_MODEL_NAME=models/docT5query-base/model.ckpt-1004000
 export DATASET=consumer
 export COLLECTION=epic_qa_prelim
 
-python -m rerank.rerank \
+python -m expand_query.expand \
+ --input_path models/${SCORE_MODEL_NAME}/${SCORE_RUN_NAME}.txt \
+ --collection_path data/${COLLECTION}/${DATASET}/data \
+ --pre_model_name ${PRE_MODEL_NAME} \
+ --model_name ${EXP_MODEL_NAME} \
+ --max_seq_len 96 \
+ --max_output_length 64 \
+ --top_k 10 \
+ --num_samples 10
+
+python -m expand_query.format_expand \
+  --model_path models/${EXP_MODEL_NAME} \
+  --output_path models/${EXP_MODEL_NAME}/${RUN_NAME}.exp \
+
+python -m rqe.rqe \
+  --pred_path models/${EXP_MODEL_NAME}/${RUN_NAME}.exp \
   --query_path data/${COLLECTION}/${DATASET}/questions.json \
-  --collection_path data/${COLLECTION}/${DATASET}/data \
   --label_path data/${COLLECTION}/prelim_judgments_corrected.json \
-  --pre_model_name ${PRE_MODEL_NAME} \
-  --model_name ${MODEL_NAME}
+  --output_path models/${RQE_MODEL_NAME}/${RUN_NAME}.rqe \
+  --max_length 128
 
-python -m rerank.format_preds \
-  --model_path models/${MODEL_NAME} \
-  --output_path models/${MODEL_NAME}/${RUN_NAME}.pred
-
-python -m rerank.format_eval \
-  --pred_path models/${MODEL_NAME}/${RUN_NAME}.pred \
-  --output_path models/${MODEL_NAME}/${RUN_NAME}.txt
+python -m rqe.format_eval \
+  --pred_path models/${RQE_MODEL_NAME}/${RUN_NAME}.rqe \
+  --output_path models/${RQE_MODEL_NAME}/${RUN_NAME}.txt
 
 python rerank/epic_eval.py \
   data/${COLLECTION}/prelim_judgments_corrected.json \
-  models/${MODEL_NAME}/${RUN_NAME}.txt \
+  models/${RQE_MODEL_NAME}/${RUN_NAME}.txt \
   rerank/.${DATASET}_ideal_ranking_scores.tsv \
   --task ${DATASET}
