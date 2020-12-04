@@ -4,24 +4,26 @@ from collections import defaultdict
 import os
 
 
-def load_predictions(model_path):
+def load_predictions(model_path, tokenizer):
 	pred_list = []
 	for file_name in os.listdir(model_path):
 		if file_name.endswith('.pt'):
 			preds = torch.load(os.path.join(model_path, file_name))
 			pred_list.extend(preds)
-	question_scores = defaultdict(list)
+	answer_queries = defaultdict(list)
 	# # {query_id}\tQ0\t{doc_pass_id}\t{rank}\t{score:.4f}\t{run_name}
 	for prediction in pred_list:
-		doc_pass_id = prediction['id']
-		question_id = prediction['question_id']
-		# score = prediction['pos_score']
-		score = prediction['pos_score'] - prediction['neg_score']
-		question_scores[question_id].append((doc_pass_id, score))
+		answer_id = prediction['id']
+		# [sample_size, max_seq_len]
+		sample_seq_ids = prediction['samples']
+		samples = []
+		for sample_ids in sample_seq_ids:
+			sample_txt = tokenizer.decode(sample_ids, skip_special_tokens=True)
+			samples.append(sample_txt)
+		answer_queries[answer_id] = samples
 
-	sorted_scores = {}
-	for question_id, question_scores in question_scores.items():
-		sorted_scores[question_id] = list(sorted(question_scores, key=lambda x: x[1], reverse=True))
+	for answer_id, answer_queries in answer_queries.items():
+
 
 	return sorted_scores
 

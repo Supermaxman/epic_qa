@@ -9,7 +9,7 @@ from transformers import T5Config, T5ForConditionalGeneration
 class T5QueryGenerator(pl.LightningModule):
 	def __init__(
 			self, pre_model_name, learning_rate, weight_decay, lr_warmup, updates_total,
-			max_output_length, top_k, num_samples,
+			max_output_length, top_k, num_samples, tokenizer,
 			torch_cache_dir, predict_mode=False, predict_path=None):
 		super().__init__()
 		self.pre_model_name = pre_model_name
@@ -24,6 +24,7 @@ class T5QueryGenerator(pl.LightningModule):
 		self.predict_mode = predict_mode
 		self.predict_path = predict_path
 		self.config = T5Config.from_pretrained('t5-base')
+		self.tokenizer = tokenizer
 		self.t5 = T5ForConditionalGeneration.from_pretrained(
 			pre_model_name,
 			from_tf=True,
@@ -71,10 +72,22 @@ class T5QueryGenerator(pl.LightningModule):
 			# [bsize, num_samples, max_output_length]
 			outputs = outputs.detach()
 			device_id = get_device_id()
+			all_samples = []
+			for b_idx in range(outputs.shape[0]):
+				samples = []
+				for sample_idx in range(outputs.shape[1]):
+					sample_txt = self.tokenizer.decode(
+						outputs[b_idx, sample_idx],
+						skip_special_tokens=True
+					)
+					samples.append(sample_txt)
+				samples_txt = '\t'.join(samples)
+				all_samples.append(samples_txt)
+
 			self.write_prediction_dict(
 				{
 					'id': batch['id'],
-					'samples': outputs,
+					'samples': all_samples,
 				},
 				filename=os.path.join(self.predict_path, f'predictions-{device_id}.pt')
 			)
