@@ -82,7 +82,6 @@ class PredictionBatchCollator(object):
 			'id': ids,
 			'input_ids': tokenizer_batch['input_ids'],
 			'attention_mask': tokenizer_batch['attention_mask'],
-			'token_type_ids': tokenizer_batch['token_type_ids'],
 		}
 
 		return batch

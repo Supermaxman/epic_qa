@@ -72,6 +72,7 @@ if __name__ == '__main__':
       logging.FileHandler(logfile, mode='w'),
       logging.StreamHandler()]
   )
+
   logging.info(f'Loading tokenizer: {tokenizer_name}')
   tokenizer = T5Tokenizer.from_pretrained(tokenizer_name)
   logging.info(f'Loading dataset: {collection_path}')

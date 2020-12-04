@@ -31,10 +31,11 @@ class T5QueryGenerator(pl.LightningModule):
 		)
 		self.save_hyperparameters()
 
-	def forward(self, input_ids):
+	def forward(self, input_ids, attention_mask):
 		# [bsize, num_samples, max_output_length]
 		outputs = self.t5.generate(
 			input_ids=input_ids,
+			attention_mask=attention_mask,
 			max_length=self.max_output_length,
 			do_sample=True,
 			top_k=self.top_k,
@@ -53,7 +54,8 @@ class T5QueryGenerator(pl.LightningModule):
 
 	def _forward_step(self, batch, batch_nb):
 		outputs = self(
-			input_ids=batch['input_ids']
+			input_ids=batch['input_ids'],
+			attention_mask=batch['attention_mask']
 		)
 		if not self.predict_mode:
 			raise NotImplementedError()
