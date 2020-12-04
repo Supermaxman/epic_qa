@@ -88,7 +88,7 @@ if __name__ == '__main__':
     collate_fn=PredictionBatchCollator(
       tokenizer,
       max_seq_len,
-      True
+      force_max_seq_len=True
     )
   )
   logging.info('Loading model...')

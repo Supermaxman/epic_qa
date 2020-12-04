@@ -69,7 +69,7 @@ class T5QueryGenerator(pl.LightningModule):
 			outputs = self._forward_step(batch, batch_nb)
 			# [bsize, num_samples, max_output_length]
 			outputs = outputs.detach()
-
+			print(outputs.shape)
 			device_id = get_device_id()
 			self.write_prediction_dict(
 				{
