@@ -70,24 +70,17 @@ class T5QueryGenerator(pl.LightningModule):
 		else:
 			outputs = self._forward_step(batch, batch_nb)
 			# [bsize, num_samples, max_output_length]
-			outputs = outputs.detach()
+			outputs = outputs.detach().tolist()
+			print(f'{len(outputs)}')
+			print(f'{len(outputs[0])}')
+			print(f'{len(outputs[0][0])}')
 			device_id = get_device_id()
-			all_samples = []
-			for b_idx in range(outputs.shape[0]):
-				samples = []
-				for sample_idx in range(outputs.shape[1]):
-					sample_txt = self.tokenizer.decode(
-						outputs[b_idx, sample_idx],
-						skip_special_tokens=True
-					)
-					samples.append(sample_txt)
-				samples_txt = '\t'.join(samples)
-				all_samples.append(samples_txt)
+
 
 			self.write_prediction_dict(
 				{
 					'id': batch['id'],
-					'samples': all_samples,
+					'samples': outputs,
 				},
 				filename=os.path.join(self.predict_path, f'predictions-{device_id}.pt')
 			)
