@@ -69,10 +69,10 @@ class T5QueryGenerator(pl.LightningModule):
 		else:
 			outputs = self._forward_step(batch, batch_nb)
 			# [bsize, num_samples, max_output_length]
-			outputs = outputs.detach().tolist()
-			print(f'{len(outputs)}')
-			print(f'{len(outputs[0])}')
-			print(f'{len(outputs[0][0])}')
+			outputs = outputs.detach().numpy()
+			print(f'{outputs.shape}')
+			# list of [num_samples, max_output_length]
+			outputs = [x for x in outputs]
 			device_id = get_device_id()
 
 
