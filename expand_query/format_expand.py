@@ -11,13 +11,14 @@ parser = argparse.ArgumentParser()
 parser.add_argument('-m', '--model_path', required=True)
 parser.add_argument('-o', '--output_path', required=True)
 parser.add_argument('-t', '--tokenizer_name', default='t5-base')
+parser.add_argument('-ps', '--num_processes', default=16, type=int)
 args = parser.parse_args()
 
 model_path = args.model_path
 output_path = args.output_path
 tokenizer_name = args.tokenizer_name
+num_processes = args.num_processes
 tokenizer = T5Tokenizer.from_pretrained(tokenizer_name)
-num_processes = 12
 
 
 def encode_prediction(prediction):
