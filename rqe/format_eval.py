@@ -6,19 +6,27 @@ def write_results(rerank_scores, output_path, output_name, threshold):
 	with open(output_path, 'w') as f:
 		for question_id, q_scores in rerank_scores.items():
 			new_q_scores = []
+			seen_questions = set()
 			for answer_id, answer_score, query_samples in q_scores:
 				nugget_count = 0.0
-				unique_samples = set()
+				answer_questions = set()
+				entailed_questions = set()
+				# TODO work on overlapping metric of entailed queries
 				for sample_text, entail_prob in query_samples:
-					if sample_text in unique_samples:
+					if sample_text in answer_questions:
 						continue
-					unique_samples.add(sample_text)
+					answer_questions.add(sample_text)
 					if entail_prob > threshold:
 						nugget_count += 1
-				sample_score = nugget_count / len(unique_samples)
-				full_score = (1.0 + sample_score) * answer_score
+						entailed_questions.add(sample_text)
+
+				question_overlap_count = len(entailed_questions.intersection(seen_questions))
+				if question_overlap_count > 0:
+					continue
 				# full_score = answer_score + sample_score
-				new_q_scores.append((answer_id, answer_score, sample_score, full_score))
+				new_q_scores.append((answer_id, answer_score, question_overlap_count, answer_score))
+				for entailed_q in entailed_questions:
+					seen_questions.add(entailed_q)
 
 			new_q_scores = list(sorted(new_q_scores, key=lambda x: x[-1], reverse=True))
 			rank = 1
