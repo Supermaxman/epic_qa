@@ -16,7 +16,8 @@ def write_results(rerank_scores, output_path, output_name, threshold):
 					if entail_prob > threshold:
 						nugget_count += 1
 				sample_score = nugget_count / len(unique_samples)
-				full_score = (1.0 + nugget_count) * answer_score
+				# full_score = (1.0 + sample_score) * answer_score
+				full_score = answer_score + sample_score
 				new_q_scores.append((answer_id, answer_score, sample_score, full_score))
 
 			new_q_scores = list(sorted(new_q_scores, key=lambda x: x[-1], reverse=True))
