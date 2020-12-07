@@ -24,6 +24,7 @@ python rerank/split_data.py \
   --label_path data/${COLLECTION}/prelim_judgments_corrected.json \
   --search_path data/${COLLECTION}/${DATASET}/search/${SEARCH_RUN} \
   --output_path data/${COLLECTION}/${DATASET}/split \
+  --dataset ${DATASET}
 
 
 

@@ -66,7 +66,7 @@ if __name__ == '__main__':
 	train_labels = labels[:train_idx]
 	val_labels = labels[train_idx:]
 	print(f'#train_qs={len(train_labels)}, #val_qs={len(val_labels)}')
-	with open(os.path.join(output_path, 'train.json')) as f:
+	with open(os.path.join(output_path, 'train.json'), 'w') as f:
 		json.dump(train_labels, f, indent=2)
-	with open(os.path.join(output_path, 'val.json')) as f:
+	with open(os.path.join(output_path, 'val.json'), 'w') as f:
 		json.dump(val_labels, f, indent=2)
