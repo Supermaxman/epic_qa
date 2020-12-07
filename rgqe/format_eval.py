@@ -133,7 +133,7 @@ class QuestionEntailmentGraph(object):
 		reranked_answers = []
 		total_entailed_set_count = len(entailed_sets)
 		seen_entailed_sets = set()
-		for answer_id, answer in self.answers.items():
+		for answer in sorted(self.answers.values(), key=lambda x: x.score, reverse=True):
 			answer_entailed_sets = answer.entailed_sets
 			num_entailed_sets_overlapping = len(answer_entailed_sets.intersection(seen_entailed_sets))
 
