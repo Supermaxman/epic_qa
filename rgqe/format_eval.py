@@ -120,8 +120,9 @@ class QuestionEntailmentGraph(object):
 		print(f'{self.question_id} # Entail-Components: {len(entailed_facts)}')
 		input()
 		for idx, entail_fact_nodes in enumerate(entailed_facts):
+			print(f'  CM{idx}: ')
 			for node in entail_fact_nodes[:5]:
-				print(f'  CM{idx}: {node.sample_text}')
+				print(f'    {node.sample_text}')
 		input()
 		reranked_answers = []
 		for answer_id, answer in self.answers.items():
