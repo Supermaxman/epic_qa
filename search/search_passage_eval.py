@@ -37,6 +37,8 @@ if __name__ == '__main__':
 				passage_qrels[question_id].add(doc_pass_id)
 
 	for question_id, q_labels in labels.items():
+		if question_id not in passage_qrels:
+			continue
 		q_passage_qrels = passage_qrels[question_id]
 		num_found = len(q_labels.intersection(q_passage_qrels))
 		total_count = len(q_labels)
