@@ -29,6 +29,7 @@ if __name__ == '__main__':
 	parser.add_argument('-cd', '--torch_cache_dir', default=None)
 	parser.add_argument('-cs', '--calc_seq_len', default=False, action='store_true')
 	parser.add_argument('-tpu', '--use_tpus', default=False, action='store_true')
+	parser.add_argument('-opa', '--only_passages', default=False, action='store_true')
 
 	args = parser.parse_args()
 	seed = args.seed
@@ -54,6 +55,7 @@ if __name__ == '__main__':
 	n_gram_max = args.n_gram_max
 	torch_cache_dir = args.torch_cache_dir
 	calc_seq_len = args.calc_seq_len
+	only_passages = args.only_passages
 
 	is_distributed = False
 	# export TPU_IP_ADDRESS=10.155.6.34
@@ -136,7 +138,8 @@ if __name__ == '__main__':
 		multi_sentence,
 		n_gram_max,
 		document_qrels,
-		passage_qrels
+		passage_qrels,
+		only_passages
 	)
 	eval_data_loader = DataLoader(
 		eval_dataset,

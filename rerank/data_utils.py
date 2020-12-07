@@ -31,7 +31,7 @@ def find_ngrams(input_list, n):
 
 
 class QueryPassageDataset(Dataset):
-	def __init__(self, root_dir, queries, multi_sentence, n_gram_max, document_qrels=None, passage_qrels=None):
+	def __init__(self, root_dir, queries, multi_sentence, n_gram_max, document_qrels=None, passage_qrels=None, only_passages=False):
 		self.root_dir = root_dir
 		self.query_lookup = {query['question_id']: query for query in queries}
 		assert not (document_qrels is not None and passage_qrels is not None), 'Cannot specify both doc and pass qrels!'
@@ -70,6 +70,7 @@ class QueryPassageDataset(Dataset):
 		self.queries = queries
 		self.multi_sentence = multi_sentence
 		self.n_gram_max = n_gram_max
+		self.only_passages = only_passages
 
 		for d_name in self.file_names:
 			if not d_name.endswith('.json'):
@@ -91,34 +92,52 @@ class QueryPassageDataset(Dataset):
 
 					for p_id, passage in doc_contexts:
 						context_examples = []
-						for s_id, sentence in enumerate(passage['sentences']):
+						if not self.only_passages:
+							for s_id, sentence in enumerate(passage['sentences']):
+								example = {
+									'id': f'{d_id}-{p_id}-{s_id}-{s_id}',
+									'question_id': question_id,
+									'd_id': d_id,
+									'p_id': p_id,
+									's_id': s_id,
+									'text': passage['text'][sentence['start']:sentence['end']],
+									'query': query['question']
+									# 'query': query['question'] + ' ' + query['query'] + ', ' + query['background']
+								}
+								self.examples.append(example)
+								context_examples.append(example)
+							if self.multi_sentence:
+								# generate sentence n-grams from 2 to n_gram_max of contiguous sentence spans
+								for k in range(2, self.n_gram_max+1):
+									for ex_list in find_ngrams(context_examples, n=k):
+										ex_first = ex_list[0]
+										ex_last = ex_list[-1]
+										example = {
+											'id': f'{ex_first["d_id"]}-{ex_first["p_id"]}-{ex_first["s_id"]}-{ex_last["s_id"]}',
+											'question_id': ex_first['question_id'],
+											'd_id': ex_first['d_id'],
+											'p_id': ex_first['p_id'],
+											's_id': f'{ex_first["s_id"]}-{ex_last["s_id"]}',
+											'text': ' '.join([ex['text'] for ex in ex_list]),
+											'query': ex_first['query']
+										}
+										self.examples.append(example)
+						else:
+							start_sentence = passage['sentences'][0]
+							end_sentence = passage['sentences'][-1]
+							start_s_id = 0
+							end_s_id = len(passage['sentences']) - 1
 							example = {
-								'id': f'{d_id}-{p_id}-{s_id}-{s_id}',
+								'id': f'{d_id}-{p_id}-{start_s_id}-{end_s_id}',
 								'question_id': question_id,
 								'd_id': d_id,
 								'p_id': p_id,
-								's_id': s_id,
-								'text': passage['text'][sentence['start']:sentence['end']],
-								'query': query['question'] + ' ' + query['query'] + ', ' + query['background']
+								's_id': f'{start_s_id}-{end_s_id}',
+								'text': passage['text'][start_sentence['start']:end_sentence['end']],
+								'query': query['question']
+								# 'query': query['question'] + ' ' + query['query'] + ', ' + query['background']
 							}
 							self.examples.append(example)
-							context_examples.append(example)
-						if self.multi_sentence:
-							# generate sentence n-grams from 2 to n_gram_max of contiguous sentence spans
-							for k in range(2, self.n_gram_max+1):
-								for ex_list in find_ngrams(context_examples, n=k):
-									ex_first = ex_list[0]
-									ex_last = ex_list[-1]
-									example = {
-										'id': f'{ex_first["d_id"]}-{ex_first["p_id"]}-{ex_first["s_id"]}-{ex_last["s_id"]}',
-										'question_id': ex_first['question_id'],
-										'd_id': ex_first['d_id'],
-										'p_id': ex_first['p_id'],
-										's_id': f'{ex_first["s_id"]}-{ex_last["s_id"]}',
-										'text': ' '.join([ex['text'] for ex in ex_list]),
-										'query': ex_first['query']
-									}
-									self.examples.append(example)
 
 	def __len__(self):
 		return len(self.examples)
