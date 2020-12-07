@@ -56,7 +56,6 @@ class QueryPassageDataset(Dataset):
 					continue
 				for doc_pass_id in question_files:
 					doc_id, pass_id = doc_pass_id.split('-')
-					pass_id = int(pass_id)
 					file_names.add(f'{doc_id}.json')
 					self.query_docs[doc_id].add(question_id)
 					self.query_doc_pass[question_id][doc_id].add(pass_id)
@@ -84,72 +83,68 @@ class QueryPassageDataset(Dataset):
 				continue
 			with open(file_path, 'r') as f:
 				doc = json.load(f)
-				if self.query_docs is None:
-					doc_queries = queries
+			if self.query_docs is None:
+				doc_queries = queries
+			else:
+				doc_queries = [self.query_lookup[q_id] for q_id in self.query_docs[d_id]]
+			for query in doc_queries:
+				question_id = query['question_id']
+				if self.query_doc_pass is None:
+					doc_contexts = doc['contexts']
 				else:
-					doc_queries = [self.query_lookup[q_id] for q_id in self.query_docs[d_id]]
-				for query in doc_queries:
-					question_id = query['question_id']
-					if self.query_doc_pass is None:
-						doc_contexts = enumerate(doc['contexts'])
-					else:
-						doc_contexts = []
-						for p_id in self.query_doc_pass[question_id][d_id]:
-							if p_id < len(doc['contexts']):
-								doc_contexts.append((p_id, doc['contexts'][p_id]))
-							else:
-								if not warned:
-									print('WARNING: some missing contexts')
-									warned = True
-
-					for p_id, passage in doc_contexts:
-						context_examples = []
-						if not self.only_passages:
-							for s_id, sentence in enumerate(passage['sentences']):
-								example = {
-									'id': f'{d_id}-{p_id}-{s_id}-{s_id}',
-									'question_id': question_id,
-									'd_id': d_id,
-									'p_id': p_id,
-									's_id': s_id,
-									'text': passage['text'][sentence['start']:sentence['end']],
-									'query': query['question']
-									# 'query': query['question'] + ' ' + query['query'] + ', ' + query['background']
-								}
-								self.examples.append(example)
-								context_examples.append(example)
-							if self.multi_sentence:
-								# generate sentence n-grams from 2 to n_gram_max of contiguous sentence spans
-								for k in range(2, self.n_gram_max+1):
-									for ex_list in find_ngrams(context_examples, n=k):
-										ex_first = ex_list[0]
-										ex_last = ex_list[-1]
-										example = {
-											'id': f'{ex_first["d_id"]}-{ex_first["p_id"]}-{ex_first["s_id"]}-{ex_last["s_id"]}',
-											'question_id': ex_first['question_id'],
-											'd_id': ex_first['d_id'],
-											'p_id': ex_first['p_id'],
-											's_id': f'{ex_first["s_id"]}-{ex_last["s_id"]}',
-											'text': ' '.join([ex['text'] for ex in ex_list]),
-											'query': ex_first['query']
-										}
-										self.examples.append(example)
+					context_lookup = [c['context_id'] for c in doc['contexts']]
+					doc_contexts = []
+					for p_id in self.query_doc_pass[question_id][d_id]:
+						if p_id in context_lookup:
+							doc_contexts.append(context_lookup[p_id])
 						else:
-							start_sentence = passage['sentences'][0]
-							end_sentence = passage['sentences'][-1]
-							start_s_id = 0
-							end_s_id = len(passage['sentences']) - 1
+							if not warned:
+								print('WARNING: some missing contexts')
+								warned = True
+
+				for passage in doc_contexts:
+					context_examples = []
+					if not self.only_passages:
+						for sentence in passage['sentences']:
+							s_id = sentence['sentence_id']
 							example = {
-								'id': f'{d_id}-{p_id}-{start_s_id}-{end_s_id}',
+								'id': f'{s_id}:{s_id}',
 								'question_id': question_id,
-								'd_id': d_id,
-								'p_id': p_id,
-								's_id': f'{start_s_id}-{end_s_id}',
-								'text': passage['text'][start_sentence['start']:end_sentence['end']],
+								's_id': s_id,
+								'text': passage['text'][sentence['start']:sentence['end']],
 								'query': query['question']
 								# 'query': query['question'] + ' ' + query['query'] + ', ' + query['background']
 							}
 							self.examples.append(example)
+							context_examples.append(example)
+						if self.multi_sentence:
+							# generate sentence n-grams from 2 to n_gram_max of contiguous sentence spans
+							for k in range(2, self.n_gram_max+1):
+								for ex_list in find_ngrams(context_examples, n=k):
+									ex_first = ex_list[0]
+									ex_last = ex_list[-1]
+									example = {
+										'id': f'{ex_first["s_id"]}:{ex_last["s_id"]}',
+										'question_id': ex_first['question_id'],
+										's_id': f'{ex_first["s_id"]}:{ex_last["s_id"]}',
+										'text': ' '.join([ex['text'] for ex in ex_list]),
+										'query': ex_first['query']
+									}
+									self.examples.append(example)
+					else:
+						start_sentence = passage['sentences'][0]
+						end_sentence = passage['sentences'][-1]
+						start_s_id = start_sentence["sentence_id"]
+						end_s_id = end_sentence["sentence_id"]
+						example = {
+							'id': f'{start_s_id}:{end_s_id}',
+							'question_id': question_id,
+							's_id': f'{start_s_id}:{end_s_id}',
+							'text': passage['text'][start_sentence['start']:end_sentence['end']],
+							'query': query['question']
+							# 'query': query['question'] + ' ' + query['query'] + ', ' + query['background']
+						}
+						self.examples.append(example)
 
 	def __len__(self):
 		return len(self.examples)

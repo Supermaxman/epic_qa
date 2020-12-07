@@ -4,6 +4,7 @@ import json
 import torch
 from torch.utils.data import Dataset
 from collections import defaultdict
+from tqdm import tqdm
 
 
 class AnswerDataset(Dataset):
@@ -11,23 +12,24 @@ class AnswerDataset(Dataset):
 		self.root_dir = root_dir
 		self.input_path = input_path
 		self.ids = set()
-		with open(self.input_path, 'r') as f:
-			for line in f:
-				line = line.strip()
-				if line:
-					q_id, _, full_id, rank, score, run_name = line.split()
-					self.ids.add(full_id)
-		self.doc_ids = defaultdict(lambda: defaultdict(set))
-		for f_id in self.ids:
-			start_id, end_id = f_id.split(':')
-			doc_id, pass_id, sent_start_id = start_id.split('-')
-			_, _, sent_end_id = end_id.split('-')
-			self.doc_ids[doc_id][pass_id].add((sent_start_id, sent_end_id))
-		self.examples = []
-		for doc_id, doc_pass_ids in self.doc_ids.items():
-			doc_path = os.path.join(self.root_dir, f'{doc_id}.json')
-			with open(doc_path) as f:
-				doc = json.load(f)
+		if self.input_path is not None:
+			with open(self.input_path, 'r') as f:
+				for line in f:
+					line = line.strip()
+					if line:
+						q_id, _, full_id, rank, score, run_name = line.split()
+						self.ids.add(full_id)
+			self.doc_ids = defaultdict(lambda: defaultdict(set))
+			for f_id in self.ids:
+				start_id, end_id = f_id.split(':')
+				doc_id, pass_id, sent_start_id = start_id.split('-')
+				_, _, sent_end_id = end_id.split('-')
+				self.doc_ids[doc_id][pass_id].add((sent_start_id, sent_end_id))
+			self.examples = []
+			for doc_id, doc_pass_ids in self.doc_ids.items():
+				doc_path = os.path.join(self.root_dir, f'{doc_id}.json')
+				with open(doc_path) as f:
+					doc = json.load(f)
 				for pass_id, sent_spans in doc_pass_ids.items():
 					pass_idx = int(pass_id[1:])
 					for sent_start_id, sent_end_id in sent_spans:
@@ -41,6 +43,24 @@ class AnswerDataset(Dataset):
 							'text': text
 						}
 						self.examples.append(example)
+		else:
+			self.ids = os.listdir(root_dir)
+			self.examples = []
+			for doc_id in tqdm(self.ids):
+				doc_path = os.path.join(self.root_dir, f'{doc_id}.json')
+				with open(doc_path) as f:
+					doc = json.load(f)
+				for passage in doc['contexts']:
+					sentences = passage['sentences']
+					start_sentence = sentences[0]
+					end_sentence = sentences[-1]
+					text = passage['text'][start_sentence['start']:end_sentence['end']]
+					example = {
+						'id': f'{start_sentence["sentence_id"]}:{end_sentence["sentence_id"]}',
+						'text': text
+					}
+					self.examples.append(example)
+
 
 	def __len__(self):
 		return len(self.examples)

@@ -58,13 +58,12 @@ def convert_doc(doc_name):
     print('----------------------')
     return None
   # gather all passages for batch processing
-  id = doc['document_id']
   passages = extract_passages(doc)
 
   with open(output_path, 'w') as f:
     for p_id, passage in enumerate(passages):
       p_dict = {
-        'id': f'{id}-{p_id}',
+        'id': passage['context_id'],
         'contents': passage
       }
       f.write(json.dumps(p_dict) + '\n')

@@ -4,6 +4,8 @@ export INDEX_NAME=passage_index
 export DATASET=expert
 export COLLECTION=epic_qa_prelim
 export SEARCH_RUN=passage-baseline
+export EXP_MODEL_NAME=docT5query-base-${DATASET}-${INDEX_NAME}
+export EXP_PRE_MODEL_NAME=models/docT5query-base/model.ckpt-1004000
 
 python search/convert_passages_to_json.py \
   --collection_path data/${COLLECTION}/${DATASET}/data \
@@ -22,3 +24,16 @@ python -m pyserini.index \
   -storeRaw
 
 mkdir data/${COLLECTION}/${DATASET}/search
+
+
+python -m expand_query.expand \
+ --collection_path data/${COLLECTION}/${DATASET}/data \
+ --pre_model_name ${EXP_PRE_MODEL_NAME} \
+ --model_name ${EXP_MODEL_NAME} \
+ --top_k 20 \
+ --num_samples 20 \
+ --batch_size 16
+
+python -m expand_query.format_expand \
+  --model_path models/${EXP_MODEL_NAME} \
+  --output_path models/${EXP_MODEL_NAME}/${SEARCH_RUN}.exp

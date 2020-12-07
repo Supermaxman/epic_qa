@@ -13,7 +13,7 @@ from expand_query.model_utils import T5QueryGenerator
 if __name__ == '__main__':
   parser = argparse.ArgumentParser()
   parser.add_argument('-c', '--collection_path', required=True)
-  parser.add_argument('-ps', '--input_path', required=True)
+  parser.add_argument('-ps', '--input_path', default=None)
   parser.add_argument('-pm', '--pre_model_name', default='docT5query-base/model.ckpt-1004000')
   parser.add_argument('-tn', '--tokenizer_name', default='t5-base')
   parser.add_argument('-mn', '--model_name', default='docT5query-base')
