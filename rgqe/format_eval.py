@@ -87,7 +87,7 @@ class QuestionEntailmentGraph(object):
 				answer['answer_id'],
 				answer['score']
 			)
-			self.answers[answer_node.answer_id] = answer
+			self.answers[answer_node.answer_id] = answer_node
 			for sample in answer['samples']:
 				sample_node = QuestionSampleNode(
 					answer_node,
