@@ -106,8 +106,13 @@ class QuestionEntailmentGraph(object):
 
 	def prune_answers(self):
 
+		nodes = []
+		for answer in self.answers.values():
+			for sample in answer.children.values():
+				nodes.append(sample)
+
 		dfs = DFS(
-			nodes=self.answers.values()
+			nodes=nodes
 		)
 
 		entailed_facts = dfs.find_connected()
