@@ -58,7 +58,7 @@ class QueryPassageDataset(Dataset):
 					doc_id, pass_id = doc_pass_id.split('-')
 					file_names.add(f'{doc_id}.json')
 					self.query_docs[doc_id].add(question_id)
-					self.query_doc_pass[question_id][doc_id].add(pass_id)
+					self.query_doc_pass[question_id][doc_id].add(doc_pass_id)
 			self.file_names = list(file_names)
 
 		else:
@@ -99,6 +99,7 @@ class QueryPassageDataset(Dataset):
 							doc_contexts.append(context_lookup[p_id])
 						else:
 							if not warned:
+								print(f'{p_id} not found in context: {context_lookup}')
 								print('WARNING: some missing contexts')
 								warned = True
 

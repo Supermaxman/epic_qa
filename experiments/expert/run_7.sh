@@ -16,8 +16,6 @@ python search/search_index.py \
   --label_path data/${COLLECTION}/prelim_judgments_corrected.json \
   --output_path data/${COLLECTION}/${DATASET}/search/${SEARCH_RUN} \
   --top_k ${SEARCH_TOP_K} \
-  --bm25_k1 0.82 \
-  --bm25_b 0.4 \
 ; \
 python search/search_passage_eval.py \
   --input_path data/${COLLECTION}/${DATASET}/search/${SEARCH_RUN} \
@@ -26,14 +24,14 @@ python search/search_passage_eval.py \
 #  --input_path data/${COLLECTION}/${DATASET}/search/${SEARCH_RUN} \
 #  --label_path data/${COLLECTION}/prelim_judgments_corrected.json
 
-
 python -m rerank.rerank \
   --query_path data/${COLLECTION}/${DATASET}/questions.json \
   --collection_path data/${COLLECTION}/${DATASET}/data \
   --passage_search_run data/${COLLECTION}/${DATASET}/search/${SEARCH_RUN} \
   --label_path data/${COLLECTION}/prelim_judgments_corrected.json \
   --pre_model_name ${PRE_MODEL_NAME} \
-  --model_name ${MODEL_NAME}
+  --model_name ${MODEL_NAME} \
+  --max_seq_len 96
 
 python -m rerank.format_preds \
   --model_path models/${MODEL_NAME} \
