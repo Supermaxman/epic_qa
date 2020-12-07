@@ -5,6 +5,7 @@ import os
 from transformers import T5Tokenizer
 from tqdm import tqdm
 from multiprocessing import Pool
+import json
 
 
 parser = argparse.ArgumentParser()
@@ -51,10 +52,12 @@ def load_predictions(model_path):
 
 
 def save_predictions(answer_queries, output_path):
+	# with open(output_path, 'w') as f:
+	# 	for answer_id, answer_qs in answer_queries.items():
+	# 		aq_text = '\t'.join(answer_qs)
+	# 		f.write(f'{answer_id}\t{aq_text}\n')
 	with open(output_path, 'w') as f:
-		for answer_id, answer_qs in answer_queries.items():
-			aq_text = '\t'.join(answer_qs)
-			f.write(f'{answer_id}\t{aq_text}\n')
+		json.dump(answer_queries, f, indent=2)
 
 
 answer_queries = load_predictions(model_path)

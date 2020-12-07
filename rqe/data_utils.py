@@ -212,29 +212,27 @@ class PredictionBatchCollator(object):
 		return batch
 
 
+def load_run(run_path):
+	query_answers = defaultdict(list)
+	with open(run_path, 'r') as f:
+		for line in f:
+			line = line.strip()
+			if line:
+				q_id, _, answer_id, rank, score, run_name = line.split()
+				query_answers[q_id].append(answer_id)
+	return query_answers
+
+
 class RQEPredictionDataset(Dataset):
 	def __init__(self, expand_path, input_path, queries):
 		self.expand_path = expand_path
 		self.input_path = input_path
 		self.query_lookup = {query['question_id']: query for query in queries}
 
-		self.answer_samples = {}
 		with open(self.expand_path, 'r') as f:
-			for line in f:
-				line = line.strip()
-				if line:
-					line_list = line.split('\t')
-					answer_id = line_list[0]
-					samples = line_list[1:]
-					self.answer_samples[answer_id] = samples
+			self.answer_samples = json.load(f)
 
-		self.query_answers = defaultdict(list)
-		with open(self.input_path, 'r') as f:
-			for line in f:
-				line = line.strip()
-				if line:
-					q_id, _, answer_id, rank, score, run_name = line.split()
-					self.query_answers[q_id].append(answer_id)
+		self.query_answers = load_run(self.input_path)
 
 		self.examples = []
 		for question_id, answer_ids in self.query_answers.items():

@@ -32,17 +32,6 @@ def sort_results(rerank_scores, query_answer_samples):
 	return results
 
 
-def write_run(results, output_path, output_name):
-	with open(output_path, 'w') as f:
-		for question_id, q_results in results.items():
-			rank = 1
-			for answer in q_results:
-				answer_id = answer['answer_id']
-				answer_score = answer['score']
-				f.write(f'{question_id}\tQ0\t{answer_id}\t{rank}\t{answer_score:.8f}\t{output_name}\n')
-				rank += 1
-
-
 def read_run(scores_path):
 	rerank_scores = defaultdict(list)
 	with open(scores_path) as f:
@@ -64,13 +53,9 @@ if __name__ == '__main__':
 
 	args = parser.parse_args()
 
-	# TODO figure out
 	rqe_path = args.rqe_path
 	scores_path = args.scores_path
 	output_path = args.output_path
-	output_name = output_path.split('/')[-1].replace('.txt', '').replace('.pred', '')
-
-	threshold = args.threshold
 
 	with open(rqe_path) as f:
 		query_answer_samples = json.load(f)
@@ -78,12 +63,6 @@ if __name__ == '__main__':
 	rerank_scores = read_run(scores_path)
 	rerank_results = sort_results(rerank_scores, query_answer_samples)
 
-	with open(output_path) as f:
-		query_answer_samples = json.load(f)
-
-	write_run(rerank_results, output_path, output_name)
-
-
-
-
+	with open(output_path, 'w') as f:
+		json.dump(rerank_results, f, indent=2)
 

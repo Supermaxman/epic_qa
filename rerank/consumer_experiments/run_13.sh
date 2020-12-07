@@ -32,17 +32,31 @@ python -m rqe.rqe \
 
 python -m rqe.format_rqe \
   --model_path models/${RQE_MODEL_NAME} \
-  --output_path models/${RQE_MODEL_NAME}/${RUN_NAME}.rqe
+  --expand_path models/${EXP_MODEL_NAME}/${RUN_NAME}.exp \
+  --output_path models/${RQE_MODEL_NAME}/${RUN_NAME}.rqe \
+  --threshold 0.5
 
-python -m rqe.format_eval \
-  --answer_query_path models/${EXP_MODEL_NAME}/${RUN_NAME}.exp \
-  --expand_path models/${RQE_MODEL_NAME}/${RUN_NAME}.rqe \
+python -m rqe.format_run \
+  --rqe_path models/${RQE_MODEL_NAME}/${RUN_NAME}.rqe \
   --scores_path models/${SCORE_MODEL_NAME}/${SCORE_RUN_NAME}.txt \
-  --output_path models/${RQE_MODEL_NAME}/${RUN_NAME}.txt \
-  --threshold 0.9
+  --output_path models/${RQE_MODEL_NAME}/${RUN_NAME}.rqe_scored
+
+python -m rgqe.rgqe \
+  --input_path models/${RQE_MODEL_NAME}/${RUN_NAME}.rqe_scored \
+  --model_name models/${RQE_MODEL_NAME}
+
+python -m rgqe.format_rgqe \
+  --model_path models/${RQE_MODEL_NAME} \
+  --output_path models/${RQE_MODEL_NAME}/${RUN_NAME}.rgqe \
+  --threshold 0.5
+
+python -m rgqe.format_eval \
+  --results_path models/${RQE_MODEL_NAME}/${RUN_NAME}.rqe_scored \
+  --rgqe_path models/${RQE_MODEL_NAME}/${RUN_NAME}.rgqe \
+  --output_path models/${RQE_MODEL_NAME}/${RUN_NAME}_RGQE.txt
 
 python rerank/epic_eval.py \
   data/${COLLECTION}/prelim_judgments_corrected.json \
-  models/${RQE_MODEL_NAME}/${RUN_NAME}.txt \
+  models/${RQE_MODEL_NAME}/${RUN_NAME}_RGQE.txt \
   rerank/.${DATASET}_ideal_ranking_scores.tsv \
   --task ${DATASET}
