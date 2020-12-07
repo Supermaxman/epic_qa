@@ -60,6 +60,7 @@ class AnswerNode(object):
 		self.rerank_score = rerank_score
 		self.children = {}
 		self.score = self.rerank_score
+		self.entailed_sets = set()
 
 	def add_child(self, child):
 		self.children[child.sample_id] = child
@@ -116,17 +117,30 @@ class QuestionEntailmentGraph(object):
 			nodes=nodes
 		)
 
-		entailed_facts = dfs.find_connected()
-		print(f'{self.question_id} # Entail-Components: {len(entailed_facts)}')
-		input()
-		for idx, entail_fact_nodes in enumerate(entailed_facts):
-			print(f'  CM{idx}: ')
-			for node in entail_fact_nodes[:5]:
-				print(f'    {node.sample_text}')
-		input()
+		entailed_sets = dfs.find_connected()
+		for entail_set_id, entailed_nodes in enumerate(entailed_sets):
+			for node in entailed_nodes:
+				answer = node.parent
+				answer.entailed_sets.add(entail_set_id)
+
+		# print(f'{self.question_id} # Entail-Components: {len(entailed_facts)}')
+		# input()
+		# for idx, entail_fact_nodes in enumerate(entailed_facts):
+		# 	print(f'  CM{idx}: ')
+		# 	for node in entail_fact_nodes[:5]:
+		# 		print(f'    {node.sample_text}')
+		# input()
 		reranked_answers = []
+		total_entailed_set_count = len(entailed_sets)
+		seen_entailed_sets = set()
 		for answer_id, answer in self.answers.items():
-			reranked_answers.append(answer)
+			answer_entailed_sets = answer.entailed_sets
+			num_entailed_sets_overlapping = len(answer_entailed_sets.intersection(seen_entailed_sets))
+
+			if num_entailed_sets_overlapping == 0:
+				reranked_answers.append(answer)
+			seen_entailed_sets += answer_entailed_sets
+
 		reranked_answers = list(sorted(reranked_answers, key=lambda x: x.score, reverse=True))
 		return reranked_answers
 
