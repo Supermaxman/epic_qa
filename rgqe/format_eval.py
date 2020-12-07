@@ -78,6 +78,7 @@ class AnswerNode(object):
 
 class QuestionEntailmentGraph(object):
 	def __init__(self, question_id, question_scores, question_samples, edge_threshold):
+		self.question_id = question_id
 		self.answers = {}
 		for answer in question_scores:
 			answer_node = AnswerNode(
@@ -106,7 +107,6 @@ class QuestionEntailmentGraph(object):
 						sample_b.add_entailment(sample_a)
 
 	def prune_answers(self):
-
 		nodes = []
 		for answer in self.answers.values():
 			for sample in answer.children.values():
@@ -117,7 +117,7 @@ class QuestionEntailmentGraph(object):
 		)
 
 		entailed_facts = dfs.find_connected()
-		print(f'Number of facts: {len(entailed_facts)}')
+		print(f'{self.question_id} # Entail-Components: {len(entailed_facts)}')
 		for entail_fact_nodes in entailed_facts:
 			pass
 
