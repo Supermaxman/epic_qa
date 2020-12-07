@@ -26,6 +26,15 @@ python rerank/split_data.py \
   --output_path data/${COLLECTION}/${DATASET}/split \
   --dataset ${DATASET}
 
+python -m rerank.rerank_train \
+  --query_path data/${COLLECTION}/${DATASET}/questions.json \
+  --collection_path data/${COLLECTION}/${DATASET}/data \
+  --passage_search_run data/${COLLECTION}/${DATASET}/search/${SEARCH_RUN} \
+  --label_path data/${COLLECTION}/prelim_judgments_corrected.json \
+  --split_path data/${COLLECTION}/${DATASET}/split \
+  --pre_model_name ${PRE_MODEL_NAME} \
+  --model_name ${MODEL_NAME} \
+  --max_seq_len 96
 
 
 python -m rerank.rerank \

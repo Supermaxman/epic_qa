@@ -314,3 +314,197 @@ class PredictionBatchCollator(object):
 		}
 
 		return batch
+
+
+class RerankBatchCollator(object):
+	def __init__(self, tokenizer,  max_seq_len: int, force_max_seq_len: bool):
+		super().__init__()
+		self.tokenizer = tokenizer
+		self.max_seq_len = max_seq_len
+		self.force_max_seq_len = force_max_seq_len
+
+	def __call__(self, examples):
+		ids = []
+		labels = []
+		weights = []
+		question_ids = []
+		sequences = []
+		for ex in examples:
+			ids.append(ex['id'])
+			labels.append(ex['label'])
+			weights.append(ex['weight'])
+			question_ids.append(ex['question_id'])
+			sequences.append((ex['query'], ex['text']))
+		# "input_ids": batch["input_ids"].to(device),
+		# "attention_mask": batch["attention_mask"].to(device),
+		tokenizer_batch = self.tokenizer.batch_encode_plus(
+			batch_text_or_text_pairs=sequences,
+			add_special_tokens=True,
+			padding='max_length' if self.force_max_seq_len else 'longest',
+			return_tensors='pt',
+			truncation='only_second',
+			max_length=self.max_seq_len
+		)
+		batch = {
+			'id': ids,
+			'question_id': question_ids,
+			'labels': labels,
+			'weights': weights,
+			'input_ids': tokenizer_batch['input_ids'],
+			'attention_mask': tokenizer_batch['attention_mask'],
+			'token_type_ids': tokenizer_batch['token_type_ids'],
+		}
+
+		return batch
+
+
+class QueryPassageLabeledDataset(Dataset):
+	def __init__(self, root_dir, queries, labels, multi_sentence, n_gram_max, document_qrels=None, passage_qrels=None, only_passages=False):
+		self.root_dir = root_dir
+		self.labels = {}
+		for label in labels:
+			question_id = label['question_id']
+			annotations = {a['sentence_id']: a for a in label['annotations']}
+			label['annotations'] = annotations
+			self.labels[question_id] = label
+
+		self.query_lookup = {query['question_id']: query for query in queries}
+		assert not (document_qrels is not None and passage_qrels is not None), 'Cannot specify both doc and pass qrels!'
+		if document_qrels is not None:
+			file_names = set()
+			self.query_docs = defaultdict(set)
+			self.query_doc_pass = None
+			for question_id, question_files in document_qrels.items():
+				if question_id not in self.query_lookup:
+					continue
+				for doc_id in question_files:
+					file_names.add(f'{doc_id}.json')
+					self.query_docs[doc_id].add(question_id)
+			self.file_names = list(file_names)
+
+		elif passage_qrels is not None:
+			file_names = set()
+			self.query_docs = defaultdict(set)
+			self.query_doc_pass = defaultdict(lambda: defaultdict(set))
+			for question_id, question_files in passage_qrels.items():
+				if question_id not in self.query_lookup:
+					continue
+				for doc_pass_id in question_files:
+					doc_id, pass_id = doc_pass_id.split('-')
+					file_names.add(f'{doc_id}.json')
+					self.query_docs[doc_id].add(question_id)
+					self.query_doc_pass[question_id][doc_id].add(doc_pass_id)
+			self.file_names = list(file_names)
+
+		else:
+			self.file_names = os.listdir(root_dir)
+			self.query_docs = None
+			self.query_doc_pass = None
+		self.examples = []
+		self.queries = queries
+		self.multi_sentence = multi_sentence
+		self.n_gram_max = n_gram_max
+		self.only_passages = only_passages
+		self.num_positive = 0
+		self.num_negative = 0
+		warned = False
+		for d_name in tqdm(self.file_names):
+			if not d_name.endswith('.json'):
+				continue
+			d_id = d_name.replace('.json', '')
+			file_path = os.path.join(self.root_dir, d_name)
+			if not os.path.exists(file_path):
+				if not warned:
+					print('WARNING: some missing files')
+					warned = True
+				continue
+			with open(file_path, 'r') as f:
+				doc = json.load(f)
+			if self.query_docs is None:
+				doc_queries = queries
+			else:
+				doc_queries = [self.query_lookup[q_id] for q_id in self.query_docs[d_id]]
+			for query in doc_queries:
+				question_id = query['question_id']
+				q_labels = self.labels[question_id]['annotations']
+				if self.query_doc_pass is None:
+					doc_contexts = doc['contexts']
+				else:
+					context_lookup = {c['context_id']: c for c in doc['contexts']}
+					doc_contexts = []
+					for p_id in self.query_doc_pass[question_id][d_id]:
+						if p_id in context_lookup:
+							doc_contexts.append(context_lookup[p_id])
+						else:
+							if not warned:
+								print(f'{p_id} not found in context: {context_lookup}')
+								print('WARNING: some missing contexts')
+								warned = True
+
+				for passage in doc_contexts:
+					context_examples = []
+					if not self.only_passages:
+						for sentence in passage['sentences']:
+							s_id = sentence['sentence_id']
+							if s_id in q_labels:
+								weight = float(len(q_labels[s_id]['nugget_ids']))
+								label = 1
+								self.num_positive += 1
+							else:
+								weight = 1.0
+								label = 0
+								self.num_negative += 1
+
+							example = {
+								'id': f'{s_id}:{s_id}',
+								'question_id': question_id,
+								's_id': s_id,
+								'text': passage['text'][sentence['start']:sentence['end']],
+								'query': query['question'],
+								'weight': weight,
+								'label': label
+							}
+							self.examples.append(example)
+							context_examples.append(example)
+						if self.multi_sentence:
+							raise NotImplementedError()
+							# generate sentence n-grams from 2 to n_gram_max of contiguous sentence spans
+							for k in range(2, self.n_gram_max+1):
+								for ex_list in find_ngrams(context_examples, n=k):
+									ex_first = ex_list[0]
+									ex_last = ex_list[-1]
+									example = {
+										'id': f'{ex_first["s_id"]}:{ex_last["s_id"]}',
+										'question_id': ex_first['question_id'],
+										's_id': f'{ex_first["s_id"]}:{ex_last["s_id"]}',
+										'text': ' '.join([ex['text'] for ex in ex_list]),
+										'query': ex_first['query']
+									}
+									self.examples.append(example)
+					else:
+						raise NotImplementedError()
+						start_sentence = passage['sentences'][0]
+						end_sentence = passage['sentences'][-1]
+						start_s_id = start_sentence["sentence_id"]
+						end_s_id = end_sentence["sentence_id"]
+						example = {
+							'id': f'{start_s_id}:{end_s_id}',
+							'question_id': question_id,
+							's_id': f'{start_s_id}:{end_s_id}',
+							'text': passage['text'][start_sentence['start']:end_sentence['end']],
+							'query': query['question']
+							# 'query': query['question'] + ' ' + query['query'] + ', ' + query['background']
+						}
+						self.examples.append(example)
+
+	def __len__(self):
+		return len(self.examples)
+
+	def __getitem__(self, idx):
+		if torch.is_tensor(idx):
+			idx = idx.tolist()
+
+		example = self.examples[idx]
+
+		return example
+

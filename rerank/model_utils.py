@@ -171,6 +171,7 @@ class RerankBert(pl.LightningModule):
 			cache_dir=torch_cache_dir
 		)
 		self.config = self.bert.config
+		self.criterion = nn.CrossEntropyLoss(reduction='none')
 		self.save_hyperparameters()
 
 	def forward(self, input_ids, attention_mask, token_type_ids):
@@ -211,12 +212,13 @@ class RerankBert(pl.LightningModule):
 				logits,
 				labels,
 			)
+			# TODO add weights batch['weights']
 			prediction = logits.max(dim=1)[1]
 			batch_size = logits.shape[0]
 			correct_count = (prediction.eq(logits)).float().sum()
 			total_count = float(batch_size)
 			accuracy = correct_count / batch_size
-			return loss, labels, prediction, correct_count, total_count, accuracy
+			return loss, logits, prediction, correct_count, total_count, accuracy
 		else:
 			return logits
 
@@ -295,6 +297,14 @@ class RerankBert(pl.LightningModule):
 			{'params': [p for n, p in param_optimizer if any(nd in n for nd in no_decay)], 'weight_decay': 0.0}]
 
 		return optimizer_params
+
+	def _loss(self, logits, labels):
+		loss = self.criterion(
+			logits,
+			labels
+		)
+
+		return loss
 
 
 def get_device_id():
