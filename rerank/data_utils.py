@@ -95,7 +95,7 @@ class QueryPassageDataset(Dataset):
 					else:
 						doc_contexts = []
 						for p_id in self.query_doc_pass[question_id][d_id]:
-							if p_id in doc['contexts']:
+							if p_id < len(doc['contexts']):
 								doc_contexts.append((p_id, doc['contexts'][p_id]))
 							else:
 								if not warned:
