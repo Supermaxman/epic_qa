@@ -61,7 +61,7 @@ def convert_doc(doc_name):
   passages = extract_passages(doc)
 
   with open(output_path, 'w') as f:
-    for p_id, passage in enumerate(passages):
+    for passage in passages:
       p_dict = {
         'id': passage['context_id'],
         'contents': passage
