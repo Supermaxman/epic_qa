@@ -159,7 +159,7 @@ class QuestionEntailmentGraph(object):
 					seen_entailed_sets.add(a_entailed_set)
 		assigned_ratio = num_assigned / len(self.answers)
 		print(
-			f'{self.question_id} # Entail-Components: {len(entailed_sets)} (%assigned={assigned_ratio})(#removed={num_removed}, '
+			f'{self.question_id} # Entail-Components: {len(entailed_sets)} (%assigned={assigned_ratio:.2f})(#removed={num_removed}, '
 			f'#overlap={num_removed_overlap_ratio}, #overall={num_removed_overall_ratio})'
 		)
 		reranked_answers = list(sorted(reranked_answers, key=lambda x: x.score, reverse=True))
