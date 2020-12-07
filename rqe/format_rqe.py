@@ -15,8 +15,11 @@ def load_predictions(model_path, answer_samples, threshold, num_samples):
 	query_answer_sample_probs = defaultdict(lambda: defaultdict(list))
 	probs = []
 	num_examples = 0
+	seen_answers = set()
+	kept_answers = set()
 	for prediction in tqdm(pred_list):
 		answer_id = prediction['id']
+		seen_answers.add(answer_id)
 		question_id = prediction['question_id']
 		sample_id = prediction['sample_id']
 		entail_prob = prediction['entail_prob']
@@ -31,10 +34,12 @@ def load_predictions(model_path, answer_samples, threshold, num_samples):
 		if len(query_answer_sample_probs[question_id][answer_id]) < num_samples:
 			query_answer_sample_probs[question_id][answer_id].append(sample_data)
 			num_examples += 1
+			kept_answers.add(answer_id)
 		probs.append(entail_prob)
 	print(f'min={min(probs)}')
 	print(f'max={max(probs)}')
 	print(f'num_examples={num_examples}')
+	print(f'%kept={len(kept_answers)/len(seen_answers):.2f}')
 	return query_answer_sample_probs
 
 
