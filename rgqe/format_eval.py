@@ -131,7 +131,10 @@ class QuestionEntailmentGraph(object):
 def create_results(query_results, sample_entail_pairs, threshold):
 	results = defaultdict(list)
 	for question_id, q_scores in query_results.items():
-		q_samples = sample_entail_pairs[question_id]
+		if question_id not in sample_entail_pairs:
+			q_samples = {}
+		else:
+			q_samples = sample_entail_pairs[question_id]
 		qe_graph = QuestionEntailmentGraph(
 			question_id,
 			q_scores,
