@@ -141,6 +141,7 @@ if __name__ == '__main__':
 		passage_qrels,
 		only_passages
 	)
+	logging.info(f'Loaded dataset, #examples={len(eval_dataset)}')
 	eval_data_loader = DataLoader(
 		eval_dataset,
 		batch_size=batch_size,
