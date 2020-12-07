@@ -40,11 +40,11 @@ if __name__ == '__main__':
 	# export TPU_IP_ADDRESS=10.155.6.34
 	# export XRT_TPU_CONFIG="tpu_worker;0;$TPU_IP_ADDRESS:8470"
 	gpus = [0]
-	use_tpus = True
+	use_tpus = False
 	precision = 16 if use_tpus else 32
 	# precision = 32
 	tpu_cores = 8
-	num_workers = 4
+	num_workers = 1
 	deterministic = True
 
 	# Also add the stream handler so that it logs on STD out as well
