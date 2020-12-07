@@ -31,6 +31,14 @@ def sort_results(rerank_scores, query_answer_samples):
 			q_results.append(answer_results)
 
 		q_results = list(sorted(q_results, key=lambda x: x['score'], reverse=True))
+		sample_count = 0
+		kept_count = 0
+		for result in q_results[:100]:
+			num_samples = len(result['samples'])
+			sample_count += num_samples
+			if num_samples > 0:
+				kept_count += 1
+		print(f'top-100 %kept={kept_count/100:.2f} (#num_samples={num_samples})')
 		results[question_id] = q_results
 	return results
 
