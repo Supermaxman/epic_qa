@@ -59,6 +59,7 @@ class AnswerNode(object):
 		self.answer_id = answer_id
 		self.rerank_score = rerank_score
 		self.children = {}
+		self.score = self.rerank_score
 
 	def add_child(self, child):
 		self.children[child.sample_id] = child
