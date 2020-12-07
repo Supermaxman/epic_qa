@@ -46,7 +46,7 @@ class AnswerDataset(Dataset):
 		else:
 			self.ids = os.listdir(root_dir)
 			self.examples = []
-			for doc_name in tqdm(self.ids):
+			for doc_name in tqdm(self.ids[:100]):
 				doc_path = os.path.join(self.root_dir, doc_name)
 				with open(doc_path) as f:
 					doc = json.load(f)
