@@ -136,8 +136,8 @@ class QuestionEntailmentGraph(object):
 		for answer in sorted(self.answers.values(), key=lambda x: x.score, reverse=True):
 			answer_entailed_sets = answer.entailed_sets
 			num_entailed_sets_overlapping = len(answer_entailed_sets.intersection(seen_entailed_sets))
-
-			if num_entailed_sets_overlapping == 0:
+			overlap_ratio = num_entailed_sets_overlapping / total_entailed_set_count
+			if overlap_ratio < 0.75:
 				reranked_answers.append(answer)
 			for a_entailed_set in answer_entailed_sets:
 				seen_entailed_sets.add(a_entailed_set)
