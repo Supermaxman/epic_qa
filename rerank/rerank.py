@@ -28,6 +28,7 @@ if __name__ == '__main__':
 	parser.add_argument('-se', '--seed', default=0, type=int)
 	parser.add_argument('-cd', '--torch_cache_dir', default=None)
 	parser.add_argument('-cs', '--calc_seq_len', default=False, action='store_true')
+	parser.add_argument('-tpu', '--use_tpus', default=False, action='store_true')
 
 	args = parser.parse_args()
 	seed = args.seed
@@ -58,7 +59,7 @@ if __name__ == '__main__':
 	# export TPU_IP_ADDRESS=10.155.6.34
 	# export XRT_TPU_CONFIG="tpu_worker;0;$TPU_IP_ADDRESS:8470"
 	gpus = [0]
-	use_tpus = True
+	use_tpus = args.use_tpus
 	precision = 16 if use_tpus else 32
 	# precision = 32
 	tpu_cores = 8

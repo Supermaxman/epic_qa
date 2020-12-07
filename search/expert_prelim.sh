@@ -22,9 +22,3 @@ python -m pyserini.index \
   -storeRaw
 
 mkdir data/${COLLECTION}/${DATASET}/search
-
-python search/search_pass_index.py \
-  --index_path data/${COLLECTION}/${DATASET}/indices/${INDEX_NAME} \
-  --query_path data/${COLLECTION}/${DATASET}/questions.json \
-  --output_path data/${COLLECTION}/${DATASET}/search/${SEARCH_RUN} \
-  --top_k 2000
