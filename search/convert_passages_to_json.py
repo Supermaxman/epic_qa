@@ -37,7 +37,10 @@ def extract_passages(doc):
         exp_text.append(sentence['expanded_query'])
       passage_text += ' '
       passage_text += ' '.join(exp_text)
-    passages.append(passage_text)
+    passages.append({
+      'context_id': context['context_id'],
+      'text': passage_text,
+    })
   return passages
 
 
@@ -45,8 +48,8 @@ def convert_doc(doc_name):
   # ignore already existing expanded files
   input_path = os.path.join(collection_path, doc_name)
   output_path = os.path.join(json_collection_path, doc_name.replace('.json', '.jsonl'))
-  if os.path.exists(output_path):
-    return None
+  # if os.path.exists(output_path):
+  #   return None
   try:
     with open(input_path, 'r') as f:
       doc = json.load(f)
@@ -64,7 +67,7 @@ def convert_doc(doc_name):
     for passage in passages:
       p_dict = {
         'id': passage['context_id'],
-        'contents': passage
+        'contents': passage['text']
       }
       f.write(json.dumps(p_dict) + '\n')
   return output_path
