@@ -215,7 +215,7 @@ class RerankBert(pl.LightningModule):
 			# TODO add weights batch['weights']
 			prediction = logits.max(dim=1)[1]
 			batch_size = logits.shape[0]
-			correct_count = (prediction.eq(logits)).float().sum()
+			correct_count = (prediction.eq(labels)).float().sum()
 			total_count = float(batch_size)
 			accuracy = correct_count / batch_size
 			return loss, logits, prediction, correct_count, total_count, accuracy
