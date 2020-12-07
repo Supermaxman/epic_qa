@@ -36,6 +36,8 @@ class QuestionSampleNode(object):
 	def left_merge(self, other):
 		if self.is_merged():
 			self.merged_parent.left_merge(other)
+		if other.is_merged():
+			self.left_merge(other.merged_parent)
 		else:
 			self.remove_entailment(other)
 			other.remove_entailment(self)
