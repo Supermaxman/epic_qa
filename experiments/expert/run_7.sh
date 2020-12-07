@@ -7,7 +7,7 @@ export PRE_MODEL_NAME=nboost/pt-biobert-base-msmarco
 export DATASET=expert
 export INDEX_NAME=passage_index
 export COLLECTION=epic_qa_prelim
-export SEARCH_TOP_K=1200
+export SEARCH_TOP_K=4000
 
 python search/search_pass_index.py \
   --index_path data/${COLLECTION}/${DATASET}/indices/${INDEX_NAME} \
@@ -16,7 +16,7 @@ python search/search_pass_index.py \
   --output_path data/${COLLECTION}/${DATASET}/search/${SEARCH_RUN} \
   --top_k ${SEARCH_TOP_K}
 
-python search/search_passage_sentence_eval.py \
+python search/search_passage_eval.py \
   --input_path data/${COLLECTION}/${DATASET}/search/${SEARCH_RUN} \
   --label_path data/${COLLECTION}/prelim_judgments_corrected.json
 
