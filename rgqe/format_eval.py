@@ -123,13 +123,13 @@ class QuestionEntailmentGraph(object):
 				answer = node.parent
 				answer.entailed_sets.add(entail_set_id)
 
-		# print(f'{self.question_id} # Entail-Components: {len(entailed_facts)}')
-		# input()
-		# for idx, entail_fact_nodes in enumerate(entailed_facts):
-		# 	print(f'  CM{idx}: ')
-		# 	for node in entail_fact_nodes[:5]:
-		# 		print(f'    {node.sample_text}')
-		# input()
+		print(f'{self.question_id} # Entail-Components: {len(entailed_sets)}')
+		input()
+		for idx, entail_fact_nodes in enumerate(entailed_sets):
+			print(f'  CM{idx}: ')
+			for node in entail_fact_nodes[:5]:
+				print(f'    {node.sample_text}')
+		input()
 		reranked_answers = []
 		total_entailed_set_count = max(len(entailed_sets), 1)
 		seen_entailed_sets = set()
@@ -186,7 +186,6 @@ if __name__ == '__main__':
 
 	args = parser.parse_args()
 
-	# TODO figure out
 	results_path = args.results_path
 	rgqe_path = args.rgqe_path
 	output_path = args.output_path
