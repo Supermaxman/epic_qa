@@ -71,7 +71,7 @@ class QueryPassageDataset(Dataset):
 		self.n_gram_max = n_gram_max
 		self.only_passages = only_passages
 		warned = False
-		for d_name in self.file_names:
+		for d_name in tqdm(self.file_names):
 			if not d_name.endswith('.json'):
 				continue
 			d_id = d_name.replace('.json', '')
