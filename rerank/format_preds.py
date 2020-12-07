@@ -20,8 +20,8 @@ def load_predictions(model_path):
 		question_scores[question_id].append((doc_pass_id, score))
 
 	sorted_scores = {}
-	for question_id, question_scores in question_scores.items():
-		sorted_scores[question_id] = list(sorted(question_scores, key=lambda x: x[1], reverse=True))
+	for question_id, q_scores in question_scores.items():
+		sorted_scores[question_id] = list(sorted(q_scores, key=lambda x: x[1], reverse=True))
 
 	return sorted_scores
 
