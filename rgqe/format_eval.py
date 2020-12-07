@@ -133,11 +133,14 @@ class QuestionEntailmentGraph(object):
 		reranked_answers = []
 		total_entailed_set_count = max(len(entailed_sets), 1)
 		seen_entailed_sets = set()
+		num_assigned = 0
 		num_removed = 0
 		num_removed_overlap_ratio = 0
 		num_removed_overall_ratio = 0
 		for answer in sorted(self.answers.values(), key=lambda x: x.score, reverse=True):
 			answer_entailed_sets = answer.entailed_sets
+			if len(answer_entailed_sets) > 0:
+				num_assigned += 1
 			num_entailed_sets_overlapping = len(answer_entailed_sets.intersection(seen_entailed_sets))
 			entailed_overlap_ratio = num_entailed_sets_overlapping / max(len(answer_entailed_sets), 1)
 			entailed_overall_ratio = len(answer_entailed_sets) / total_entailed_set_count
@@ -154,9 +157,9 @@ class QuestionEntailmentGraph(object):
 				reranked_answers.append(answer)
 				for a_entailed_set in answer_entailed_sets:
 					seen_entailed_sets.add(a_entailed_set)
-
+		assigned_ratio = num_assigned / len(self.answers)
 		print(
-			f'{self.question_id} # Entail-Components: {len(entailed_sets)} (#removed={num_removed}, '
+			f'{self.question_id} # Entail-Components: {len(entailed_sets)} (%assigned={assigned_ratio})(#removed={num_removed}, '
 			f'#overlap={num_removed_overlap_ratio}, #overall={num_removed_overall_ratio})'
 		)
 		reranked_answers = list(sorted(reranked_answers, key=lambda x: x.score, reverse=True))
