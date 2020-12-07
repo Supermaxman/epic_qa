@@ -146,7 +146,7 @@ class QuestionEntailmentGraph(object):
 					seen_entailed_sets.add(a_entailed_set)
 
 		reranked_answers = list(sorted(reranked_answers, key=lambda x: x.score, reverse=True))
-		return reranked_answers
+		return reranked_answers[:100]
 
 
 def create_results(query_results, sample_entail_pairs, threshold, overlap_ratio):
