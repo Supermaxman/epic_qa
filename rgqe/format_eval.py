@@ -134,6 +134,7 @@ class QuestionEntailmentGraph(object):
 		reranked_answers = []
 		total_entailed_set_count = max(len(entailed_sets), 1)
 		seen_entailed_sets = set()
+		print(f'len(answers)={len(self.answers.values())}')
 		for answer in sorted(self.answers.values(), key=lambda x: x.score, reverse=True):
 			answer_entailed_sets = answer.entailed_sets
 			total_answer_entailed_set_count = max(len(answer_entailed_sets), 1)
