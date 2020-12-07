@@ -17,7 +17,8 @@ class QuestionSampleNode(object):
 		self.merged_parent = None
 
 	def add_entailment(self, other):
-		self.entail_edges[other.id] = other
+		if other.id != self.id:
+			self.entail_edges[other.id] = other
 
 	def remove_entailment(self, other):
 		if other.id in self.entail_edges:
@@ -34,6 +35,8 @@ class QuestionSampleNode(object):
 		return self.merged_parent is not None
 
 	def left_merge(self, other):
+		if other.id == self.id:
+			return
 		if self.is_merged():
 			self.merged_parent.left_merge(other)
 		if other.is_merged():
