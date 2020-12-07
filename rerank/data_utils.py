@@ -82,7 +82,7 @@ class QueryPassageDataset(Dataset):
 					print('WARNING: some missing files')
 					warned = True
 				continue
-			with open(file_path) as f:
+			with open(file_path, 'r') as f:
 				doc = json.load(f)
 				if self.query_docs is None:
 					doc_queries = queries
