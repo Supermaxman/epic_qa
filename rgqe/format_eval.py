@@ -124,7 +124,6 @@ class QuestionEntailmentGraph(object):
 				answer = node.parent
 				answer.entailed_sets.add(entail_set_id)
 
-		print(f'{self.question_id} # Entail-Components: {len(entailed_sets)}')
 		# for idx, entail_fact_nodes in enumerate(entailed_sets):
 		# 	print(f'  CM{idx}: ')
 		# 	for node in entail_fact_nodes[:3]:
@@ -134,6 +133,7 @@ class QuestionEntailmentGraph(object):
 		reranked_answers = []
 		total_entailed_set_count = max(len(entailed_sets), 1)
 		seen_entailed_sets = set()
+		num_removed = 0
 		for answer in sorted(self.answers.values(), key=lambda x: x.score, reverse=True):
 			answer_entailed_sets = answer.entailed_sets
 			total_answer_entailed_set_count = max(len(answer_entailed_sets), 1)
@@ -146,7 +146,10 @@ class QuestionEntailmentGraph(object):
 				reranked_answers.append(answer)
 				for a_entailed_set in answer_entailed_sets:
 					seen_entailed_sets.add(a_entailed_set)
+			else:
+				num_removed += 1
 
+		print(f'{self.question_id} # Entail-Components: {len(entailed_sets)} (#removed={num_removed})')
 		reranked_answers = list(sorted(reranked_answers, key=lambda x: x.score, reverse=True))
 		return reranked_answers[:top_k]
 

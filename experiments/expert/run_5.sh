@@ -57,7 +57,7 @@ python -m rgqe.format_eval \
   --results_path models/${RQE_MODEL_NAME}/${RUN_NAME}.rqe_scored \
   --rgqe_path models/${RQE_MODEL_NAME}/${RUN_NAME}.rgqe \
   --output_path models/${RQE_MODEL_NAME}/${RUN_NAME}_RGQE.txt \
-  --threshold 0.5 \
+  --threshold 0.8 \
   --overlap 1.0
 
 python rerank/epic_eval.py \
