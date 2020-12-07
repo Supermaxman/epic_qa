@@ -16,10 +16,11 @@ if __name__ == '__main__':
 	parser.add_argument('-i', '--input_path', required=True)
 	parser.add_argument('-mn', '--model_name', default='models/quora-seq-at-nboost-pt-bert-base-uncased-msmarco')
 	parser.add_argument('-pm', '--pre_model_name', default='nboost/pt-bert-base-uncased-msmarco')
-	parser.add_argument('-bs', '--batch_size', default=64, type=int)
+	parser.add_argument('-bs', '--batch_size', default=16, type=int)
 	parser.add_argument('-ml', '--max_seq_len', default=128, type=int)
 	parser.add_argument('-se', '--seed', default=0, type=int)
 	parser.add_argument('-cd', '--torch_cache_dir', default=None)
+	parser.add_argument('-tpu', '--use_tpus', default=False, action='store_true')
 
 	args = parser.parse_args()
 	seed = args.seed
@@ -40,11 +41,11 @@ if __name__ == '__main__':
 	# export TPU_IP_ADDRESS=10.155.6.34
 	# export XRT_TPU_CONFIG="tpu_worker;0;$TPU_IP_ADDRESS:8470"
 	gpus = [0]
-	use_tpus = False
+	use_tpus = args.use_tpus
 	precision = 16 if use_tpus else 32
 	# precision = 32
 	tpu_cores = 8
-	num_workers = 1
+	num_workers = 4
 	deterministic = True
 
 	# Also add the stream handler so that it logs on STD out as well
