@@ -71,12 +71,17 @@ class QueryPassageDataset(Dataset):
 		self.multi_sentence = multi_sentence
 		self.n_gram_max = n_gram_max
 		self.only_passages = only_passages
-
+		warned = False
 		for d_name in self.file_names:
 			if not d_name.endswith('.json'):
 				continue
 			d_id = d_name.replace('.json', '')
 			file_path = os.path.join(self.root_dir, d_name)
+			if not os.path.exists(file_path):
+				if not warned:
+					print('WARNING: some missing files')
+					warned = True
+				continue
 			with open(file_path) as f:
 				doc = json.load(f)
 				if self.query_docs is None:

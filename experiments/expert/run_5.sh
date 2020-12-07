@@ -16,9 +16,9 @@ python -m expand_query.expand \
  --collection_path data/${COLLECTION}/${DATASET}/data \
  --pre_model_name ${EXP_PRE_MODEL_NAME} \
  --model_name ${EXP_MODEL_NAME} \
- --top_k 10 \
- --num_samples 3 \
- --batch_size 16 \
+ --top_k 20 \
+ --num_samples 20 \
+ --batch_size 8 \
  --max_seq_len 512
 
 python -m expand_query.format_expand \
@@ -36,7 +36,7 @@ python -m rqe.format_rqe \
   --model_path models/${RQE_MODEL_NAME} \
   --expand_path models/${EXP_MODEL_NAME}/${RUN_NAME}.exp \
   --output_path models/${RQE_MODEL_NAME}/${RUN_NAME}.rqe \
-  --threshold 0.10 \
+  --threshold 0.01 \
   --num_samples 3
 
 python -m rqe.format_run \
