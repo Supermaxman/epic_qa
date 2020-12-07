@@ -38,7 +38,7 @@ def sort_results(rerank_scores, query_answer_samples):
 			sample_count += num_samples
 			if num_samples > 0:
 				kept_count += 1
-		print(f'top-100 %kept={kept_count/100:.2f} (#num_samples={num_samples})')
+		print(f'top-100 %kept={kept_count/100:.2f} (#num_samples={sample_count})')
 		results[question_id] = q_results
 	return results
 
