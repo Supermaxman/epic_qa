@@ -36,7 +36,7 @@ python -m rqe.format_rqe \
   --expand_path models/${EXP_MODEL_NAME}/${RUN_NAME}.exp \
   --output_path models/${RQE_MODEL_NAME}/${RUN_NAME}.rqe \
   --threshold 0.01 \
-  --num_samples 20 \
+  --num_samples 1 \
 ; \
 python -m rqe.format_run \
   --rqe_path models/${RQE_MODEL_NAME}/${RUN_NAME}.rqe \

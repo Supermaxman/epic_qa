@@ -14,9 +14,7 @@ def load_predictions(model_path, answer_samples, threshold, num_samples):
 			pred_list.extend(preds)
 	query_answer_sample_probs = defaultdict(lambda: defaultdict(list))
 	probs = []
-	num_examples = 0
 	seen_answers = set()
-	kept_answers = set()
 	for prediction in tqdm(pred_list):
 		answer_id = prediction['id']
 		seen_answers.add(answer_id)
@@ -31,16 +29,25 @@ def load_predictions(model_path, answer_samples, threshold, num_samples):
 			'entail_prob': entail_prob,
 			'sample_text': sample_text
 		}
-		if len(query_answer_sample_probs[question_id][answer_id]) < num_samples:
-			query_answer_sample_probs[question_id][answer_id].append(sample_data)
-			num_examples += 1
-			kept_answers.add(answer_id)
+		query_answer_sample_probs[question_id][answer_id].append(sample_data)
 		probs.append(entail_prob)
 	print(f'min={min(probs)}')
 	print(f'max={max(probs)}')
+
+	kept_answers = set()
+	num_examples = 0
+	filtered_query_answer_sample_probs = defaultdict(lambda: defaultdict(list))
+	for question_id, q_answer_samples in query_answer_sample_probs.items():
+		for answer_id, q_a_samples in q_answer_samples.items():
+			sorted_samples = sorted(q_a_samples, key=lambda x: x['entail_prob'], reverse=True)
+			filtered_q_a_samples = sorted_samples[:num_samples]
+			filtered_query_answer_sample_probs[question_id][answer_id] = filtered_q_a_samples
+			num_examples += len(filtered_q_a_samples)
+			kept_answers.add(answer_id)
+
 	print(f'num_examples={num_examples}')
 	print(f'%kept={len(kept_answers)/len(seen_answers):.2f}')
-	return query_answer_sample_probs
+	return filtered_query_answer_sample_probs
 
 
 def save_predictions(query_answer_sample_probs, output_path):
