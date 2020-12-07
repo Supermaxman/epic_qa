@@ -9,13 +9,11 @@ if __name__ == '__main__':
 	parser = argparse.ArgumentParser()
 	parser.add_argument('-i', '--input_path', required=True)
 	parser.add_argument('-l', '--label_path', required=True)
-	parser.add_argument('-k', '--top_k', default=None, type=int)
 
 	args = parser.parse_args()
 
 	input_path = args.input_path
 	label_path = args.label_path
-	top_k = args.top_k
 
 	labels = defaultdict(set)
 	with open(label_path, 'r') as f:

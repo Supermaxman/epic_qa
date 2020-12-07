@@ -16,10 +16,9 @@ python search/search_pass_index.py \
   --output_path data/${COLLECTION}/${DATASET}/search/${SEARCH_RUN} \
   --top_k ${SEARCH_TOP_K}
 
-python search/search_passage_eval.py \
+python search/search_passage_sentence_eval.py \
   --input_path data/${COLLECTION}/${DATASET}/search/${SEARCH_RUN} \
-  --label_path data/${COLLECTION}/prelim_judgments_corrected.json \
-  --top_k ${SEARCH_TOP_K}
+  --label_path data/${COLLECTION}/prelim_judgments_corrected.json
 
 python -m rerank.rerank \
   --query_path data/${COLLECTION}/${DATASET}/questions.json \
@@ -39,8 +38,7 @@ python -m rerank.format_eval \
 
 python rerank/rerank_sentence_eval.py \
   --input_path models/${MODEL_NAME}/${RUN_NAME}.txt \
-  --label_path data/${COLLECTION}/prelim_judgments_corrected.json \
-  --top_k 1000
+  --label_path data/${COLLECTION}/prelim_judgments_corrected.json
 
 python rerank/epic_eval.py \
   data/${COLLECTION}/prelim_judgments_corrected.json \
