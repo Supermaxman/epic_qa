@@ -63,3 +63,7 @@ python rerank/epic_eval.py \
   models/${RQE_MODEL_NAME}/${RUN_NAME}_RGQE.txt \
   rerank/.${DATASET}_ideal_ranking_scores.tsv \
   --task ${DATASET}
+
+
+01d8cqn4-C000-S002
+01d8cqn4-0-2

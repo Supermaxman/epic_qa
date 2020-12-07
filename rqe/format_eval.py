@@ -15,7 +15,6 @@ def sort_results(rerank_scores, query_answer_samples):
 			for q_sample in query_samples:
 				# entail_prob = q_sample['entail_prob']
 				sample_text = q_sample['sample_text']
-				# TODO determine if we want duplicate sample questions, or other filtering
 				if sample_text in answer_questions:
 					continue
 				answer_questions.add(sample_text)
@@ -64,7 +63,6 @@ if __name__ == '__main__':
 
 	args = parser.parse_args()
 
-	# TODO figure out
 	rqe_path = args.rqe_path
 	scores_path = args.scores_path
 	output_path = args.output_path

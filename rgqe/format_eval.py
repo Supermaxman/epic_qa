@@ -108,7 +108,7 @@ class QuestionEntailmentGraph(object):
 						sample_a.add_entailment(sample_b)
 						sample_b.add_entailment(sample_a)
 
-	def prune_answers(self, overlap_ratio):
+	def prune_answers(self, overlap_ratio, top_k):
 		nodes = []
 		for answer in self.answers.values():
 			for sample in answer.children.values():
@@ -147,10 +147,10 @@ class QuestionEntailmentGraph(object):
 					seen_entailed_sets.add(a_entailed_set)
 
 		reranked_answers = list(sorted(reranked_answers, key=lambda x: x.score, reverse=True))
-		return reranked_answers[:100]
+		return reranked_answers[:top_k]
 
 
-def create_results(query_results, sample_entail_pairs, threshold, overlap_ratio):
+def create_results(query_results, sample_entail_pairs, threshold, overlap_ratio, top_k):
 	results = defaultdict(list)
 	for question_id, q_scores in query_results.items():
 		if question_id not in sample_entail_pairs:
@@ -163,7 +163,7 @@ def create_results(query_results, sample_entail_pairs, threshold, overlap_ratio)
 			q_samples,
 			threshold
 		)
-		q_answers = qe_graph.prune_answers(overlap_ratio)
+		q_answers = qe_graph.prune_answers(overlap_ratio, top_k)
 		results[question_id] = q_answers
 	return results
 
@@ -187,6 +187,7 @@ if __name__ == '__main__':
 	parser.add_argument('-o', '--output_path', required=True)
 	parser.add_argument('-t', '--threshold', default=0.8, type=float)
 	parser.add_argument('-l', '--overlap_ratio', default=0.8, type=float)
+	parser.add_argument('-k', '--top_k', default=1000, type=int)
 
 	args = parser.parse_args()
 
@@ -196,6 +197,7 @@ if __name__ == '__main__':
 	output_path = args.output_path
 	threshold = args.threshold
 	overlap_ratio = args.overlap_ratio
+	top_k = args.top_k
 	output_name = output_path.split('/')[-1].replace('.txt', '').replace('.pred', '')
 
 	with open(results_path) as f:
@@ -204,7 +206,7 @@ if __name__ == '__main__':
 	with open(rgqe_path) as f:
 		sample_entail_pairs = json.load(f)
 
-	rerank_results = create_results(query_results, sample_entail_pairs, threshold, overlap_ratio)
+	rerank_results = create_results(query_results, sample_entail_pairs, threshold, overlap_ratio, top_k)
 	write_run(rerank_results, output_path, output_name)
 
 

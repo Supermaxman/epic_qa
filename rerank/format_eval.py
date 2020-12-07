@@ -65,13 +65,13 @@ if __name__ == '__main__':
 	parser = argparse.ArgumentParser()
 	parser.add_argument('-p', '--pred_path', required=True)
 	parser.add_argument('-o', '--output_path', required=True)
-	parser.add_argument('-k', '--top_k', default=1000, type=int)
+	parser.add_argument('-k', '--top_k', default=2000, type=int)
 	parser.add_argument('-sd', '--single_per_doc', default=False, action='store_true')
 	parser.add_argument('-ao', '--allow_overlap', default=False, action='store_true')
 	parser.add_argument('-t', '--threshold', default=None, type=float)
 
 	args = parser.parse_args()
-	# 'runs/consumer/pruned_biobert_msmarco_multi_sentence'
+
 	pred_path = args.pred_path
 	output_path = args.output_path
 	output_name = output_path.split('/')[-1].replace('.txt', '').replace('.pred', '')
