@@ -108,7 +108,7 @@ class QuestionEntailmentGraph(object):
 						sample_a.add_entailment(sample_b)
 						sample_b.add_entailment(sample_a)
 
-	def prune_answers(self, overlap_ratio, top_k):
+	def prune_answers(self, overlap_ratio, overall_ratio, top_k):
 		nodes = []
 		for answer in self.answers.values():
 			for sample in answer.children.values():
@@ -134,27 +134,37 @@ class QuestionEntailmentGraph(object):
 		total_entailed_set_count = max(len(entailed_sets), 1)
 		seen_entailed_sets = set()
 		num_removed = 0
+		num_removed_overlap_ratio = 0
+		num_removed_overall_ratio = 0
 		for answer in sorted(self.answers.values(), key=lambda x: x.score, reverse=True):
 			answer_entailed_sets = answer.entailed_sets
 			total_answer_entailed_set_count = max(len(answer_entailed_sets), 1)
 			num_entailed_sets_overlapping = len(answer_entailed_sets.intersection(seen_entailed_sets))
 			entailed_overlap_ratio = num_entailed_sets_overlapping / total_answer_entailed_set_count
+			entailed_overall_ratio = total_answer_entailed_set_count / total_entailed_set_count
 			# overlap_ratio of 0 means result only contains new entailed sets
 			# overlap_ratio of 1.0 means result must contain at least one new entailed set
 			# overlap ratio above 1 means result can completely overlap with seen entailed sets
-			if entailed_overlap_ratio < overlap_ratio:
+			if entailed_overlap_ratio >= overlap_ratio:
+				num_removed_overlap_ratio += 1
+				num_removed += 1
+			if entailed_overall_ratio <= overall_ratio:
+				num_removed_overall_ratio += 1
+				num_removed += 1
+			else:
 				reranked_answers.append(answer)
 				for a_entailed_set in answer_entailed_sets:
 					seen_entailed_sets.add(a_entailed_set)
-			else:
-				num_removed += 1
 
-		print(f'{self.question_id} # Entail-Components: {len(entailed_sets)} (#removed={num_removed})')
+		print(
+			f'{self.question_id} # Entail-Components: {len(entailed_sets)} (#removed={num_removed}, '
+			f'#overlap={num_removed_overlap_ratio}, #overall={num_removed_overall_ratio})'
+		)
 		reranked_answers = list(sorted(reranked_answers, key=lambda x: x.score, reverse=True))
 		return reranked_answers[:top_k]
 
 
-def create_results(query_results, sample_entail_pairs, threshold, overlap_ratio, top_k):
+def create_results(query_results, sample_entail_pairs, threshold, overlap_ratio, overall_ratio, top_k):
 	results = defaultdict(list)
 	for question_id, q_scores in query_results.items():
 		if question_id not in sample_entail_pairs:
@@ -167,7 +177,7 @@ def create_results(query_results, sample_entail_pairs, threshold, overlap_ratio,
 			q_samples,
 			threshold
 		)
-		q_answers = qe_graph.prune_answers(overlap_ratio, top_k)
+		q_answers = qe_graph.prune_answers(overlap_ratio, overall_ratio, top_k)
 		results[question_id] = q_answers
 	return results
 
@@ -190,7 +200,8 @@ if __name__ == '__main__':
 	parser.add_argument('-g', '--rgqe_path', required=True)
 	parser.add_argument('-o', '--output_path', required=True)
 	parser.add_argument('-t', '--threshold', default=0.8, type=float)
-	parser.add_argument('-l', '--overlap_ratio', default=1.0, type=float)
+	parser.add_argument('-or', '--overlap_ratio', default=1.0, type=float)
+	parser.add_argument('-al', '--overall_ratio', default=0.0, type=float)
 	parser.add_argument('-k', '--top_k', default=1000, type=int)
 
 	args = parser.parse_args()
@@ -201,6 +212,7 @@ if __name__ == '__main__':
 	output_path = args.output_path
 	threshold = args.threshold
 	overlap_ratio = args.overlap_ratio
+	overall_ratio = args.overall_ratio
 	top_k = args.top_k
 	output_name = output_path.split('/')[-1].replace('.txt', '').replace('.pred', '')
 
@@ -210,7 +222,8 @@ if __name__ == '__main__':
 	with open(rgqe_path) as f:
 		sample_entail_pairs = json.load(f)
 
-	rerank_results = create_results(query_results, sample_entail_pairs, threshold, overlap_ratio, top_k)
+	rerank_results = create_results(
+		query_results, sample_entail_pairs, threshold, overlap_ratio, overall_ratio, top_k)
 	write_run(rerank_results, output_path, output_name)
 
 

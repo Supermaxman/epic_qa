@@ -57,14 +57,15 @@ python -m rgqe.format_eval \
   --results_path models/${RQE_MODEL_NAME}/${RUN_NAME}.rqe_scored \
   --rgqe_path models/${RQE_MODEL_NAME}/${RUN_NAME}.rgqe \
   --output_path models/${RQE_MODEL_NAME}/${RUN_NAME}_RGQE.txt \
-  --threshold 0.8 \
-  --overlap 1.0
+  --threshold 0.5 \
+  --overlap_ratio 1.0 \
+  --overall_ratio 0.0
 
 python rerank/epic_eval.py \
   data/${COLLECTION}/prelim_judgments_corrected.json \
   models/${RQE_MODEL_NAME}/${RUN_NAME}_RGQE.txt \
   rerank/.${DATASET}_ideal_ranking_scores.tsv \
-  --task ${DATASET}
+  --task ${DATASET} | tail -n 3
 
 
 01d8cqn4-C000-S002
