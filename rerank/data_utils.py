@@ -348,8 +348,8 @@ class RerankBatchCollator(object):
 		batch = {
 			'id': ids,
 			'question_id': question_ids,
-			'labels': labels,
-			'weights': weights,
+			'labels': torch.tensor(labels, dtype=torch.long),
+			'weights': torch.tensor(weights, dtype=torch.float),
 			'input_ids': tokenizer_batch['input_ids'],
 			'attention_mask': tokenizer_batch['attention_mask'],
 			'token_type_ids': tokenizer_batch['token_type_ids'],
