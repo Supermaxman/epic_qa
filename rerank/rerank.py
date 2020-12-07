@@ -21,7 +21,7 @@ if __name__ == '__main__':
 	parser.add_argument('-pm', '--pre_model_name', default='nboost/pt-biobert-base-msmarco')
 	parser.add_argument('-mn', '--model_name', default='pt-biobert-base-msmarco')
 	parser.add_argument('-sd', '--save_directory', default='models')
-	parser.add_argument('-bs', '--batch_size', default=128, type=int)
+	parser.add_argument('-bs', '--batch_size', default=32, type=int)
 	parser.add_argument('-ml', '--max_seq_len', default=96, type=int)
 	parser.add_argument('-ms', '--multi_sentence', default=False, action='store_true')
 	parser.add_argument('-ng', '--n_gram_max', default=3, type=int)
