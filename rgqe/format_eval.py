@@ -118,9 +118,11 @@ class QuestionEntailmentGraph(object):
 
 		entailed_facts = dfs.find_connected()
 		print(f'{self.question_id} # Entail-Components: {len(entailed_facts)}')
-		for entail_fact_nodes in entailed_facts:
-			pass
-
+		input()
+		for idx, entail_fact_nodes in enumerate(entailed_facts):
+			for node in entail_fact_nodes[:5]:
+				print(f'  CM{idx}: {node.sample_text}')
+		input()
 		reranked_answers = []
 		for answer_id, answer in self.answers.items():
 			reranked_answers.append(answer)
