@@ -30,9 +30,10 @@ python -m expand_query.expand \
  --collection_path data/${COLLECTION}/${DATASET}/data \
  --pre_model_name ${EXP_PRE_MODEL_NAME} \
  --model_name ${EXP_MODEL_NAME} \
- --top_k 20 \
- --num_samples 20 \
- --batch_size 16
+ --top_k 10 \
+ --num_samples 1 \
+ --batch_size 16 \
+ --max_seq_len 512
 
 python -m expand_query.format_expand \
   --model_path models/${EXP_MODEL_NAME} \
