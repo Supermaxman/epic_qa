@@ -1,4 +1,5 @@
 
+import sys
 from collections import defaultdict
 import argparse
 import json
@@ -186,6 +187,7 @@ if __name__ == '__main__':
 
 	args = parser.parse_args()
 
+	sys.setrecursionlimit(10 ** 6)
 	results_path = args.results_path
 	rgqe_path = args.rgqe_path
 	output_path = args.output_path

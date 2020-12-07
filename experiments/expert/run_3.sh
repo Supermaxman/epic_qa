@@ -55,7 +55,7 @@ python -m rgqe.format_eval \
   --results_path models/${RQE_MODEL_NAME}/${RUN_NAME}.rqe_scored \
   --rgqe_path models/${RQE_MODEL_NAME}/${RUN_NAME}.rgqe \
   --output_path models/${RQE_MODEL_NAME}/${RUN_NAME}_RGQE.txt \
-  --threshold 0.8 \
+  --threshold 0.5 \
   --overlap 0.8
 
 
