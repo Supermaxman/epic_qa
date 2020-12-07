@@ -64,8 +64,10 @@ if __name__ == '__main__':
 	num_labels = len(labels)
 	train_idx = int(split_ratio * num_labels)
 	train_labels = labels[:train_idx]
+	num_train_sentences = sum([len(x['annotations']) for x in train_labels])
 	val_labels = labels[train_idx:]
-	print(f'#train_qs={len(train_labels)}, #val_qs={len(val_labels)}')
+	num_val_sentences = sum([len(x['annotations']) for x in val_labels])
+	print(f'#train_qs={len(train_labels)} (#sentences={num_train_sentences}), #val_qs={len(val_labels)} (#sentences={num_val_sentences})')
 	with open(os.path.join(output_path, 'train.json'), 'w') as f:
 		json.dump(train_labels, f, indent=2)
 	with open(os.path.join(output_path, 'val.json'), 'w') as f:
