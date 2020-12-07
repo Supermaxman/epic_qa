@@ -10,7 +10,10 @@ def sort_results(rerank_scores, query_answer_samples):
 		q_results = []
 		for answer_id, answer_score in q_scores:
 			answer_questions = set()
-			query_samples = query_answer_samples[question_id][answer_id]
+			try:
+				query_samples = query_answer_samples[question_id][answer_id]
+			except KeyError:
+				query_samples = []
 			filtered_samples = []
 			for q_sample in query_samples:
 				# entail_prob = q_sample['entail_prob']

@@ -19,7 +19,6 @@ python -m expand_query.expand \
  --top_k 10 \
  --num_samples 10
 
-# kinda slow, need to speed up eventually
 python -m expand_query.format_expand \
   --model_path models/${EXP_MODEL_NAME} \
   --output_path models/${EXP_MODEL_NAME}/${RUN_NAME}.exp
