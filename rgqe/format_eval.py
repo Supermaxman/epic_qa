@@ -47,7 +47,7 @@ def create_results(query_results, sample_entail_pairs):
 			# if an answer which is ranked higher has at least one overlapping entailed sample question
 			# then we assume duplicate information is provided by the lower-ranked answer.
 			# TODO work on these
-			if num_higher_entailed_answers > 0:
+			if num_lower_entailed_answers > 0:
 				continue
 			q_results.append(answer)
 
