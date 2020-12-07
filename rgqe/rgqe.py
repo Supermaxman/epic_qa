@@ -16,7 +16,7 @@ if __name__ == '__main__':
 	parser.add_argument('-i', '--input_path', required=True)
 	parser.add_argument('-mn', '--model_name', default='models/quora-seq-at-nboost-pt-bert-base-uncased-msmarco')
 	parser.add_argument('-pm', '--pre_model_name', default='nboost/pt-bert-base-uncased-msmarco')
-	parser.add_argument('-bs', '--batch_size', default=64, type=int)
+	parser.add_argument('-bs', '--batch_size', default=16, type=int)
 	parser.add_argument('-ml', '--max_seq_len', default=128, type=int)
 	parser.add_argument('-se', '--seed', default=0, type=int)
 	parser.add_argument('-cd', '--torch_cache_dir', default=None)
@@ -40,7 +40,7 @@ if __name__ == '__main__':
 	is_distributed = False
 	# export TPU_IP_ADDRESS=10.155.6.34
 	# export XRT_TPU_CONFIG="tpu_worker;0;$TPU_IP_ADDRESS:8470"
-	gpus = [4, 5, 6, 7]
+	gpus = [0]
 	use_tpus = args.use_tpus
 	precision = 16 if use_tpus else 32
 	# precision = 32
