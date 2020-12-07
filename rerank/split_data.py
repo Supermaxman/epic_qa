@@ -51,6 +51,9 @@ if __name__ == '__main__':
 	split_ratio = args.split_ratio
 	dataset_prefix = 'C' if args.dataset.lower() == 'consumer' else 'E'
 
+	if not os.path.exists(output_path):
+		os.mkdir(output_path)
+
 	labels = []
 	with open(label_path, 'r') as f:
 		all_labels = json.load(f)

@@ -20,6 +20,10 @@ python search/search_passage_eval.py \
   --input_path data/${COLLECTION}/${DATASET}/search/${SEARCH_RUN} \
   --label_path data/${COLLECTION}/prelim_judgments_corrected.json
 
+python rerank/split_data.py \
+  --label_path data/${COLLECTION}/prelim_judgments_corrected.json \
+  --search_path data/${COLLECTION}/${DATASET}/search/${SEARCH_RUN} \
+  --output_path data/${COLLECTION}/${DATASET}/split \
 
 
 
