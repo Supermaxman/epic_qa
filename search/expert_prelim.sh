@@ -25,6 +25,21 @@ python -m pyserini.index \
 
 mkdir data/${COLLECTION}/${DATASET}/search
 
+python search/convert_sentences_to_json.py \
+  --collection_path data/${COLLECTION}/${DATASET}/data \
+  --json_collection_path data/${COLLECTION}/${DATASET}/data_sentence_json
+
+export INDEX_NAME=sentence_index
+
+python -m pyserini.index \
+  -collection JsonCollection \
+  -generator DefaultLuceneDocumentGenerator \
+  -threads 12 \
+  -input data/${COLLECTION}/${DATASET}/data_sentence_json \
+  -index data/${COLLECTION}/${DATASET}/indices/${INDEX_NAME} \
+  -storePositions \
+  -storeDocvectors \
+  -storeRaw
 
 python -m expand_query.expand \
  --collection_path data/${COLLECTION}/${DATASET}/data \

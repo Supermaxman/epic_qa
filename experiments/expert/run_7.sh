@@ -5,20 +5,27 @@ export SEARCH_RUN=passage-large
 export MODEL_NAME=rerank-expert-${SEARCH_RUN}
 export PRE_MODEL_NAME=nboost/pt-biobert-base-msmarco
 export DATASET=expert
-export INDEX_NAME=passage_index
+#export INDEX_NAME=passage_index
+export INDEX_NAME=sentence_index
 export COLLECTION=epic_qa_prelim
-export SEARCH_TOP_K=4000
+export SEARCH_TOP_K=2000
 
-python search/search_pass_index.py \
+python search/search_index.py \
   --index_path data/${COLLECTION}/${DATASET}/indices/${INDEX_NAME} \
   --query_path data/${COLLECTION}/${DATASET}/questions.json \
   --label_path data/${COLLECTION}/prelim_judgments_corrected.json \
   --output_path data/${COLLECTION}/${DATASET}/search/${SEARCH_RUN} \
-  --top_k ${SEARCH_TOP_K}
-
-python search/search_passage_eval.py \
+  --top_k ${SEARCH_TOP_K} \
+  --bm25_k1 0.82 \
+  --bm25_b 0.68 \
+; \
+python rerank/rerank_sentence_eval.py \
   --input_path data/${COLLECTION}/${DATASET}/search/${SEARCH_RUN} \
   --label_path data/${COLLECTION}/prelim_judgments_corrected.json
+
+#python search/search_passage_eval.py \
+#  --input_path data/${COLLECTION}/${DATASET}/search/${SEARCH_RUN} \
+#  --label_path data/${COLLECTION}/prelim_judgments_corrected.json
 
 python -m rerank.rerank \
   --query_path data/${COLLECTION}/${DATASET}/questions.json \
