@@ -5,14 +5,14 @@ import json
 
 
 def create_results(query_results, sample_entail_pairs):
-	lower_ranked_entailed_answers = sample_entail_pairs
+	lower_ranked_entailed_answers = defaultdict(lambda: defaultdict(lambda: defaultdict(list)))
 	higher_ranked_entailed_answers = defaultdict(lambda: defaultdict(lambda: defaultdict(list)))
 	for question_id, answer_a_entailed_answers in sample_entail_pairs.items():
 		for answer_a_id, answer_b_entailed_answers in answer_a_entailed_answers.items():
 			for answer_b_id, a_b_sample_pairs in answer_b_entailed_answers.items():
 				for sample_a, sample_b in a_b_sample_pairs:
 					higher_ranked_entailed_answers[question_id][answer_b_id][answer_a_id].append((sample_b, sample_a))
-
+					lower_ranked_entailed_answers[question_id][answer_a_id][answer_b_id].append((sample_a, sample_b))
 	results = defaultdict(list)
 	for question_id, q_scores in query_results.items():
 		q_results = []
@@ -27,14 +27,22 @@ def create_results(query_results, sample_entail_pairs):
 			# for q_sample in query_samples:
 			# 	sample_id = q_sample['sample_id']
 			# num answers with at least one sampled question which entails a current answer question
-			num_higher_entailed_answers = len(answer_higher_entailed)
+			num_higher_entailed_answers = 0
 			num_higher_entailed_samples = 0
-			for higher_answer, sample_pairs in answer_higher_entailed.items():
-				num_higher_entailed_samples += len(sample_pairs)
-			num_lower_entailed_answers = len(answer_lower_entailed)
+			for higher_answer_id, sample_pairs in answer_higher_entailed.items():
+				if higher_answer_id != answer_id:
+					num_higher_entailed_answers += 1
+					num_higher_entailed_samples += len(sample_pairs)
+				else:
+					# TODO self-entailed samples need to be handed explicitly
+					pass
+
+			num_lower_entailed_answers = 0
 			num_lower_entailed_samples = 0
-			for lower_answer, sample_pairs in answer_lower_entailed.items():
-				num_lower_entailed_samples += len(sample_pairs)
+			for lower_answer_id, sample_pairs in answer_lower_entailed.items():
+				if lower_answer_id != answer_id:
+					num_lower_entailed_answers += 1
+					num_lower_entailed_samples += len(sample_pairs)
 
 			# if an answer which is ranked higher has at least one overlapping entailed sample question
 			# then we assume duplicate information is provided by the lower-ranked answer.
