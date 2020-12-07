@@ -142,8 +142,8 @@ class QuestionEntailmentGraph(object):
 			# overlap_ratio of 1 means result only contains seen entailed sets
 			if entailed_overlap_ratio <= overlap_ratio:
 				reranked_answers.append(answer)
-			for a_entailed_set in answer_entailed_sets:
-				seen_entailed_sets.add(a_entailed_set)
+				for a_entailed_set in answer_entailed_sets:
+					seen_entailed_sets.add(a_entailed_set)
 
 		reranked_answers = list(sorted(reranked_answers, key=lambda x: x.score, reverse=True))
 		return reranked_answers
