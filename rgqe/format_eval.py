@@ -33,14 +33,17 @@ class QuestionSampleNode(object):
 		return self.merged_parent is not None
 
 	def left_merge(self, other):
-		self.remove_entailment(other)
-		other.remove_entailment(self)
-		for o_child_id, o_child in other.entail_edges.items():
-			o_child.remove_entailment(other)
-			o_child.add_entailment(self)
-			self.add_entailment(o_child)
-		self.merged_nodes[other.id] = other
-		other.set_merged(self)
+		if self.is_merged():
+			self.merged_parent.left_merge(other)
+		else:
+			self.remove_entailment(other)
+			other.remove_entailment(self)
+			for o_child_id, o_child in other.entail_edges.items():
+				o_child.remove_entailment(other)
+				o_child.add_entailment(self)
+				self.add_entailment(o_child)
+			self.merged_nodes[other.id] = other
+			other.set_merged(self)
 
 	def __len__(self):
 		return len(self.entail_edges)
@@ -69,7 +72,7 @@ class AnswerNode(object):
 	def merge_children(self):
 		for child_a, child_b in itertools.combinations(list(self.children.values()), r=2):
 			if child_a.entails(child_b):
-				child_b.left_merge(child_a)
+				child_a.left_merge(child_b)
 		for child in self.children:
 			if child.is_merged():
 				del self.children[child.id]
