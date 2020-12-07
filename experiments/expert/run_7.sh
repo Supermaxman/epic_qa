@@ -31,7 +31,8 @@ python -m rerank.rerank \
   --label_path data/${COLLECTION}/prelim_judgments_corrected.json \
   --pre_model_name ${PRE_MODEL_NAME} \
   --model_name ${MODEL_NAME} \
-  --max_seq_len 96
+  --max_seq_len 96 \
+  --use_tpus
 
 python -m rerank.format_preds \
   --model_path models/${MODEL_NAME} \

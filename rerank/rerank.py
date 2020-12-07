@@ -65,7 +65,7 @@ if __name__ == '__main__':
 	precision = 16 if use_tpus else 32
 	# precision = 32
 	tpu_cores = 8
-	num_workers = 1
+	num_workers = 4
 	deterministic = True
 
 	# Also add the stream handler so that it logs on STD out as well
