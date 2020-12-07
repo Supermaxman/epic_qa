@@ -88,10 +88,6 @@ if __name__ == '__main__':
 		sample_entail_pairs = json.load(f)
 
 	rerank_results = create_results(query_results, sample_entail_pairs)
-
-	with open(output_path) as f:
-		query_answer_samples = json.load(f)
-
 	write_run(rerank_results, output_path, output_name)
 
 
