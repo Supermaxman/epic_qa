@@ -31,13 +31,16 @@ if __name__ == '__main__':
 			line = line.strip().split()
 			if line:
 				question_id, _, answer_id, dq_rank, dq_score, dq_run = line
-				start_id, end_id = answer_id.split(':')
-				doc_id, pass_id, start_sent_id = start_id.split('-')
-				_, _, end_sent_id = end_id.split('-')
-				start_sent_idx = int(start_sent_id[1:])
-				end_sent_idx = int(end_sent_id[1:])
-				for sent_idx in range(start_sent_idx, end_sent_idx+1):
-					passage_qrels[question_id].add(f'{doc_id}-{pass_id}-S{sent_idx:03d}')
+				if ':' in answer_id:
+					start_id, end_id = answer_id.split(':')
+					doc_id, pass_id, start_sent_id = start_id.split('-')
+					_, _, end_sent_id = end_id.split('-')
+					start_sent_idx = int(start_sent_id[1:])
+					end_sent_idx = int(end_sent_id[1:])
+					for sent_idx in range(start_sent_idx, end_sent_idx+1):
+						passage_qrels[question_id].add(f'{doc_id}-{pass_id}-S{sent_idx:03d}')
+				else:
+					passage_qrels[question_id].add(answer_id)
 
 	for question_id, q_labels in labels.items():
 		if question_id not in passage_qrels:
