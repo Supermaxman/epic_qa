@@ -16,7 +16,7 @@ python search/search_pass_index.py \
   --output_path data/${COLLECTION}/${DATASET}/search/${SEARCH_RUN} \
   --top_k ${SEARCH_TOP_K}
 
-python search/search_eval.py \
+python search/search_passage_eval.py \
   --input_path data/${COLLECTION}/${DATASET}/search/${SEARCH_RUN} \
   --label_path data/${COLLECTION}/prelim_judgments_corrected.json \
   --top_k ${SEARCH_TOP_K}
