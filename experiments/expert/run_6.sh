@@ -17,7 +17,7 @@ python search/search_pass_index.py \
 
 python -m rerank.rerank \
   --query_path data/${COLLECTION}/${DATASET}/questions.json \
-  --collection_path data/expert/epic_qa_cord_2020-06-19_v2 \
+  --collection_path data/${COLLECTION}/${DATASET}/data \
   --passage_search_run data/${COLLECTION}/${DATASET}/search/${SEARCH_RUN} \
   --label_path data/prelim_judgments.json \
   --pre_model_name ${PRE_MODEL_NAME} \

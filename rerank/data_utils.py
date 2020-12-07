@@ -93,7 +93,14 @@ class QueryPassageDataset(Dataset):
 					if self.query_doc_pass is None:
 						doc_contexts = enumerate(doc['contexts'])
 					else:
-						doc_contexts = [(p_id, doc['contexts'][p_id]) for p_id in self.query_doc_pass[question_id][d_id]]
+						doc_contexts = []
+						for p_id in self.query_doc_pass[question_id][d_id]:
+							if p_id in doc['contexts']:
+								doc_contexts.append((p_id, doc['contexts'][p_id]))
+							else:
+								if not warned:
+									print('WARNING: some missing contexts')
+									warned = True
 
 					for p_id, passage in doc_contexts:
 						context_examples = []
