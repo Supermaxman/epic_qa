@@ -34,7 +34,7 @@ python -m rqe.format_rqe \
   --model_path models/${RQE_MODEL_NAME} \
   --expand_path models/${EXP_MODEL_NAME}/${RUN_NAME}.exp \
   --output_path models/${RQE_MODEL_NAME}/${RUN_NAME}.rqe \
-  --threshold 0.5
+  --threshold 0.008
 
 python -m rqe.format_run \
   --rqe_path models/${RQE_MODEL_NAME}/${RUN_NAME}.rqe \
