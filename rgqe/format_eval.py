@@ -141,8 +141,9 @@ class QuestionEntailmentGraph(object):
 			num_entailed_sets_overlapping = len(answer_entailed_sets.intersection(seen_entailed_sets))
 			entailed_overlap_ratio = num_entailed_sets_overlapping / total_answer_entailed_set_count
 			# overlap_ratio of 0 means result only contains new entailed sets
-			# overlap_ratio of 1 means result only contains seen entailed sets
-			if entailed_overlap_ratio <= overlap_ratio:
+			# overlap_ratio of 1.0 means result must contain at least one new entailed set
+			# overlap ratio above 1 means result can completely overlap with seen entailed sets
+			if entailed_overlap_ratio < overlap_ratio:
 				reranked_answers.append(answer)
 				for a_entailed_set in answer_entailed_sets:
 					seen_entailed_sets.add(a_entailed_set)
@@ -187,7 +188,7 @@ if __name__ == '__main__':
 	parser.add_argument('-g', '--rgqe_path', required=True)
 	parser.add_argument('-o', '--output_path', required=True)
 	parser.add_argument('-t', '--threshold', default=0.8, type=float)
-	parser.add_argument('-l', '--overlap_ratio', default=0.8, type=float)
+	parser.add_argument('-l', '--overlap_ratio', default=1.0, type=float)
 	parser.add_argument('-k', '--top_k', default=1000, type=int)
 
 	args = parser.parse_args()

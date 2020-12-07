@@ -36,7 +36,7 @@ python -m rqe.format_rqe \
   --model_path models/${RQE_MODEL_NAME} \
   --expand_path models/${EXP_MODEL_NAME}/${RUN_NAME}.exp \
   --output_path models/${RQE_MODEL_NAME}/${RUN_NAME}.rqe \
-  --threshold 0.4 \
+  --threshold 0.10 \
   --num_samples 3
 
 python -m rqe.format_run \
@@ -58,7 +58,7 @@ python -m rgqe.format_eval \
   --rgqe_path models/${RQE_MODEL_NAME}/${RUN_NAME}.rgqe \
   --output_path models/${RQE_MODEL_NAME}/${RUN_NAME}_RGQE.txt \
   --threshold 0.5 \
-  --overlap 0.5
+  --overlap 1.0
 
 python rerank/epic_eval.py \
   data/${COLLECTION}/prelim_judgments_corrected.json \
