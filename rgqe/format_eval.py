@@ -138,17 +138,16 @@ class QuestionEntailmentGraph(object):
 		num_removed_overall_ratio = 0
 		for answer in sorted(self.answers.values(), key=lambda x: x.score, reverse=True):
 			answer_entailed_sets = answer.entailed_sets
-			total_answer_entailed_set_count = max(len(answer_entailed_sets), 1)
 			num_entailed_sets_overlapping = len(answer_entailed_sets.intersection(seen_entailed_sets))
-			entailed_overlap_ratio = num_entailed_sets_overlapping / total_answer_entailed_set_count
-			entailed_overall_ratio = total_answer_entailed_set_count / total_entailed_set_count
+			entailed_overlap_ratio = num_entailed_sets_overlapping / max(len(answer_entailed_sets), 1)
+			entailed_overall_ratio = len(answer_entailed_sets) / total_entailed_set_count
 			# overlap_ratio of 0 means result only contains new entailed sets
 			# overlap_ratio of 1.0 means result must contain at least one new entailed set
 			# overlap ratio above 1 means result can completely overlap with seen entailed sets
 			if entailed_overlap_ratio >= overlap_ratio:
 				num_removed_overlap_ratio += 1
 				num_removed += 1
-			if entailed_overall_ratio <= overall_ratio:
+			elif entailed_overall_ratio <= overall_ratio:
 				num_removed_overall_ratio += 1
 				num_removed += 1
 			else:
