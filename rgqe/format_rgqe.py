@@ -27,7 +27,7 @@ def load_predictions(model_path, threshold):
 		probs.append(entail_prob)
 		if entail_prob < threshold:
 			continue
-		sample_entail_pairs[question_id][answer_a_id][answer_b_id].append((sample_a_id, sample_b_id))
+		sample_entail_pairs[question_id][answer_a_id][answer_b_id].append((sample_a_id, sample_b_id, entail_prob))
 	print(f'min={min(probs)}')
 	print(f'max={max(probs)}')
 	return sample_entail_pairs

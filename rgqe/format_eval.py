@@ -5,6 +5,31 @@ import json
 import itertools
 
 
+class DFS(object):
+	def __init__(self, nodes):
+		self.visited = {}
+		self.nodes = nodes
+		for v in self.nodes:
+			self.visited[v] = False
+
+	def find_connected(self):
+		components = []
+		for v in self.nodes:
+			if not self.visited[v]:
+				c_list = []
+				c = self.dfs_search(v, c_list)
+				components.append(c)
+		return components
+
+	def dfs_search(self, v, c_list):
+		self.visited[v] = True
+		c_list.append(v)
+		for c in v.entail_edges.values():
+			if c in self.visited and not self.visited[c]:
+				self.dfs_search(c, c_list)
+		return c_list
+
+
 class QuestionSampleNode(object):
 	def __init__(self, parent, sample_id, entail_prob, sample_text):
 		self.id = f'{parent.answer_id}|{sample_id}'
@@ -27,33 +52,6 @@ class QuestionSampleNode(object):
 	def entails(self, other):
 		return other.id in self.entail_edges
 
-	def set_merged(self, other):
-		assert self.merged_parent is None
-		self.merged_parent = other
-
-	def is_merged(self):
-		return self.merged_parent is not None
-
-	def left_merge(self, other):
-		if other.id == self.id:
-			return
-		if self.is_merged():
-			self.merged_parent.left_merge(other)
-		if other.is_merged():
-			self.left_merge(other.merged_parent)
-		else:
-			self.remove_entailment(other)
-			other.remove_entailment(self)
-			for o_child_id, o_child in other.entail_edges.items():
-				o_child.remove_entailment(other)
-				o_child.add_entailment(self)
-				self.add_entailment(o_child)
-			self.merged_nodes[other.id] = other
-			other.set_merged(self)
-
-	def __len__(self):
-		return len(self.entail_edges)
-
 
 class AnswerNode(object):
 	def __init__(self, question_id, answer_id, rerank_score):
@@ -68,27 +66,17 @@ class AnswerNode(object):
 	def get_child(self, sample_id):
 		return self.children[sample_id]
 
-	def num_unique(self):
-		num_unique = 0
-		for child_a, child_b in itertools.combinations(self.children, r=2):
-			if child_a.entails(child_b):
-				num_unique += 1
-		return num_unique
-
-	def merge_children(self):
-		for child_a, child_b in itertools.combinations(list(self.children.values()), r=2):
-			if child_a.entails(child_b):
-				child_a.left_merge(child_b)
-		for child in self.children:
-			if child.is_merged():
-				del self.children[child.id]
+	def find_connected(self):
+		dfs = DFS(self.children.values())
+		entailed_components = dfs.find_connected()
+		return entailed_components
 
 	def __len__(self):
 		return len(self.children)
 
 
 class QuestionEntailmentGraph(object):
-	def __init__(self, question_id, question_scores, question_samples):
+	def __init__(self, question_id, question_scores, question_samples, edge_threshold):
 		self.answers = {}
 		for answer in question_scores:
 			answer_node = AnswerNode(
@@ -109,32 +97,42 @@ class QuestionEntailmentGraph(object):
 			answer_a = self.answers[answer_a_id]
 			for answer_b_id, a_b_sample_pairs in answer_b_entailed_answers.items():
 				answer_b = self.answers[answer_b_id]
-				for sample_a_id, sample_b_id in a_b_sample_pairs:
-					sample_a = answer_a.get_child(sample_a_id)
-					sample_b = answer_b.get_child(sample_b_id)
-					sample_a.add_entailment(sample_b)
-					sample_b.add_entailment(sample_a)
+				for sample_a_id, sample_b_id, a_b_entail_prob in a_b_sample_pairs:
+					if a_b_entail_prob > edge_threshold:
+						sample_a = answer_a.get_child(sample_a_id)
+						sample_b = answer_b.get_child(sample_b_id)
+						sample_a.add_entailment(sample_b)
+						sample_b.add_entailment(sample_a)
 
-	def rerank_answers(self):
+	def prune_answers(self):
+
+		dfs = DFS(
+			nodes=self.answers.values()
+		)
+
+		entailed_facts = dfs.find_connected()
+		print(f'Number of facts: {len(entailed_facts)}')
+		for entail_fact_nodes in entailed_facts:
+			pass
+
 		reranked_answers = []
 		for answer_id, answer in self.answers.items():
-			answer.merge_children()
-			num_unique = len(answer)
 			reranked_answers.append(answer)
 		reranked_answers = list(sorted(reranked_answers, key=lambda x: x.score, reverse=True))
 		return reranked_answers
 
 
-def create_results(query_results, sample_entail_pairs):
+def create_results(query_results, sample_entail_pairs, threshold):
 	results = defaultdict(list)
 	for question_id, q_scores in query_results.items():
 		q_samples = sample_entail_pairs[question_id]
 		qe_graph = QuestionEntailmentGraph(
 			question_id,
 			q_scores,
-			q_samples
+			q_samples,
+			threshold
 		)
-		q_answers = qe_graph.rerank_answers()
+		q_answers = qe_graph.prune_answers()
 		results[question_id] = q_answers
 	return results
 
@@ -206,6 +204,7 @@ if __name__ == '__main__':
 	parser.add_argument('-r', '--results_path', required=True)
 	parser.add_argument('-g', '--rgqe_path', required=True)
 	parser.add_argument('-o', '--output_path', required=True)
+	parser.add_argument('-t', '--threshold', default=0.5, type=float)
 
 	args = parser.parse_args()
 
@@ -213,6 +212,7 @@ if __name__ == '__main__':
 	results_path = args.results_path
 	rgqe_path = args.rgqe_path
 	output_path = args.output_path
+	threshold = args.threshold
 	output_name = output_path.split('/')[-1].replace('.txt', '').replace('.pred', '')
 
 	with open(results_path) as f:
@@ -221,7 +221,7 @@ if __name__ == '__main__':
 	with open(rgqe_path) as f:
 		sample_entail_pairs = json.load(f)
 
-	rerank_results = create_results(query_results, sample_entail_pairs)
+	rerank_results = create_results(query_results, sample_entail_pairs, threshold)
 	write_run(rerank_results, output_path, output_name)
 
 
