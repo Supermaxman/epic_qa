@@ -139,7 +139,8 @@ class QuestionEntailmentGraph(object):
 
 			if num_entailed_sets_overlapping == 0:
 				reranked_answers.append(answer)
-			seen_entailed_sets += answer_entailed_sets
+			for a_entailed_set in answer_entailed_sets:
+				seen_entailed_sets.add(a_entailed_set)
 
 		reranked_answers = list(sorted(reranked_answers, key=lambda x: x.score, reverse=True))
 		return reranked_answers
