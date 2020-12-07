@@ -16,7 +16,7 @@ mkdir data/${COLLECTION}/${DATASET}/indices
 python -m pyserini.index \
   -collection JsonCollection \
   -generator DefaultLuceneDocumentGenerator \
-  -threads 8 \
+  -threads 12 \
   -input data/${COLLECTION}/${DATASET}/data_json \
   -index data/${COLLECTION}/${DATASET}/indices/${INDEX_NAME} \
   -storePositions \

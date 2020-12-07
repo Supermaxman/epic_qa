@@ -37,6 +37,11 @@ python -m rerank.format_eval \
   --pred_path models/${MODEL_NAME}/${RUN_NAME}.pred \
   --output_path models/${MODEL_NAME}/${RUN_NAME}.txt
 
+python rerank/rerank_sentence_eval.py \
+  --input_path models/${MODEL_NAME}/${RUN_NAME}.txt \
+  --label_path data/${COLLECTION}/prelim_judgments_corrected.json \
+  --top_k 1000
+
 python rerank/epic_eval.py \
   data/${COLLECTION}/prelim_judgments_corrected.json \
   models/${MODEL_NAME}/${RUN_NAME}.txt \

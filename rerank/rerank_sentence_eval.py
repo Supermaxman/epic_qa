@@ -39,7 +39,7 @@ if __name__ == '__main__':
 				start_sent_idx = int(start_sent_id[1:])
 				end_sent_idx = int(end_sent_id[1:])
 				for sent_idx in range(start_sent_idx, end_sent_idx+1):
-					passage_qrels[question_id].add(f'{doc_id}-{pass_id}-S{sent_idx:04d}')
+					passage_qrels[question_id].add(f'{doc_id}-{pass_id}-S{sent_idx:03d}')
 
 	for question_id, q_passage_qrels in passage_qrels.items():
 		q_labels = labels[question_id]
