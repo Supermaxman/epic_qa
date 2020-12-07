@@ -20,7 +20,8 @@ class QuestionSampleNode(object):
 		self.entail_edges[other.id] = other
 
 	def remove_entailment(self, other):
-		del self.entail_edges[other.id]
+		if other.id in self.entail_edges:
+			del self.entail_edges[other.id]
 
 	def entails(self, other):
 		return other.id in self.entail_edges
