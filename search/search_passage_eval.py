@@ -36,8 +36,8 @@ if __name__ == '__main__':
 				question_id, _, doc_pass_id, dq_rank, dq_score, dq_run = line
 				passage_qrels[question_id].add(doc_pass_id)
 
-	for question_id, q_passage_qrels in passage_qrels.items():
-		q_labels = labels[question_id]
+	for question_id, q_labels in labels.items():
+		q_passage_qrels = passage_qrels[question_id]
 		num_found = len(q_labels.intersection(q_passage_qrels))
 		total_count = len(q_labels)
 		percent_found = num_found / total_count

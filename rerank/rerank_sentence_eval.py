@@ -41,8 +41,8 @@ if __name__ == '__main__':
 				for sent_idx in range(start_sent_idx, end_sent_idx+1):
 					passage_qrels[question_id].add(f'{doc_id}-{pass_id}-S{sent_idx:03d}')
 
-	for question_id, q_passage_qrels in passage_qrels.items():
-		q_labels = labels[question_id]
+	for question_id, q_labels in labels.items():
+		q_passage_qrels = passage_qrels[question_id]
 		num_found = len(q_labels.intersection(q_passage_qrels))
 		total_count = len(q_labels)
 		percent_found = num_found / total_count
