@@ -125,12 +125,12 @@ class QuestionEntailmentGraph(object):
 				answer.entailed_sets.add(entail_set_id)
 
 		print(f'{self.question_id} # Entail-Components: {len(entailed_sets)}')
-		for idx, entail_fact_nodes in enumerate(entailed_sets):
-			print(f'  CM{idx}: ')
-			for node in entail_fact_nodes[:20]:
-				print(f'    {node.sample_text}')
-				input()
-		input()
+		# for idx, entail_fact_nodes in enumerate(entailed_sets):
+		# 	print(f'  CM{idx}: ')
+		# 	for node in entail_fact_nodes[:3]:
+		# 		print(f'    {node.sample_text}')
+		# 		# input()
+		# input()
 		reranked_answers = []
 		total_entailed_set_count = max(len(entailed_sets), 1)
 		seen_entailed_sets = set()

@@ -17,7 +17,7 @@ python -m expand_query.expand \
  --pre_model_name ${EXP_PRE_MODEL_NAME} \
  --model_name ${EXP_MODEL_NAME} \
  --top_k 10 \
- --num_samples 10
+ --num_samples 3
 
 python -m expand_query.format_expand \
   --model_path models/${EXP_MODEL_NAME} \
@@ -34,8 +34,8 @@ python -m rqe.format_rqe \
   --model_path models/${RQE_MODEL_NAME} \
   --expand_path models/${EXP_MODEL_NAME}/${RUN_NAME}.exp \
   --output_path models/${RQE_MODEL_NAME}/${RUN_NAME}.rqe \
-  --threshold 0.15 \
-  --num_samples 10
+  --threshold 0.10 \
+  --num_samples 3
 
 python -m rqe.format_run \
   --rqe_path models/${RQE_MODEL_NAME}/${RUN_NAME}.rqe \
@@ -57,7 +57,7 @@ python -m rgqe.format_eval \
   --output_path models/${RQE_MODEL_NAME}/${RUN_NAME}_RGQE.txt \
   --threshold 0.65 \
   --overlap 0.1  \
-; \
+
 python rerank/epic_eval.py \
   data/${COLLECTION}/prelim_judgments_corrected.json \
   models/${RQE_MODEL_NAME}/${RUN_NAME}_RGQE.txt \
@@ -67,3 +67,4 @@ python rerank/epic_eval.py \
 
 01d8cqn4-C000-S002
 01d8cqn4-0-2
+01d8cqn4-0-5
