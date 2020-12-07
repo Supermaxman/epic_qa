@@ -42,7 +42,7 @@ if __name__ == '__main__':
 	parser.add_argument('-s', '--search_path', required=True)
 	parser.add_argument('-o', '--output_path', required=True)
 	parser.add_argument('-ds', '--dataset', required=True)
-	parser.add_argument('-sr', '--split_ratio', default=0.8, type=float)
+	parser.add_argument('-sr', '--split_ratio', default=0.9, type=float)
 	args = parser.parse_args()
 
 	label_path = args.label_path
