@@ -92,7 +92,7 @@ class QueryPassageDataset(Dataset):
 				if self.query_doc_pass is None:
 					doc_contexts = doc['contexts']
 				else:
-					context_lookup = [c['context_id'] for c in doc['contexts']]
+					context_lookup = {c['context_id']: c for c in doc['contexts']}
 					doc_contexts = []
 					for p_id in self.query_doc_pass[question_id][d_id]:
 						if p_id in context_lookup:
