@@ -138,7 +138,9 @@ class QuestionEntailmentGraph(object):
 			total_answer_entailed_set_count = max(len(answer_entailed_sets), 1)
 			num_entailed_sets_overlapping = len(answer_entailed_sets.intersection(seen_entailed_sets))
 			entailed_overlap_ratio = num_entailed_sets_overlapping / total_answer_entailed_set_count
-			if entailed_overlap_ratio < overlap_ratio:
+			# overlap_ratio of 0 means result only contains new entailed sets
+			# overlap_ratio of 1 means result only contains seen entailed sets
+			if entailed_overlap_ratio <= overlap_ratio:
 				reranked_answers.append(answer)
 			for a_entailed_set in answer_entailed_sets:
 				seen_entailed_sets.add(a_entailed_set)
