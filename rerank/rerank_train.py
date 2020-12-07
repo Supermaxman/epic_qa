@@ -155,6 +155,7 @@ if __name__ == '__main__':
 		passage_qrels,
 		only_passages
 	)
+	logging.info(f'#positive={train_dataset.num_positive}, #negative={train_dataset.num_negative}')
 	val_dataset = QueryPassageLabeledDataset(
 		collection_path,
 		queries,
