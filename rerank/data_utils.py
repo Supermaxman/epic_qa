@@ -426,6 +426,8 @@ class QueryPassageLabeledDataset(Dataset):
 				doc_queries = [self.query_lookup[q_id] for q_id in self.query_docs[d_id]]
 			for query in doc_queries:
 				question_id = query['question_id']
+				if question_id not in self.labels:
+					continue
 				q_labels = self.labels[question_id]['annotations']
 				if self.query_doc_pass is None:
 					doc_contexts = doc['contexts']
