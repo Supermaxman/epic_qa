@@ -35,7 +35,7 @@ python -m rerank.rerank_train \
   --split_path data/${COLLECTION}/${DATASET}/split \
   --pre_model_name ${PRE_MODEL_NAME} \
   --model_name ${MODEL_NAME} \
-  --max_seq_len 96 \
+  --max_seq_len 80 \
   --batch_size 64 \
   --negative_samples ${NEGATIVE_SAMPLES} \
   --add_all_labels \
