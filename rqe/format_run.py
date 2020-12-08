@@ -18,7 +18,6 @@ def sort_results(rerank_scores, query_answer_samples):
 			for q_sample in query_samples:
 				# entail_prob = q_sample['entail_prob']
 				sample_text = q_sample['sample_text']
-				# TODO determine if we want duplicate sample questions, or other filtering
 				if sample_text in answer_questions:
 					continue
 				answer_questions.add(sample_text)

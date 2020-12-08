@@ -1,53 +1,53 @@
 #!/usr/bin/env bash
 
-export RUN_NAME=HLTRI_RERANK_EXPANDED_5
-export SEARCH_RUN=passage-1200
-export SCORE_RUN_NAME=HLTRI_RERANK_4
-export SCORE_MODEL_NAME=pt-biobert-base-msmarco-expert-${SEARCH_RUN}
+export RUN_NAME=HLTRI_RERANK_RQE_21
+export SEARCH_RUN=passage-large
+export RERANK_RUN_NAME=HLTRI_RERANK_15
+export RERANK_MODEL_NAME=rerank-expert-${SEARCH_RUN}-${RERANK_RUN_NAME}
 export EXP_MODEL_NAME=docT5query-base
 export RQE_MODEL_NAME=quora-seq-nboost-pt-bert-base-uncased-msmarco
 export EXP_PRE_MODEL_NAME=models/docT5query-base/model.ckpt-1004000
 export DATASET=expert
 export COLLECTION=epic_qa_prelim
 
-# needs to be run on GPU, TPUs do not like generator
+# create expanded questions for every answer
 python -m expand_query.expand \
- --input_path models/${SCORE_MODEL_NAME}/${SCORE_RUN_NAME}.txt \
+ --input_path models/${RERANK_MODEL_NAME}/${RERANK_RUN_NAME}.txt \
  --collection_path data/${COLLECTION}/${DATASET}/data \
  --pre_model_name ${EXP_PRE_MODEL_NAME} \
  --model_name ${EXP_MODEL_NAME} \
  --top_k 20 \
  --num_samples 20 \
- --batch_size 8 \
- --max_seq_len 512 \
+ --batch_size 16 \
 ; \
 python -m expand_query.format_expand \
   --model_path models/${EXP_MODEL_NAME} \
   --output_path models/${EXP_MODEL_NAME}/${RUN_NAME}.exp
 
+#
 python -m rqe.rqe \
-  --input_path models/${SCORE_MODEL_NAME}/${SCORE_RUN_NAME}.txt \
+  --input_path models/${RERANK_MODEL_NAME}/${RERANK_RUN_NAME}.txt \
   --expand_path models/${EXP_MODEL_NAME}/${RUN_NAME}.exp \
   --query_path data/${COLLECTION}/${DATASET}/questions.json \
-  --label_path data/${COLLECTION}/prelim_judgments_corrected.json \
-  --model_name models/${RQE_MODEL_NAME}
-
+  --label_path data/${COLLECTION}/${DATASET}/split/val.json \
+  --model_name models/${RQE_MODEL_NAME} \
+; \
 python -m rqe.format_rqe \
   --model_path models/${RQE_MODEL_NAME} \
   --expand_path models/${EXP_MODEL_NAME}/${RUN_NAME}.exp \
   --output_path models/${RQE_MODEL_NAME}/${RUN_NAME}.rqe \
   --threshold 0.01 \
-  --num_samples 3
-
+  --num_samples 1 \
+; \
 python -m rqe.format_run \
   --rqe_path models/${RQE_MODEL_NAME}/${RUN_NAME}.rqe \
-  --scores_path models/${SCORE_MODEL_NAME}/${SCORE_RUN_NAME}.txt \
+  --scores_path models/${RERANK_MODEL_NAME}/${RERANK_RUN_NAME}.txt \
   --output_path models/${RQE_MODEL_NAME}/${RUN_NAME}.rqe_scored
 
 python -m rgqe.rgqe \
   --input_path models/${RQE_MODEL_NAME}/${RUN_NAME}.rqe_scored \
-  --model_name models/${RQE_MODEL_NAME}
-
+  --model_name models/${RQE_MODEL_NAME} \
+; \
 python -m rgqe.format_rgqe \
   --model_path models/${RQE_MODEL_NAME} \
   --output_path models/${RQE_MODEL_NAME}/${RUN_NAME}.rgqe \
@@ -59,15 +59,17 @@ python -m rgqe.format_eval \
   --output_path models/${RQE_MODEL_NAME}/${RUN_NAME}_RGQE.txt \
   --threshold 0.5 \
   --overlap_ratio 1.0 \
-  --overall_ratio 0.0
-
+  --overall_ratio 0.0 \
+; \
 python rerank/epic_eval.py \
-  data/${COLLECTION}/prelim_judgments_corrected.json \
-  models/${RQE_MODEL_NAME}/${RUN_NAME}_RGQE.txt \
+  data/${COLLECTION}/${DATASET}/split/val.json \
+  models/${RQE_MODEL_NAME}/${RUN_NAME}.txt \
   rerank/.${DATASET}_ideal_ranking_scores.tsv \
-  --task ${DATASET} | tail -n 3
-
-
-01d8cqn4-C000-S002
-01d8cqn4-0-2
-01d8cqn4-0-5
+  --task ${DATASET} \
+  | tail -n 3 \
+  | awk \
+    '{ for (i=1; i<=NF; i++) RtoC[i]= (RtoC[i]? RtoC[i] FS $i: $i) }
+    END{ for (i in RtoC) print RtoC[i] }' \
+  | tail -n 2 > models/${RQE_MODEL_NAME}/${RUN_NAME}.eval \
+; \
+cat models/${RQE_MODEL_NAME}/${RUN_NAME}.eval
