@@ -419,6 +419,7 @@ class QueryPassageLabeledDataset(Dataset):
 		self.only_passages = only_passages
 		self.num_positive = 0
 		self.num_negative = 0
+		self.query_num_negative = {query['question_id']: 0 for query in queries}
 		warned = False
 		for d_name in tqdm(self.file_names):
 			if not d_name.endswith('.json'):
@@ -465,11 +466,12 @@ class QueryPassageLabeledDataset(Dataset):
 								label = 1
 								self.num_positive += 1
 							else:
-								if self.num_negative > self.negative_samples:
+								if self.query_num_negative[question_id] > self.negative_samples:
 									continue
 								weight = 1.0
 								label = 0
 								self.num_negative += 1
+								self.query_num_negative[question_id] += 1
 
 							example = {
 								'id': f'{s_id}:{s_id}',
