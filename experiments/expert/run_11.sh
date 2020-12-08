@@ -39,6 +39,7 @@ python -m rerank.rerank_train \
   --negative_samples 400 \
   --add_all_labels \
   --weighted_loss \
+  --learning_rate 5e-6 \
   --epochs 5
 
 python -m rerank.rerank \

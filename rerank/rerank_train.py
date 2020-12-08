@@ -37,6 +37,7 @@ if __name__ == '__main__':
 	parser.add_argument('-opa', '--only_passages', default=False, action='store_true')
 	parser.add_argument('-al', '--add_all_labels', default=False, action='store_true')
 	parser.add_argument('-wl', '--weighted_loss', default=False, action='store_true')
+	parser.add_argument('-lr', '--learning_rate', default=5e-5, type=float)
 
 	args = parser.parse_args()
 	seed = args.seed
@@ -69,6 +70,7 @@ if __name__ == '__main__':
 	add_all_labels = args.add_all_labels
 	epochs = args.epochs
 	weighted_loss = args.weighted_loss
+	learning_rate = args.learning_rate
 
 	is_distributed = False
 	# export TPU_IP_ADDRESS=10.155.6.34
@@ -207,10 +209,10 @@ if __name__ == '__main__':
 	logging.info('Loading model...')
 	model = RerankBert(
 		pre_model_name=pre_model_name,
-		learning_rate=5e-5,
+		learning_rate=learning_rate,
 		lr_warmup=0.1,
 		updates_total=updates_total,
-		weight_decay=0.01,
+		weight_decay=0.0,
 		torch_cache_dir=torch_cache_dir,
 		weighted_loss=weighted_loss
 	)
