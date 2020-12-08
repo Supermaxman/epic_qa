@@ -46,7 +46,8 @@ python -m rerank.rerank \
   --label_path data/${COLLECTION}/${DATASET}/split/val.json \
   --pre_model_name ${PRE_MODEL_NAME} \
   --model_name ${MODEL_NAME} \
-  --max_seq_len 96
+  --max_seq_len 96 \
+  --load_trained_model
 
 python -m rerank.format_preds \
   --model_path models/${MODEL_NAME} \

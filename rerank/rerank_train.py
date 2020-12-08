@@ -66,6 +66,7 @@ if __name__ == '__main__':
 	only_passages = args.only_passages
 	negative_samples = args.negative_samples
 	add_all_labels = args.add_all_labels
+	epochs = args.epochs
 
 	is_distributed = False
 	# export TPU_IP_ADDRESS=10.155.6.34
@@ -78,7 +79,6 @@ if __name__ == '__main__':
 	num_workers = 4
 	deterministic = True
 
-	epochs = 10
 	# Also add the stream handler so that it logs on STD out as well
 	# Ref: https://stackoverflow.com/a/46098711/4535284
 	for handler in logging.root.handlers[:]:
