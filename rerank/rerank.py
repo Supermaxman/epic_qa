@@ -189,7 +189,9 @@ if __name__ == '__main__':
 		logging.warning('Loading weights from trained checkpoint...')
 		# model.load_state_dict(torch.load(checkpoint_path))
 		model = RerankBert.load_from_checkpoint(
-			checkpoint_path='models/rerank-expert-passage-large-rebalanced-100/default/version_0/checkpoints/epoch=4.ckpt'
+			checkpoint_path='models/rerank-expert-passage-large-rebalanced-100/default/version_0/checkpoints/epoch=4.ckpt',
+			predict_mode=True,
+			predict_path=save_directory
 		)
 	else:
 		model = RerankBert(
