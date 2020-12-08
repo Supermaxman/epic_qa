@@ -35,7 +35,7 @@ python -m rerank.rerank_train \
   --pre_model_name ${PRE_MODEL_NAME} \
   --model_name ${MODEL_NAME} \
   --max_seq_len 96 \
-  --batch_size 32 \
+  --batch_size 8 \
   --negative_samples 100 \
   --add_all_labels \
   --weighted_loss \
