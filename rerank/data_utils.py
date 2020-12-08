@@ -419,7 +419,7 @@ class QueryPassageLabeledDataset(Dataset):
 		self.only_passages = only_passages
 		self.num_positive = 0
 		self.num_negative = 0
-		self.query_num_negative = {query['question_id']: 0 for query in queries}
+		self.question_negative_examples = defaultdict(list)
 		warned = False
 		for d_name in tqdm(self.file_names):
 			if not d_name.endswith('.json'):
@@ -466,12 +466,8 @@ class QueryPassageLabeledDataset(Dataset):
 								label = 1
 								self.num_positive += 1
 							else:
-								if self.query_num_negative[question_id] > self.negative_samples:
-									continue
 								weight = 1.0
 								label = 0
-								self.num_negative += 1
-								self.query_num_negative[question_id] += 1
 
 							example = {
 								'id': f'{s_id}:{s_id}',
@@ -482,7 +478,10 @@ class QueryPassageLabeledDataset(Dataset):
 								'weight': weight,
 								'label': label
 							}
-							self.examples.append(example)
+							if label == 1:
+								self.examples.append(example)
+							else:
+								self.question_negative_examples[question_id].append(example)
 							context_examples.append(example)
 						if self.multi_sentence:
 							raise NotImplementedError()
@@ -513,7 +512,15 @@ class QueryPassageLabeledDataset(Dataset):
 							'query': query['question']
 							# 'query': query['question'] + ' ' + query['query'] + ', ' + query['background']
 						}
-						self.examples.append(example)
+		self.negative_examples = []
+		for question_id, q_negative_examples in self.question_negative_examples.items():
+			random.shuffle(q_negative_examples)
+			q_negative_examples = q_negative_examples[:self.negative_samples]
+			self.negative_examples += q_negative_examples
+
+		self.num_negative = len(self.negative_examples)
+		self.examples = self.examples + self.negative_examples
+		random.shuffle(self.examples)
 
 	def __len__(self):
 		return len(self.examples)

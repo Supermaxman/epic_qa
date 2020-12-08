@@ -38,7 +38,8 @@ python -m rerank.rerank_train \
   --batch_size 32 \
   --negative_samples 100 \
   --add_all_labels \
-  --weighted_loss
+  --weighted_loss \
+  --epochs 5
 
 python -m rerank.rerank \
   --query_path data/${COLLECTION}/${DATASET}/questions.json \
