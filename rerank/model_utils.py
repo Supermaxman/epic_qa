@@ -156,7 +156,7 @@ class QuestionAnsweringSampledBert(pl.LightningModule):
 class RerankBert(pl.LightningModule):
 	def __init__(
 			self, pre_model_name, learning_rate, weight_decay, lr_warmup, updates_total,
-			torch_cache_dir, predict_mode=False, predict_path=None):
+			torch_cache_dir, predict_mode=False, predict_path=None, weighted_loss=False):
 		super().__init__()
 		self.pre_model_name = pre_model_name
 		self.torch_cache_dir = torch_cache_dir
@@ -166,6 +166,7 @@ class RerankBert(pl.LightningModule):
 		self.updates_total = updates_total
 		self.predict_mode = predict_mode
 		self.predict_path = predict_path
+		self.weighted_loss = weighted_loss
 		self.bert = AutoModelForSequenceClassification.from_pretrained(
 			pre_model_name,
 			cache_dir=torch_cache_dir
@@ -208,10 +209,18 @@ class RerankBert(pl.LightningModule):
 		)
 		if not self.predict_mode:
 			labels = batch['labels']
-			loss = self._loss(
-				logits,
-				labels,
-			)
+			if self.weighted_loss:
+				weights = batch['weights']
+				loss = self._loss(
+					logits,
+					labels,
+					weights
+				)
+			else:
+				loss = self._loss(
+					logits,
+					labels,
+				)
 			# TODO add weights batch['weights']
 			prediction = logits.max(dim=1)[1]
 			batch_size = logits.shape[0]
@@ -298,11 +307,13 @@ class RerankBert(pl.LightningModule):
 
 		return optimizer_params
 
-	def _loss(self, logits, labels):
+	def _loss(self, logits, labels, weights=None):
 		loss = self.criterion(
 			logits,
 			labels
 		)
+		if weights is not None:
+			loss = loss * weights
 
 		return loss
 
