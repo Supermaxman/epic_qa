@@ -8,7 +8,7 @@ export DATASET=expert
 export INDEX_NAME=passage_index
 export COLLECTION=epic_qa_prelim
 export SEARCH_TOP_K=1000
-export NEGATIVE_SAMPLES=400
+export NEGATIVE_SAMPLES=800
 
 #python search/search_index.py \
 #  --index_path data/${COLLECTION}/${DATASET}/indices/${INDEX_NAME} \
