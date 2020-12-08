@@ -231,7 +231,8 @@ if __name__ == '__main__':
 			default_root_dir=save_directory,
 			max_epochs=0,
 			precision=precision,
-			deterministic=deterministic
+			deterministic=deterministic,
+			checkpoint_callback=False,
 		)
 	else:
 		if len(gpus) > 1:
@@ -246,7 +247,8 @@ if __name__ == '__main__':
 			precision=precision,
 			distributed_backend=backend,
 			gradient_clip_val=1.0,
-			deterministic=deterministic
+			deterministic=deterministic,
+			checkpoint_callback=False,
 		)
 
 	logging.info('Training...')
