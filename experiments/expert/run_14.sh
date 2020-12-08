@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-export RUN_NAME=HLTRI_RERANK_13
+export RUN_NAME=HLTRI_RERANK_14
 export SEARCH_RUN=passage-large
 export MODEL_NAME=rerank-expert-${SEARCH_RUN}-${RUN_NAME}
 export PRE_MODEL_NAME=nboost/pt-biobert-base-msmarco
@@ -8,7 +8,7 @@ export DATASET=expert
 export INDEX_NAME=passage_index
 export COLLECTION=epic_qa_prelim
 export SEARCH_TOP_K=1000
-export NEGATIVE_SAMPLES=400
+export NEGATIVE_SAMPLES=200
 
 #python search/search_index.py \
 #  --index_path data/${COLLECTION}/${DATASET}/indices/${INDEX_NAME} \
@@ -39,6 +39,7 @@ python -m rerank.rerank_train \
   --batch_size 32 \
   --negative_samples ${NEGATIVE_SAMPLES} \
   --add_all_labels \
+  --weighted_loss \
   --learning_rate 5e-6 \
   --epochs 5
 
