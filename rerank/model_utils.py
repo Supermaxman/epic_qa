@@ -243,6 +243,8 @@ class RerankBert(pl.LightningModule):
 				f'{name}_batch_accuracy': accuracy,
 				f'{name}_correct_count': correct_count,
 				f'{name}_total_count': total_count,
+				f'{name}_batch_logits': logits,
+				f'{name}_batch_labels': batch['labels'],
 			}
 
 			return result
@@ -270,11 +272,21 @@ class RerankBert(pl.LightningModule):
 	def _eval_epoch_end(self, outputs, name):
 		if not self.predict_mode:
 			loss = torch.cat([x[f'{name}_batch_loss'] for x in outputs], dim=0).mean()
+			logits = torch.cat([x[f'{name}_batch_logits'] for x in outputs], dim=0)
+			labels = torch.cat([x[f'{name}_batch_labels'] for x in outputs], dim=0)
+			score = logits[:, 1] - logits[:, 0]
+			pos_mask = labels.eq(1).float()
+			neg_mask = labels.eq(0).float()
+			pos_avg_score = (pos_mask * score).sum() / pos_mask.sum()
+			neg_avg_score = (neg_mask * score).sum() / neg_mask.sum()
+			margin = pos_avg_score - neg_avg_score
+
 			correct_count = torch.stack([x[f'{name}_correct_count'] for x in outputs], dim=0).sum()
 			total_count = sum([x[f'{name}_total_count'] for x in outputs])
 			accuracy = correct_count / total_count
 			self.log(f'{name}_loss', loss)
 			self.log(f'{name}_accuracy', accuracy)
+			self.log(f'{name}_margin', margin)
 		else:
 			pass
 
