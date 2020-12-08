@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-export RUN_NAME=HLTRI_RERANK_12
+export RUN_NAME=HLTRI_RERANK_13
 export SEARCH_RUN=passage-large
 export MODEL_NAME=rerank-expert-${SEARCH_RUN}-${RUN_NAME}
 export PRE_MODEL_NAME=nboost/pt-biobert-base-msmarco
@@ -41,7 +41,7 @@ python -m rerank.rerank_train \
   --add_all_labels \
   --weighted_loss \
   --learning_rate 5e-6 \
-  --epochs 10
+  --epochs 5
 
 python -m rerank.rerank \
   --query_path data/${COLLECTION}/${DATASET}/questions.json \
