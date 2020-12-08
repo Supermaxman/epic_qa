@@ -226,6 +226,9 @@ class RerankBert(pl.LightningModule):
 			correct_count = ((labels.eq(1)).float() * (prediction.eq(labels)).float()).sum()
 			total_count = (labels.eq(1)).float().sum()
 			accuracy = correct_count / total_count
+			if accuracy.isnan().item():
+				accuracy = torch.zeros(1, dtype=torch.float)
+
 			return loss, logits, prediction, correct_count, total_count, accuracy
 		else:
 			return logits
