@@ -185,19 +185,23 @@ if __name__ == '__main__':
 		exit()
 
 	logging.info('Loading model...')
-	model = RerankBert(
-		pre_model_name=pre_model_name,
-		learning_rate=5e-5,
-		lr_warmup=0.1,
-		updates_total=0,
-		weight_decay=0.01,
-		torch_cache_dir=torch_cache_dir,
-		predict_mode=True,
-		predict_path=save_directory
-	)
 	if load_trained_model:
 		logging.warning('Loading weights from trained checkpoint...')
-		model.load_state_dict(torch.load(checkpoint_path))
+		# model.load_state_dict(torch.load(checkpoint_path))
+		model = RerankBert.from_checkpoint(
+			checkpoint_path='models/rerank-expert-passage-large-rebalanced-100/default/version_0/checkpoints/epoch=4.ckpt'
+		)
+	else:
+		model = RerankBert(
+			pre_model_name=pre_model_name,
+			learning_rate=5e-5,
+			lr_warmup=0.1,
+			updates_total=0,
+			weight_decay=0.01,
+			torch_cache_dir=torch_cache_dir,
+			predict_mode=True,
+			predict_path=save_directory
+		)
 
 	logger = pl_loggers.TensorBoardLogger(
 		save_dir=save_directory,
