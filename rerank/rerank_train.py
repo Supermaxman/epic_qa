@@ -26,13 +26,16 @@ if __name__ == '__main__':
 	parser.add_argument('-sd', '--save_directory', default='models')
 	parser.add_argument('-bs', '--batch_size', default=16, type=int)
 	parser.add_argument('-ml', '--max_seq_len', default=128, type=int)
+	parser.add_argument('-nc', '--negative_samples', default=500, type=int)
 	parser.add_argument('-ms', '--multi_sentence', default=False, action='store_true')
 	parser.add_argument('-ng', '--n_gram_max', default=3, type=int)
 	parser.add_argument('-se', '--seed', default=0, type=int)
+	parser.add_argument('-eo', '--epochs', default=10, type=int)
 	parser.add_argument('-cd', '--torch_cache_dir', default=None)
 	parser.add_argument('-cs', '--calc_seq_len', default=False, action='store_true')
 	parser.add_argument('-tpu', '--use_tpus', default=False, action='store_true')
 	parser.add_argument('-opa', '--only_passages', default=False, action='store_true')
+	parser.add_argument('-al', '--add_all_labels', default=False, action='store_true')
 
 	args = parser.parse_args()
 	seed = args.seed
@@ -61,6 +64,8 @@ if __name__ == '__main__':
 	torch_cache_dir = args.torch_cache_dir
 	calc_seq_len = args.calc_seq_len
 	only_passages = args.only_passages
+	negative_samples = args.negative_samples
+	add_all_labels = args.add_all_labels
 
 	is_distributed = False
 	# export TPU_IP_ADDRESS=10.155.6.34
@@ -153,7 +158,9 @@ if __name__ == '__main__':
 		n_gram_max,
 		document_qrels,
 		passage_qrels,
-		only_passages
+		only_passages,
+		negative_samples,
+		add_all_labels
 	)
 	logging.info(f'#positive={train_dataset.num_positive}, #negative={train_dataset.num_negative}')
 	val_dataset = QueryPassageLabeledDataset(
@@ -164,7 +171,9 @@ if __name__ == '__main__':
 		n_gram_max,
 		document_qrels,
 		passage_qrels,
-		only_passages
+		only_passages,
+		negative_samples,
+		add_all_labels
 	)
 
 	train_data_loader = DataLoader(
@@ -202,6 +211,8 @@ if __name__ == '__main__':
 		weight_decay=0.01,
 		torch_cache_dir=torch_cache_dir
 	)
+	tokenizer.save_pretrained(save_directory)
+	model.config.save_pretrained(save_directory)
 
 	logger = pl_loggers.TensorBoardLogger(
 		save_dir=save_directory,
@@ -239,5 +250,5 @@ if __name__ == '__main__':
 	trainer.fit(model, train_data_loader, val_data_loader)
 	logging.info('Saving checkpoint...')
 	model.to('cpu')
-	torch.save(model, checkpoint_path)
+	torch.save(model.state_dict(), checkpoint_path)
 

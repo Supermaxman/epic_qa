@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 
-export RUN_NAME=HLTRI_RERANK_7
+export RUN_NAME=HLTRI_RERANK_8
 export SEARCH_RUN=passage-large
-export MODEL_NAME=rerank-expert-${SEARCH_RUN}
+export MODEL_NAME=rerank-expert-${SEARCH_RUN}-rebalanced
 export PRE_MODEL_NAME=nboost/pt-biobert-base-msmarco
 export DATASET=expert
 export INDEX_NAME=passage_index
@@ -35,28 +35,9 @@ python -m rerank.rerank_train \
   --pre_model_name ${PRE_MODEL_NAME} \
   --model_name ${MODEL_NAME} \
   --max_seq_len 96 \
-  --batch_size 16 \
-  --negative_samples 10000
-
-#python -m rerank.rerank \
-#  --query_path data/${COLLECTION}/${DATASET}/questions.json \
-#  --collection_path data/${COLLECTION}/${DATASET}/data \
-#  --passage_search_run data/${COLLECTION}/${DATASET}/search/${SEARCH_RUN} \
-#  --label_path data/${COLLECTION}/${DATASET}/split/val.json \
-#  --pre_model_name ${PRE_MODEL_NAME} \
-#  --model_name ${MODEL_NAME} \
-#  --max_seq_len 96
-
-python -m rerank.rerank_train \
-  --query_path data/${COLLECTION}/${DATASET}/questions.json \
-  --collection_path data/${COLLECTION}/${DATASET}/data \
-  --passage_search_run data/${COLLECTION}/${DATASET}/search/${SEARCH_RUN} \
-  --label_path data/${COLLECTION}/prelim_judgments_corrected.json \
-  --split_path data/${COLLECTION}/${DATASET}/split \
-  --pre_model_name ${PRE_MODEL_NAME} \
-  --model_name ${MODEL_NAME} \
-  --max_seq_len 96 \
-  --batch_size 8
+  --batch_size 8 \
+  --negative_samples 500 \
+  --add_all_labels
 
 python -m rerank.rerank \
   --query_path data/${COLLECTION}/${DATASET}/questions.json \
@@ -66,17 +47,6 @@ python -m rerank.rerank \
   --pre_model_name ${PRE_MODEL_NAME} \
   --model_name ${MODEL_NAME} \
   --max_seq_len 96
-
-#python -m rerank.rerank \
-#  --query_path data/${COLLECTION}/${DATASET}/questions.json \
-#  --collection_path data/${COLLECTION}/${DATASET}/data \
-#  --passage_search_run data/${COLLECTION}/${DATASET}/search/${SEARCH_RUN} \
-#  --label_path data/${COLLECTION}/prelim_judgments_corrected.json \
-#  --pre_model_name ${PRE_MODEL_NAME} \
-#  --model_name ${MODEL_NAME} \
-#  --max_seq_len 96 \
-#  --use_tpus \
-#  --batch_size 32
 
 python -m rerank.format_preds \
   --model_path models/${MODEL_NAME} \

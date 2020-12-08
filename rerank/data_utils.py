@@ -359,9 +359,12 @@ class RerankBatchCollator(object):
 
 
 class QueryPassageLabeledDataset(Dataset):
-	def __init__(self, root_dir, queries, labels, multi_sentence, n_gram_max, document_qrels=None, passage_qrels=None, only_passages=False):
+	def __init__(self, root_dir, queries, labels, multi_sentence, n_gram_max, document_qrels=None, passage_qrels=None, only_passages=False,
+		negative_samples=10000, add_all_labels=False):
 		self.root_dir = root_dir
+		self.negative_samples = negative_samples
 		self.labels = {}
+		self.add_all_labels = add_all_labels
 		for label in labels:
 			question_id = label['question_id']
 			annotations = {a['sentence_id']: a for a in label['annotations']}
@@ -389,6 +392,13 @@ class QueryPassageLabeledDataset(Dataset):
 			for question_id, question_files in passage_qrels.items():
 				if question_id not in self.query_lookup:
 					continue
+				if self.add_all_labels:
+					for sentence_id in self.labels[question_id]['annotations']:
+						doc_id, pass_id, sent_id = sentence_id.split('-')
+						file_names.add(f'{doc_id}.json')
+						self.query_docs[doc_id].add(question_id)
+						self.query_doc_pass[question_id][doc_id].add(f'{doc_id}-{pass_id}')
+
 				for doc_pass_id in question_files:
 					doc_id, pass_id = doc_pass_id.split('-')
 					file_names.add(f'{doc_id}.json')
@@ -453,6 +463,8 @@ class QueryPassageLabeledDataset(Dataset):
 								label = 1
 								self.num_positive += 1
 							else:
+								if self.num_negative > self.negative_samples:
+									continue
 								weight = 1.0
 								label = 0
 								self.num_negative += 1

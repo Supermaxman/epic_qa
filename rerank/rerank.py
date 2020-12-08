@@ -9,6 +9,7 @@ from rerank.model_utils import RerankBert
 from rerank.data_utils import QueryPassageDataset, PredictionBatchCollator
 import logging
 from pytorch_lightning import loggers as pl_loggers
+import torch
 
 
 if __name__ == '__main__':
@@ -30,6 +31,7 @@ if __name__ == '__main__':
 	parser.add_argument('-cs', '--calc_seq_len', default=False, action='store_true')
 	parser.add_argument('-tpu', '--use_tpus', default=False, action='store_true')
 	parser.add_argument('-opa', '--only_passages', default=False, action='store_true')
+	parser.add_argument('-lt', '--load_trained_model', default=False, action='store_true')
 
 	args = parser.parse_args()
 	seed = args.seed
@@ -56,6 +58,7 @@ if __name__ == '__main__':
 	torch_cache_dir = args.torch_cache_dir
 	calc_seq_len = args.calc_seq_len
 	only_passages = args.only_passages
+	load_trained_model = args.load_trained_model
 
 	is_distributed = False
 	# export TPU_IP_ADDRESS=10.155.6.34
@@ -68,6 +71,7 @@ if __name__ == '__main__':
 	num_workers = 4
 	deterministic = True
 
+	checkpoint_path = os.path.join(save_directory, 'pytorch_model.bin')
 	# Also add the stream handler so that it logs on STD out as well
 	# Ref: https://stackoverflow.com/a/46098711/4535284
 	for handler in logging.root.handlers[:]:
@@ -191,6 +195,9 @@ if __name__ == '__main__':
 		predict_mode=True,
 		predict_path=save_directory
 	)
+	if load_trained_model:
+		logging.warning('Loading weights from trained checkpoint...')
+		model.load_state_dict(torch.load(checkpoint_path))
 
 	logger = pl_loggers.TensorBoardLogger(
 		save_dir=save_directory,
