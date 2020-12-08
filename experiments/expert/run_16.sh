@@ -8,7 +8,7 @@ export DATASET=expert
 export INDEX_NAME=passage_index
 export COLLECTION=epic_qa_prelim
 export SEARCH_TOP_K=1000
-export NEGATIVE_SAMPLES=800
+export NEGATIVE_SAMPLES=2000
 
 #python search/search_index.py \
 #  --index_path data/${COLLECTION}/${DATASET}/indices/${INDEX_NAME} \
@@ -36,7 +36,7 @@ python -m rerank.rerank_train \
   --pre_model_name ${PRE_MODEL_NAME} \
   --model_name ${MODEL_NAME} \
   --max_seq_len 96 \
-  --batch_size 64 \
+  --batch_size 32 \
   --negative_samples ${NEGATIVE_SAMPLES} \
   --add_all_labels \
   --weighted_loss \
