@@ -392,6 +392,8 @@ class QueryPassageLabeledDataset(Dataset):
 			for question_id, question_files in passage_qrels.items():
 				if question_id not in self.query_lookup:
 					continue
+				if question_id not in self.labels:
+					continue
 				if self.add_all_labels:
 					for sentence_id in self.labels[question_id]['annotations']:
 						doc_id, pass_id, sent_id = sentence_id.split('-')
