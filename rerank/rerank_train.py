@@ -37,7 +37,7 @@ if __name__ == '__main__':
 	parser.add_argument('-opa', '--only_passages', default=False, action='store_true')
 	parser.add_argument('-al', '--add_all_labels', default=False, action='store_true')
 	parser.add_argument('-wl', '--weighted_loss', default=False, action='store_true')
-	parser.add_argument('-lr', '--learning_rate', default=5e-5, type=float)
+	parser.add_argument('-lr', '--learning_rate', default=5e-6, type=float)
 
 	args = parser.parse_args()
 	seed = args.seed
