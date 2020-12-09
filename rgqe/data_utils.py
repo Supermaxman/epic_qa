@@ -81,7 +81,6 @@ class RGQEAllPredictionDataset(Dataset):
 			qa_set_entailments = json.load(f)
 			for question_id, q_set_entailments in qa_set_entailments.items():
 				for answer_id, a_set_entailments in q_set_entailments.items():
-					a_entails = set()
 					for entailed_set_id, entail_prob in a_set_entailments:
 						if entail_prob < threshold:
 							continue
