@@ -24,12 +24,12 @@ def load_predictions(model_path):
 		answer_a_id, entailed_set_a_id = get_id(prediction['question_a_id'])
 		entailed_set_b_id = prediction['question_b_id']
 		entail_prob = prediction['entail_prob']
+		if entail_prob < 0.5:
+			continue
 		probs.append(entail_prob)
 		sample_entail_pairs[answer_a_id].append(
 			(entailed_set_a_id, entailed_set_b_id, entail_prob)
 		)
-	print(f'min={min(probs)}')
-	print(f'max={max(probs)}')
 	return sample_entail_pairs
 
 
