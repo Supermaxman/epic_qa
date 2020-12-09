@@ -88,10 +88,10 @@ def create_components(entail_set_pairs, answer_sets, threshold):
 		if len(merged_entailed_set["entailed_set"]) < 2:
 			unconnected_sets.add(merged_entailed_set["entailed_set"][0]['entailed_set_id'])
 		else:
-			print(f'{merged_entailed_set["entailed_set_id"]}({len(merged_entailed_set["entailed_set"])}): '
+			print(f'({len(merged_entailed_set["entailed_set"])}): '
 						f'{merged_entailed_set["entailed_set"][0]["entailed_set_text"]}')
 
-	print(f'{len(unconnected_sets)} unconnected sets')
+	print(f'({len(unconnected_sets)}) unconnected sets')
 
 	merged_entailed_set_answer_lookup = {}
 	seen_answers = len(entailed_set_answer_lookup)
