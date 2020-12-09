@@ -40,6 +40,20 @@ python -m rgqe.rgqe_self_components \
   --output_path models/${RQE_MODEL_NAME}/${RUN_NAME}.rgqe_cc \
   --threshold 0.5
 
+python -m rgqe.rgqe \
+  --input_path models/${RQE_MODEL_NAME}/${RUN_NAME}.rgqe_cc \
+  --search_path models/${RERANK_MODEL_NAME}/${RERANK_RUN_NAME}.txt \
+  --query_path data/${COLLECTION}/${DATASET}/questions.json \
+  --label_path data/${COLLECTION}/${DATASET}/split/val.json \
+  --model_name models/${RQE_MODEL_NAME} \
+  --mode question \
+  --top_k 100 \
+; \
+python -m rgqe.format_rgqe_question \
+  --model_path models/${RQE_MODEL_NAME} \
+  --output_path models/${RQE_MODEL_NAME}/${RUN_NAME}.rgqe_question
+
+
 # top_k set entailment
 python -m rgqe.rgqe \
   --input_path models/${RQE_MODEL_NAME}/${RUN_NAME}.rgqe_cc \

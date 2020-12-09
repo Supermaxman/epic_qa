@@ -6,7 +6,7 @@ from transformers import AutoTokenizer
 from torch.utils.data import DataLoader
 from rgqe.model_utils import RGQEPredictionBert
 from rgqe.data_utils import RGQEAllPredictionDataset, RGQESelfPredictionDataset, RGQETopPredictionDataset, \
-	PredictionBatchCollator
+	RGQEQuestionPredictionDataset, PredictionBatchCollator
 import logging
 from pytorch_lightning import loggers as pl_loggers
 import torch
@@ -25,6 +25,8 @@ if __name__ == '__main__':
 	parser.add_argument('-m', '--mode', required=True, help='all/self/top')
 	parser.add_argument('-k', '--top_k', default=100, type=int)
 	parser.add_argument('-sp', '--search_path', default=None)
+	parser.add_argument('-qp', '--query_path', default=None)
+	parser.add_argument('-lp', '--label_path', default=None)
 
 	args = parser.parse_args()
 	seed = args.seed
@@ -43,6 +45,8 @@ if __name__ == '__main__':
 	mode = args.mode.lower()
 	top_k = args.top_k
 	search_path = args.search_path
+	query_path = args.query_path
+	label_path = args.label_path
 
 	is_distributed = False
 	# export TPU_IP_ADDRESS=10.155.6.34
@@ -87,6 +91,31 @@ if __name__ == '__main__':
 			top_k
 		)
 		logging.info(f'num_sets={len(eval_dataset.sets)}')
+	elif mode == 'question':
+		logging.info('Loading queries...')
+		keep_ids = None
+		if label_path:
+			keep_ids = set()
+			with open(label_path) as f:
+				questions = json.load(f)
+				for question in questions:
+					question_id = question['question_id']
+					keep_ids.add(question_id)
+
+		queries = []
+		with open(query_path) as f:
+			all_queries = json.load(f)
+			for query in all_queries:
+				if keep_ids is not None and query['question_id'] not in keep_ids:
+					continue
+				else:
+					queries.append(query)
+		eval_dataset = RGQEQuestionPredictionDataset(
+			input_path,
+			search_path,
+			queries,
+			top_k
+		)
 	else:
 		raise ValueError(f'Unknown mode: {mode}')
 	logging.info(f'num_examples={len(eval_dataset)}')

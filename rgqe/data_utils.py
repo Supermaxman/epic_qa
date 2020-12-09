@@ -204,3 +204,54 @@ class RGQETopPredictionDataset(Dataset):
 		example = self.examples[idx]
 
 		return example
+
+
+class RGQEQuestionPredictionDataset(Dataset):
+	def __init__(self, input_path, search_path, queries, top_k):
+		self.input_path = input_path
+		self.search_path = search_path
+		self.queries = {q['question_id']: q for q in queries}
+		self.sets = set()
+		with open(input_path) as f:
+			self.answers = json.load(f)
+
+		seen_answers = set()
+		seen_count = defaultdict(int)
+		seen_questions = defaultdict(set)
+		with open(self.search_path, 'r') as f:
+			for line in f:
+				line = line.strip()
+				if line:
+					q_id, _, full_id, rank, score, run_name = line.split()
+					if seen_count[q_id] > top_k:
+						continue
+					seen_count[q_id] += 1
+					seen_answers.add(full_id)
+					seen_questions[full_id].add(q_id)
+
+		self.examples = []
+		for answer_id, a_sets in self.answers.items():
+			if answer_id not in seen_answers:
+				continue
+			for entailed_set in a_sets:
+				entailed_set_id = entailed_set['entailed_set_id']
+				entailed_set_sample_text = entailed_set['entailed_set'][0]['sample_text']
+				for question_id, query in self.queries.items():
+					example = {
+						'question_a_id': f'{answer_id}|{entailed_set_id}',
+						'question_b_id': question_id,
+						'question_a_text': entailed_set_sample_text,
+						'question_b_text': query['question'],
+					}
+					self.examples.append(example)
+
+	def __len__(self):
+		return len(self.examples)
+
+	def __getitem__(self, idx):
+		if torch.is_tensor(idx):
+			idx = idx.tolist()
+
+		example = self.examples[idx]
+
+		return example
