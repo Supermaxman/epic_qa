@@ -165,7 +165,7 @@ class RGQETopPredictionDataset(Dataset):
 					seen_questions[full_id].add(q_id)
 
 		self.examples = []
-		question_samples = []
+		question_samples = defaultdict(list)
 		for answer_id, a_sets in self.answers.items():
 			if answer_id not in seen_answers:
 				continue
@@ -175,26 +175,23 @@ class RGQETopPredictionDataset(Dataset):
 				example = {
 					'id': f'{answer_id}|{entailed_set_id}',
 					'answer_id': answer_id,
-					'question_ids': seen_questions[answer_id],
 					'entailed_set_text': entailed_set_sample_text
 				}
 				self.sets.add(entailed_set_id)
-				question_samples.append(example)
-
-			for sample_a, sample_b in itertools.combinations(question_samples, r=2):
-				# ignore self entailment since that was already computed
-				if sample_a['answer_id'] == sample_b['answer_id']:
-					continue
-				# ensure we only check top-k sample pairs for each question
-				if len(sample_a['question_ids'].intersection(sample_b['question_ids'])) == 0:
-					continue
-				example = {
-					'question_a_id': sample_a['id'],
-					'question_b_id': sample_b['id'],
-					'question_a_text': sample_a['entailed_set_text'],
-					'question_b_text': sample_b['entailed_set_text'],
-				}
-				self.examples.append(example)
+				for question_id in seen_questions[answer_id]:
+					question_samples[question_id].append(example)
+			for question_id, q_samples in question_samples.items():
+				for sample_a, sample_b in itertools.combinations(q_samples, r=2):
+					# ignore self entailment since that was already computed
+					if sample_a['answer_id'] == sample_b['answer_id']:
+						continue
+					example = {
+						'question_a_id': sample_a['id'],
+						'question_b_id': sample_b['id'],
+						'question_a_text': sample_a['entailed_set_text'],
+						'question_b_text': sample_b['entailed_set_text'],
+					}
+					self.examples.append(example)
 
 	def __len__(self):
 		return len(self.examples)
