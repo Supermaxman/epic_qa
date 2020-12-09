@@ -6,7 +6,7 @@ export SEARCH_RUN=passage-large
 export RERANK_RUN_NAME=HLTRI_RERANK_15
 export DATASET=expert
 export COLLECTION=epic_qa_prelim
-export RGQE_THRESHOLD=0.9
+export RGQE_THRESHOLD=0.8
 export RQE_THRESHOLD=0.01
 
 export RERANK_MODEL_NAME=rerank-expert-${SEARCH_RUN}-${RERANK_RUN_NAME}
