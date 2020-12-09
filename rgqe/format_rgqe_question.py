@@ -22,7 +22,7 @@ def load_predictions(model_path):
 	probs = []
 	for prediction in tqdm(pred_list):
 		answer_a_id, entailed_set_id = get_id(prediction['question_a_id'])
-		question_id = get_id(prediction['question_b_id'])
+		question_id = prediction['question_b_id']
 		entail_prob = prediction['entail_prob']
 		probs.append(entail_prob)
 		sample_entail_pairs[question_id][answer_a_id].append((entailed_set_id, entail_prob))
