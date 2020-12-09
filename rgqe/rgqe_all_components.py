@@ -86,8 +86,12 @@ if __name__ == '__main__':
 			# for t in [entailed_sets_text[x] for x in novel_sets]:
 			# 	print(f'  {t}')
 			# print(f'novelty_count: {novel_count}')
+			if novel_count == 0:
+				new_score = ratio * rerank_score
+			else:
+				new_score = rerank_score
 
-			answer['score'] = (novel_count) * rerank_score
+			answer['score'] = new_score
 
 			seen_entailed_sets = seen_entailed_sets.union(entailed_sets)
 			# input()
