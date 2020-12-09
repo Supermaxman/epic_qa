@@ -149,7 +149,7 @@ if __name__ == '__main__':
 			if line:
 				question_id, _, answer_id, rank, score, run_name = line.split()
 				score = float(score)
-				if answer_id in rgqe_top_cc:
+				if answer_id in top_answer_sets:
 					qa_sets = top_answer_sets[answer_id]
 				else:
 					qa_sets = set()
