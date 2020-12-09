@@ -26,7 +26,7 @@ class DFS(object):
 	def dfs_search(self, v, c_list):
 		self.visited[v] = True
 		c_list.append(v)
-		for c in self.edges[v].values():
+		for c in self.edges[v]:
 			if c in self.visited and not self.visited[c]:
 				self.dfs_search(c, c_list)
 		return c_list
