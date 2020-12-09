@@ -31,8 +31,9 @@ python -m rgqe.rgqe_self \
 ; \
 python -m rgqe.format_rgqe_self \
   --model_path models/${RQE_MODEL_NAME} \
-  --output_path models/${RQE_MODEL_NAME}/${RUN_NAME}.rgqe_self \
-; \
+  --output_path models/${RQE_MODEL_NAME}/${RUN_NAME}.rgqe_self
+
+
 python -m rgqe.rgqe_self_components \
   --input_path models/${RQE_MODEL_NAME}/${RUN_NAME}.rgqe_self \
   --output_path models/${RQE_MODEL_NAME}/${RUN_NAME}.rgqe_cc \
