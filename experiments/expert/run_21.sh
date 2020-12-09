@@ -130,3 +130,5 @@ python rerank/epic_eval.py \
   | tail -n 2 > models/${RQE_MODEL_NAME}/${RUN_NAME}.eval \
 ; \
 cat models/${RQE_MODEL_NAME}/${RUN_NAME}.eval
+
+

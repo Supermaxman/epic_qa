@@ -83,7 +83,7 @@ if __name__ == '__main__':
 			if novel_count == 0:
 				new_score = ratio * rerank_score
 			else:
-				new_score = (1.0 + novelty_ratio) * rerank_score
+				new_score = (1.0 + (1.0-ratio)) * rerank_score
 
 			answer['score'] = new_score
 
