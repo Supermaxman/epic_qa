@@ -148,6 +148,7 @@ if __name__ == '__main__':
 	rerank_scores = answers['rerank_scores']
 	answer_text_lookup = answers['answer_text_lookup']
 	for question_id, question_answers in rerank_scores.items():
+		num_answers_with_set = 0
 		for answer in question_answers:
 			answer_id = answer['answer_id']
 			if answer_id in top_answer_sets:
@@ -160,10 +161,12 @@ if __name__ == '__main__':
 							continue
 						qa_sets.add(entailed_set_b_id)
 			qa_sets = list(qa_sets)
+			if len(qa_sets) > 0:
+				num_answers_with_set += 1
 			answer['entailed_sets'] = qa_sets
 			answer['text'] = answer_text_lookup[answer_id]
 			answer['entailed_sets_text'] = [entailed_sets[x] for x in qa_sets]
-
+		print(f'{question_id}: {num_answers_with_set/len(question_answers):.2f}%')
 	with open(output_path, 'w') as f:
 		json.dump(rerank_scores, f, indent=2)
 

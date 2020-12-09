@@ -199,7 +199,6 @@ if __name__ == '__main__':
 
 	parser = argparse.ArgumentParser()
 	parser.add_argument('-r', '--results_path', required=True)
-	parser.add_argument('-g', '--rgqe_path', required=True)
 	parser.add_argument('-o', '--output_path', required=True)
 	parser.add_argument('-t', '--threshold', default=0.8, type=float)
 	parser.add_argument('-or', '--overlap_ratio', default=1.0, type=float)
