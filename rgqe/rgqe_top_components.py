@@ -34,11 +34,13 @@ class DFS(object):
 def create_components(entail_set_pairs, answer_sets, threshold):
 	entailed_set_text_lookup = {}
 	new_entailed_set_id = 0
+	entailed_set_answer_lookup = defaultdict(set)
 	for answer_id, a_sets in answer_sets.items():
 		for a_set in a_sets:
 			entailed_set_id = a_set['entailed_set_id']
 			entailed_set_text = a_set['entailed_set'][0]['sample_text']
 			entailed_set_text_lookup[entailed_set_id] = entailed_set_text
+			entailed_set_answer_lookup[answer_id].add(entailed_set_id)
 
 	nodes = set()
 	edges = defaultdict(set)
@@ -54,11 +56,13 @@ def create_components(entail_set_pairs, answer_sets, threshold):
 		nodes=nodes,
 		edges=edges,
 	)
-
+	merged_entailed_sets = []
 	entailed_sets = dfs.find_connected()
+	merged_mapping = {}
 	for entailed_nodes in entailed_sets:
 		set_samples = []
 		for v in entailed_nodes:
+			merged_mapping[v] = new_entailed_set_id
 			num_connected = len(edges[v].intersection(entailed_nodes))
 			set_sample = {
 				'entailed_set_id': v,
@@ -72,12 +76,22 @@ def create_components(entail_set_pairs, answer_sets, threshold):
 			'entailed_set': set_samples
 		}
 
-		answer_sets.append(
+		merged_entailed_sets.append(
 			answer_set
 		)
 		new_entailed_set_id += 1
 
-	return answer_sets
+	merged_entailed_set_answer_lookup = defaultdict(set)
+	for answer_id, a_sets in entailed_set_answer_lookup.items():
+		for entailed_set_id in a_sets:
+			new_entailed_set_id = merged_mapping[entailed_set_id]
+			merged_entailed_set_answer_lookup[answer_id].add(new_entailed_set_id)
+
+	results = {
+		'answer_sets': merged_entailed_set_answer_lookup,
+		'entailed_sets': merged_entailed_sets
+	}
+	return results
 
 
 if __name__ == '__main__':
