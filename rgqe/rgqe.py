@@ -27,6 +27,8 @@ if __name__ == '__main__':
 	parser.add_argument('-sp', '--search_path', default=None)
 	parser.add_argument('-qp', '--query_path', default=None)
 	parser.add_argument('-lp', '--label_path', default=None)
+	parser.add_argument('-qe', '--qe_path', default=None)
+	parser.add_argument('-te', '--threshold', default=0.5, type=float)
 
 	args = parser.parse_args()
 	seed = args.seed
@@ -47,6 +49,8 @@ if __name__ == '__main__':
 	search_path = args.search_path
 	query_path = args.query_path
 	label_path = args.label_path
+	qe_path = args.qe_path
+	threshold = args.threshold
 
 	is_distributed = False
 	# export TPU_IP_ADDRESS=10.155.6.34
@@ -87,8 +91,10 @@ if __name__ == '__main__':
 	elif mode == 'top':
 		eval_dataset = RGQETopPredictionDataset(
 			input_path,
+			qe_path,
 			search_path,
-			top_k
+			top_k,
+			threshold=threshold
 		)
 		logging.info(f'num_sets={len(eval_dataset.sets)}')
 	elif mode == 'question':

@@ -142,44 +142,46 @@ class RGQESelfPredictionDataset(Dataset):
 
 
 class RGQETopPredictionDataset(Dataset):
-	def __init__(self, input_path, search_path, top_k):
+	def __init__(self, input_path, qe_path, search_path, top_k, threshold):
 		self.input_path = input_path
 		self.search_path = search_path
+		self.qe_path = qe_path
 		self.top_k = top_k
 		self.sets = set()
 		with open(input_path) as f:
 			self.answers = json.load(f)
 
-		seen_answers = set()
-		seen_count = defaultdict(int)
-		seen_questions = defaultdict(set)
+		with open(qe_path) as f:
+			self.qa_set_entailments = json.load(f)
+
+		question_answer_count = defaultdict(int)
+		question_samples = defaultdict(list)
 		with open(self.search_path, 'r') as f:
 			for line in f:
 				line = line.strip()
 				if line:
-					q_id, _, full_id, rank, score, run_name = line.split()
-					if seen_count[q_id] > top_k:
+					question_id, _, answer_id, rank, score, run_name = line.split()
+					if question_answer_count > top_k:
 						continue
-					seen_count[q_id] += 1
-					seen_answers.add(full_id)
-					seen_questions[full_id].add(q_id)
+					answer_sets = self.answers[answer_id]
+					answer_sets = {e['entailed_set_id']: e for e in answer_sets}
+					num_entailed = 0
+					for entailed_set_id, entail_prob in self.qa_set_entailments[question_id][answer_id]:
+						if entail_prob < threshold:
+							continue
+						entailed_set = answer_sets[entailed_set_id]
+						entailed_set_sample_text = entailed_set['entailed_set'][0]['sample_text']
+						example = {
+							'id': f'{answer_id}|{entailed_set_id}',
+							'answer_id': answer_id,
+							'entailed_set_text': entailed_set_sample_text
+						}
+						question_samples[question_id].append(example)
+						num_entailed += 1
+					if num_entailed > 0:
+						question_answer_count[question_id] += 1
 
 		self.examples = []
-		question_samples = defaultdict(list)
-		for answer_id, a_sets in self.answers.items():
-			if answer_id not in seen_answers:
-				continue
-			for entailed_set in a_sets:
-				entailed_set_id = entailed_set['entailed_set_id']
-				entailed_set_sample_text = entailed_set['entailed_set'][0]['sample_text']
-				example = {
-					'id': f'{answer_id}|{entailed_set_id}',
-					'answer_id': answer_id,
-					'entailed_set_text': entailed_set_sample_text
-				}
-				self.sets.add(entailed_set_id)
-				for question_id in seen_questions[answer_id]:
-					question_samples[question_id].append(example)
 		for question_id, q_samples in question_samples.items():
 			print(f'{question_id}: {len(q_samples)}')
 			for sample_a, sample_b in itertools.combinations(q_samples, r=2):

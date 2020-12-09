@@ -3,6 +3,7 @@
     <words>
       <w>dataloader</w>
       <w>dataset</w>
+      <w>entailments</w>
       <w>logits</w>
       <w>ngrams</w>
       <w>probs</w>

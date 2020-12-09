@@ -57,6 +57,7 @@ python -m rgqe.format_rgqe_question \
 # top_k set entailment
 python -m rgqe.rgqe \
   --input_path models/${RQE_MODEL_NAME}/${RUN_NAME}.rgqe_cc \
+  --qe_path models/${RQE_MODEL_NAME}/${RUN_NAME}.rgqe_question \
   --search_path models/${RERANK_MODEL_NAME}/${RERANK_RUN_NAME}.txt \
   --model_name models/${RQE_MODEL_NAME} \
   --mode top \
