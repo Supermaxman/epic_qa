@@ -67,8 +67,8 @@ if __name__ == '__main__':
 	results = {}
 	for question_id, question_answers in rerank_scores.items():
 		query = queries[question_id]
-		# print(f'{question_id}: {queries[question_id]["question"]}')
 		seen_entailed_sets = set()
+		num_modified = 0
 		for answer in question_answers:
 			answer_id = answer['answer_id']
 			text = answer['text']
@@ -82,13 +82,15 @@ if __name__ == '__main__':
 			novel_count = len(novel_sets)
 			if novel_count == 0:
 				new_score = ratio * rerank_score
+				num_modified += 1
 			else:
-				new_score = (1.0 + (1.0-ratio)) * rerank_score
+				new_score = rerank_score
 
 			answer['score'] = new_score
 
 			seen_entailed_sets = seen_entailed_sets.union(entailed_sets)
 
+		print(f'{question_id}: #modified={num_modified}')
 		results[question_id] = {
 			'query': query,
 			'answers': list(sorted(question_answers, key=lambda x: x['score'], reverse=True))
