@@ -83,10 +83,14 @@ def create_components(entail_set_pairs, answer_sets, threshold):
 		)
 		new_entailed_set_id += 1
 
+	num_less = 0
 	for merged_entailed_set in merged_entailed_sets:
-		print(f'{merged_entailed_set["entailed_set_id"]}({len(merged_entailed_set["entailed_set"])}): '
-					f'{merged_entailed_set["entailed_set"][0]["entailed_set_text"]}')
-
+		if len(merged_entailed_set["entailed_set"]) < 2:
+			num_less += 1
+		else:
+			print(f'{merged_entailed_set["entailed_set_id"]}({len(merged_entailed_set["entailed_set"])}): '
+						f'{merged_entailed_set["entailed_set"][0]["entailed_set_text"]}')
+	print(f'{num_less} sets with 1 entailed set')
 
 	merged_entailed_set_answer_lookup = {}
 	for answer_id, a_sets in entailed_set_answer_lookup.items():
