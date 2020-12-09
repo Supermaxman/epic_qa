@@ -9,7 +9,8 @@ export RQE_MODEL_NAME=quora-seq-nboost-pt-bert-base-uncased-msmarco
 export EXP_PRE_MODEL_NAME=models/docT5query-base/model.ckpt-1004000
 export DATASET=expert
 export COLLECTION=epic_qa_prelim
-export RQE_THRESHOLD=0.9
+export RGQE_THRESHOLD=0.9
+export RQE_THRESHOLD=0.1
 
 #python -m rerank.extract_answers \
 #  --search_path models/${RERANK_MODEL_NAME}/${RERANK_RUN_NAME}.txt \
@@ -45,7 +46,7 @@ python -m rgqe.rgqe_self_components \
   --input_path models/${RQE_MODEL_NAME}/${RUN_NAME}.rgqe_self \
   --expand_path models/${EXP_MODEL_NAME}/${RUN_NAME}.exp \
   --output_path models/${RQE_MODEL_NAME}/${RUN_NAME}.rgqe_cc \
-  --threshold ${RQE_THRESHOLD}
+  --threshold ${RGQE_THRESHOLD}
 
 # top_k question entailment to filter out bad generated questions
 python -m rgqe.rgqe \
@@ -71,7 +72,7 @@ python -m rgqe.rgqe \
   --max_seq_len 64 \
   --mode top \
   --top_k 100 \
-  --threshold 0.01 \
+  --threshold ${RQE_THRESHOLD} \
 ; \
 python -m rgqe.format_rgqe_top \
   --model_path models/${RQE_MODEL_NAME} \
@@ -81,7 +82,7 @@ python -m rgqe.rgqe_top_components \
   --input_path models/${RQE_MODEL_NAME}/${RUN_NAME}.rgqe_top \
   --cc_path models/${RQE_MODEL_NAME}/${RUN_NAME}.rgqe_cc \
   --output_path models/${RQE_MODEL_NAME}/${RUN_NAME}.rgqe_top_cc \
-  --threshold ${RQE_THRESHOLD}
+  --threshold ${RGQE_THRESHOLD}
 
 
 python -m rgqe.rgqe \
@@ -90,6 +91,7 @@ python -m rgqe.rgqe \
   --qe_path models/${RQE_MODEL_NAME}/${RUN_NAME}.rgqe_question \
   --model_name models/${RQE_MODEL_NAME} \
   --mode all \
+  --threshold ${RQE_THRESHOLD} \
   --max_seq_len 64 \
   --batch_size 128 \
   --use_tpus
@@ -112,7 +114,7 @@ python -m rgqe.rgqe_all_components \
   --answers_path models/${RERANK_MODEL_NAME}/${RERANK_RUN_NAME}.answers \
   --queries_path data/${COLLECTION}/${DATASET}/questions.json \
   --output_path models/${RQE_MODEL_NAME}/${RUN_NAME}.rgqe_all_cc_scored \
-  --threshold ${RQE_THRESHOLD} \
+  --threshold ${RGQE_THRESHOLD} \
   --ratio 0.8 \
 ; \
 python -m rgqe.format_eval \

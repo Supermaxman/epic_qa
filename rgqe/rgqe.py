@@ -86,7 +86,8 @@ if __name__ == '__main__':
 		eval_dataset = RGQEAllPredictionDataset(
 			input_path,
 			qe_path,
-			cc_path
+			cc_path,
+			threshold=threshold
 		)
 	elif mode == 'self':
 		eval_dataset = RGQESelfPredictionDataset(
