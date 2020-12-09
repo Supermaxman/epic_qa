@@ -153,10 +153,11 @@ if __name__ == '__main__':
 					qa_sets = top_answer_sets[answer_id]
 				else:
 					qa_sets = set()
-					for entailed_set_a_id, entailed_set_b_id, entail_prob in answer_sets[answer_id]:
-						if entail_prob < threshold:
-							continue
-						qa_sets.add(entailed_set_b_id)
+					if answer_id in answer_sets:
+						for entailed_set_a_id, entailed_set_b_id, entail_prob in answer_sets[answer_id]:
+							if entail_prob < threshold:
+								continue
+							qa_sets.add(entailed_set_b_id)
 				qa_sets = list(qa_sets)
 				results[question_id].append(
 					{
