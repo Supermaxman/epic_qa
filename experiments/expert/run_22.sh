@@ -75,7 +75,7 @@ python -m rgqe.rgqe \
   --model_name models/${RQE_MODEL_NAME} \
   --max_seq_len 64 \
   --mode question \
-  --top_k 1000 \
+  --top_k 10000 \
 ; \
 python -m rgqe.format_rgqe_question \
   --model_path models/${RQE_MODEL_NAME} \
