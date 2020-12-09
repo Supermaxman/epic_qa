@@ -77,16 +77,17 @@ if __name__ == '__main__':
 			overlap_set = entailed_sets.intersection(seen_entailed_sets)
 			# 0 means all seen, 1 means all novel
 			novelty_ratio = 1.0 - (len(overlap_set) / max(len(entailed_sets), 1))
-
+			novel_sets = entailed_sets.difference(overlap_set)
 			print(f'seen sets: ')
 			for t in [entailed_sets_text[x] for x in seen_entailed_sets]:
 				print(f'  {t}')
 			print(f'{rerank_score:.2f} {answer_id}:')
 			print(f'  {text}')
-			print(f'new sets:')
-			for t in [entailed_sets_text[x] for x in entailed_sets]:
+			print(f'novel sets:')
+			for t in [entailed_sets_text[x] for x in overlap_set]:
 				print(f'  {t}')
 			print(f'novelty_ratio: {novelty_ratio:.2f}')
+			print(f'novelty_count: {len(novel_sets)}')
 
 			answer['score'] = (0.5* novelty_ratio) * rerank_score
 
