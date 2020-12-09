@@ -27,20 +27,20 @@ export EXP_ANSWER_BATCH_SIZE=16
 
 # flags to avoid re-running certain components
 # index & search flags
-export CREATE_INDEX=false
+export CREATE_INDEX=true
 export EXPAND_INDEX=false
-export SEARCH_INDEX=false
+export SEARCH_INDEX=true
 
 # rerank flags
 # RERANK fine-tune reranking model using training set
-export TRAIN_RERANK=true
+export TRAIN_RERANK=false
 # RERANK run rerank using trained model on validation set
 export RUN_RERANK=true
 # RERANK run evaluation script on validation set
 export EVAL_RERANK=true
 
 # rerank answer query expansion flags
-export RUN_EXPAND_ANSWERS=true
+export RUN_EXPAND_ANSWERS=false
 
 # RGQE pairwise self-entailment to find entailed sets for each answer
 export RUN_RGQE_SELF=false
@@ -160,16 +160,16 @@ if [[ ${CREATE_INDEX} = true ]]; then
           -storeDocvectors \
           -storeRaw
     else
-        mkdir ${COLLECTION_JSONL_PATH}/data
-        python search/expand_passages_jsonl.py \
-          --collection_path ${COLLECTION_JSONL_FILE_PATH} \
-          --output_path ${COLLECTION_JSONL_PATH}/data/data.jsonl
+#        mkdir ${COLLECTION_JSONL_PATH}/data
+#        python search/expand_passages_jsonl.py \
+#          --collection_path ${COLLECTION_JSONL_FILE_PATH} \
+#          --output_path ${COLLECTION_JSONL_PATH}/data/data.jsonl
         # index dataset
         python -m pyserini.index \
           -collection JsonCollection \
           -generator DefaultLuceneDocumentGenerator \
           -threads 12 \
-          -input ${COLLECTION_JSONL_PATH}/data \
+          -input ${DATASET_PATH}/data \
           -index ${INDEX_FILE_PATH} \
           -storePositions \
           -storeDocvectors \
@@ -209,6 +209,8 @@ fi
 
 if [[ ${RUN_RERANK} = true ]]; then
     echo "Running rerank model..."
+    # TODO add back after fixed
+#      --load_trained_model \
     python -m rerank.rerank \
       --query_path ${QUERY_PATH} \
       --collection_path ${COLLECTION_PATH} \
@@ -218,7 +220,6 @@ if [[ ${RUN_RERANK} = true ]]; then
       --pre_model_name ${RERANK_PRE_MODEL_NAME} \
       --model_name ${RERANK_MODEL_NAME} \
       --max_seq_len 96 \
-      --load_trained_model \
     ; \
     python -m rerank.format_rerank \
       --input_path ${RERANK_PATH} \
