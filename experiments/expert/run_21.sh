@@ -116,9 +116,6 @@ python -m rgqe.rgqe_all_components \
 python -m rgqe.format_eval \
   --results_path models/${RQE_MODEL_NAME}/${RUN_NAME}.rgqe_all_cc_scored \
   --output_path models/${RQE_MODEL_NAME}/${RUN_NAME}.txt \
-  --threshold 0.5 \
-  --overlap_ratio 1.0 \
-  --overall_ratio 0.0 \
 ; \
 python rerank/epic_eval.py \
   data/${COLLECTION}/${DATASET}/split/val.json \
