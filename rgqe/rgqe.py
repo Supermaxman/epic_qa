@@ -28,6 +28,7 @@ if __name__ == '__main__':
 	parser.add_argument('-qp', '--query_path', default=None)
 	parser.add_argument('-lp', '--label_path', default=None)
 	parser.add_argument('-qe', '--qe_path', default=None)
+	parser.add_argument('-cc', '--cc_path', default=None)
 	parser.add_argument('-te', '--threshold', default=0.5, type=float)
 
 	args = parser.parse_args()
@@ -50,6 +51,7 @@ if __name__ == '__main__':
 	query_path = args.query_path
 	label_path = args.label_path
 	qe_path = args.qe_path
+	cc_path = args.cc_path
 	threshold = args.threshold
 
 	is_distributed = False
@@ -82,7 +84,8 @@ if __name__ == '__main__':
 	logging.info(f'Loading {mode} dataset...')
 	if mode == 'all':
 		eval_dataset = RGQEAllPredictionDataset(
-			input_path
+			input_path,
+			cc_path
 		)
 	elif mode == 'self':
 		eval_dataset = RGQESelfPredictionDataset(
@@ -96,7 +99,6 @@ if __name__ == '__main__':
 			top_k,
 			threshold=threshold
 		)
-		logging.info(f'num_sets={len(eval_dataset.sets)}')
 	elif mode == 'question':
 		logging.info('Loading queries...')
 		keep_ids = None

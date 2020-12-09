@@ -9,7 +9,7 @@ export RQE_MODEL_NAME=quora-seq-nboost-pt-bert-base-uncased-msmarco
 export EXP_PRE_MODEL_NAME=models/docT5query-base/model.ckpt-1004000
 export DATASET=expert
 export COLLECTION=epic_qa_prelim
-export RQE_THRESHOLD=0.7
+export RQE_THRESHOLD=0.9
 
 # create expanded questions for every answer
 #python -m expand_query.expand \
@@ -76,33 +76,40 @@ python -m rgqe.rgqe_top_components \
   --threshold ${RQE_THRESHOLD}
 
 # all entailment against sets
-#python -m rgqe.rgqe \
-#  --input_path models/${RQE_MODEL_NAME}/${RUN_NAME}.rqe_scored \
-#  --model_name models/${RQE_MODEL_NAME} \
-#  --mode all \
-#; \
-#python -m rgqe.format_rgqe \
-#  --model_path models/${RQE_MODEL_NAME} \
-#  --output_path models/${RQE_MODEL_NAME}/${RUN_NAME}.rgqe \
-#  --threshold 0.5
-#
-#python -m rgqe.format_eval \
-#  --results_path models/${RQE_MODEL_NAME}/${RUN_NAME}.rqe_scored \
-#  --rgqe_path models/${RQE_MODEL_NAME}/${RUN_NAME}.rgqe \
-#  --output_path models/${RQE_MODEL_NAME}/${RUN_NAME}_RGQE.txt \
-#  --threshold 0.5 \
-#  --overlap_ratio 1.0 \
-#  --overall_ratio 0.0 \
-#; \
-#python rerank/epic_eval.py \
-#  data/${COLLECTION}/${DATASET}/split/val.json \
-#  models/${RQE_MODEL_NAME}/${RUN_NAME}.txt \
-#  rerank/.${DATASET}_ideal_ranking_scores.tsv \
-#  --task ${DATASET} \
-#  | tail -n 3 \
-#  | awk \
-#    '{ for (i=1; i<=NF; i++) RtoC[i]= (RtoC[i]? RtoC[i] FS $i: $i) }
-#    END{ for (i in RtoC) print RtoC[i] }' \
-#  | tail -n 2 > models/${RQE_MODEL_NAME}/${RUN_NAME}.eval \
-#; \
-#cat models/${RQE_MODEL_NAME}/${RUN_NAME}.eval
+python -m rgqe.rgqe \
+  --input_path models/${RQE_MODEL_NAME}/${RUN_NAME}.rgqe_top_cc \
+  --cc_path models/${RQE_MODEL_NAME}/${RUN_NAME}.rgqe_cc \
+  --model_name models/${RQE_MODEL_NAME} \
+  --mode all \
+; \
+python -m rgqe.format_all_rgqe \
+  --model_path models/${RQE_MODEL_NAME} \
+  --output_path models/${RQE_MODEL_NAME}/${RUN_NAME}.rgqe_all \
+; \
+python -m rgqe.rgqe_all_components \
+  --input_path models/${RQE_MODEL_NAME}/${RUN_NAME}.rgqe_all \
+  --cc_path models/${RQE_MODEL_NAME}/${RUN_NAME}.rgqe_top_cc \
+  --search_path models/${RERANK_MODEL_NAME}/${RERANK_RUN_NAME}.txt \
+  --output_path models/${RQE_MODEL_NAME}/${RUN_NAME}.rgqe_all_cc_scored \
+  --threshold ${RQE_THRESHOLD}
+
+# final eval
+python -m rgqe.format_eval \
+  --results_path models/${RQE_MODEL_NAME}/${RUN_NAME}.rgqe_all_cc_scored \
+  --output_path models/${RQE_MODEL_NAME}/${RUN_NAME}.txt \
+  --threshold 0.5 \
+  --overlap_ratio 1.0 \
+  --overall_ratio 0.0 \
+; \
+python rerank/epic_eval.py \
+  data/${COLLECTION}/${DATASET}/split/val.json \
+  models/${RQE_MODEL_NAME}/${RUN_NAME}.txt \
+  rerank/.${DATASET}_ideal_ranking_scores.tsv \
+  --task ${DATASET} \
+  | tail -n 3 \
+  | awk \
+    '{ for (i=1; i<=NF; i++) RtoC[i]= (RtoC[i]? RtoC[i] FS $i: $i) }
+    END{ for (i in RtoC) print RtoC[i] }' \
+  | tail -n 2 > models/${RQE_MODEL_NAME}/${RUN_NAME}.eval \
+; \
+cat models/${RQE_MODEL_NAME}/${RUN_NAME}.eval

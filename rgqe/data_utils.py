@@ -4,6 +4,7 @@ import torch
 from torch.utils.data import Dataset
 from collections import defaultdict
 import itertools
+import os
 
 
 class PredictionBatchCollator(object):
@@ -61,36 +62,40 @@ def make_id(sample):
 
 
 class RGQEAllPredictionDataset(Dataset):
-	def __init__(self, input_path):
+	def __init__(self, input_path, cc_path):
 		self.input_path = input_path
-		with open(input_path) as f:
-			self.query_answers = json.load(f)
+		self.cc_path = cc_path
 
+		with open(self.input_path, 'r') as f:
+			self.top_cc = json.load(f)
+
+		with open(self.cc_path, 'r') as f:
+			# [answer_id] -> list of entailed sets
+			self.answer_sets = json.load(f)
+
+		# list of entailed_set_id, entailed_set with entailed_set containing samples,
+		# where entailed_set[0]['entailed_set_text'] is representative question
+		self.entailed_sets = self.top_cc['entailed_sets']
+		# [answer_id] -> merged_entailed_sets for top_k answers
+		self.top_answer_sets = self.top_cc['answer_sets']
 		self.examples = []
-		for question_id, answers in self.query_answers.items():
-			question_samples = []
-			for answer in answers:
-				answer_id = answer['answer_id']
-				answer_samples = answer['samples']
-				for sample in answer_samples:
+		for answer_id, a_sets in self.answer_sets.items():
+			if answer_id in self.top_answer_sets:
+				continue
+			for entailed_set_a in a_sets:
+				entailed_set_a_id = entailed_set_a['entailed_set_id']
+				entailed_set_a_text = entailed_set_a['entailed_set'][0]['sample_text']
+				for entailed_set_b in self.entailed_sets:
+					entailed_set_b_id = entailed_set_b['entailed_set_id']
+					entailed_set_b_text = entailed_set_b['entailed_set'][0]['entailed_set_text']
 					example = {
-						'id': answer_id,
-						'question_id': question_id,
-						'sample_id':  sample['sample_id'],
-						'sample_text': sample['sample_text']
+						'question_a_id': f'{answer_id}|{entailed_set_a_id}',
+						'question_b_id': entailed_set_b_id,
+						'question_a_text': entailed_set_a_text,
+						'question_b_text': entailed_set_b_text,
 					}
-					question_samples.append(example)
+					self.examples.append(example)
 
-			for sample_a, sample_b in itertools.combinations(question_samples, r=2):
-				a_id = make_id(sample_a)
-				b_id = make_id(sample_b)
-				example = {
-					'question_a_id': a_id,
-					'question_b_id': b_id,
-					'question_a_text': sample_a['sample_text'],
-					'question_b_text': sample_b['sample_text'],
-				}
-				self.examples.append(example)
 
 	def __len__(self):
 		return len(self.examples)
@@ -147,7 +152,7 @@ class RGQETopPredictionDataset(Dataset):
 		self.search_path = search_path
 		self.qe_path = qe_path
 		self.top_k = top_k
-		self.sets = set()
+
 		with open(input_path) as f:
 			self.answers = json.load(f)
 
@@ -210,7 +215,7 @@ class RGQEQuestionPredictionDataset(Dataset):
 		self.input_path = input_path
 		self.search_path = search_path
 		self.queries = {q['question_id']: q for q in queries}
-		self.sets = set()
+
 		with open(input_path) as f:
 			self.answers = json.load(f)
 

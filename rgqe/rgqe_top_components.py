@@ -73,13 +73,13 @@ def create_components(entail_set_pairs, answer_sets, threshold):
 			}
 			set_samples.append(set_sample)
 		set_samples = list(sorted(set_samples, key=lambda x: x['num_connected'], reverse=True))
-		answer_set = {
+		merged_set = {
 			'entailed_set_id': new_entailed_set_id,
 			'entailed_set': set_samples
 		}
 
 		merged_entailed_sets.append(
-			answer_set
+			merged_set
 		)
 		new_entailed_set_id += 1
 
