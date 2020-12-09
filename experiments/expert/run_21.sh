@@ -9,6 +9,7 @@ export RQE_MODEL_NAME=quora-seq-nboost-pt-bert-base-uncased-msmarco
 export EXP_PRE_MODEL_NAME=models/docT5query-base/model.ckpt-1004000
 export DATASET=expert
 export COLLECTION=epic_qa_prelim
+export RQE_THRESHOLD=0.8
 
 # create expanded questions for every answer
 python -m expand_query.expand \
@@ -25,7 +26,6 @@ python -m expand_query.format_expand \
   --output_path models/${EXP_MODEL_NAME}/${RUN_NAME}.exp \
 
 # self entailment
-# TODO consider stricter self-entailment than 0.5
 python -m rgqe.rgqe \
   --input_path models/${EXP_MODEL_NAME}/${RUN_NAME}.exp \
   --model_name models/${RQE_MODEL_NAME} \
@@ -39,7 +39,7 @@ python -m rgqe.rgqe_self_components \
   --input_path models/${RQE_MODEL_NAME}/${RUN_NAME}.rgqe_self \
   --expand_path models/${EXP_MODEL_NAME}/${RUN_NAME}.exp \
   --output_path models/${RQE_MODEL_NAME}/${RUN_NAME}.rgqe_cc \
-  --threshold 0.5
+  --threshold ${RQE_THRESHOLD}
 
 # top_k question entailment to filter out bad generated questions
 python -m rgqe.rgqe \
@@ -73,34 +73,7 @@ python -m rgqe.rgqe_top_components \
   --input_path models/${RQE_MODEL_NAME}/${RUN_NAME}.rgqe_top \
   --cc_path models/${RQE_MODEL_NAME}/${RUN_NAME}.rgqe_cc \
   --output_path models/${RQE_MODEL_NAME}/${RUN_NAME}.rgqe_top_cc \
-  --threshold 0.7
-
-
-
-#python -m expand_query.format_run \
-#  --input_path models/${EXP_MODEL_NAME}/${RUN_NAME}.exp \
-#  --scores_path models/${RERANK_MODEL_NAME}/${RERANK_RUN_NAME}.txt \
-#  --output_path models/${RQE_MODEL_NAME}/${RUN_NAME}.exp_scored
-
-#
-python -m rqe.rqe \
-  --input_path models/${RERANK_MODEL_NAME}/${RERANK_RUN_NAME}.txt \
-  --expand_path models/${EXP_MODEL_NAME}/${RUN_NAME}.exp \
-  --query_path data/${COLLECTION}/${DATASET}/questions.json \
-  --label_path data/${COLLECTION}/${DATASET}/split/val.json \
-  --model_name models/${RQE_MODEL_NAME} \
-; \
-python -m rqe.format_rqe \
-  --model_path models/${RQE_MODEL_NAME} \
-  --expand_path models/${EXP_MODEL_NAME}/${RUN_NAME}.exp \
-  --output_path models/${RQE_MODEL_NAME}/${RUN_NAME}.rqe \
-  --threshold 0.01 \
-  --num_samples 1 \
-; \
-python -m rqe.format_run \
-  --rqe_path models/${RQE_MODEL_NAME}/${RUN_NAME}.rqe \
-  --scores_path models/${RERANK_MODEL_NAME}/${RERANK_RUN_NAME}.txt \
-  --output_path models/${RQE_MODEL_NAME}/${RUN_NAME}.rqe_scored
+  --threshold ${RQE_THRESHOLD}
 
 python -m rgqe.rgqe \
   --input_path models/${RQE_MODEL_NAME}/${RUN_NAME}.rqe_scored \

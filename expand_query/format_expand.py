@@ -40,6 +40,7 @@ replace_set = {
 	'coincid',
 	'covied',
 	'covvid',
+	'combid'
 }
 replace_text = 'covid'
 replace_length = len(replace_text)
