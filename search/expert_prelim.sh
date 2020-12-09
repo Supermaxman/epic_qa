@@ -41,6 +41,11 @@ python -m pyserini.index \
   -storeDocvectors \
   -storeRaw
 
+python search/extract_collection.py \
+ --collection_path data/${COLLECTION}/${DATASET}/data \
+ --collection_path data/${COLLECTION}/${DATASET}/data.json
+
+
 python -m expand_query.expand \
  --collection_path data/${COLLECTION}/${DATASET}/data \
  --pre_model_name ${EXP_PRE_MODEL_NAME} \
@@ -48,8 +53,8 @@ python -m expand_query.expand \
  --top_k 10 \
  --num_samples 1 \
  --batch_size 32 \
- --max_seq_len 256
-
+ --max_seq_len 256 \
+; \
 python -m expand_query.format_expand \
   --model_path models/${EXP_MODEL_NAME} \
   --output_path models/${EXP_MODEL_NAME}/${SEARCH_RUN}.exp

@@ -61,7 +61,6 @@ class AnswerDataset(Dataset):
 					}
 					self.examples.append(example)
 
-
 	def __len__(self):
 		return len(self.examples)
 

@@ -6,25 +6,6 @@ from tqdm import tqdm
 import argparse
 
 
-def write_results(question_id, question_scores, run_name, f, top_k=1000, multiple_per_doc=True, allow_overlap=False, threshold=None):
-	num_top = 0
-	rel_idx = 0
-	seen_docs = set()
-	seen_sentences = set()
-	while num_top < top_k and rel_idx < len(question_scores):
-		answer_id, doc_id, pass_id, sent_start_idx, sent_end_idx, score = question_scores[rel_idx]
-		sent_ids = [(doc_id, pass_id, sent_id) for sent_id in range(sent_start_idx, sent_end_idx + 1)]
-		if (multiple_per_doc or doc_id not in seen_docs) \
-				and (allow_overlap or all([x not in seen_sentences for x in sent_ids]))\
-				and (threshold is None or score > threshold):
-			f.write(f'{question_id}\tQ0\t{answer_id}\t{num_top + 1}\t{score}\t{run_name}\n')
-			num_top += 1
-			seen_docs.add(doc_id)
-			for x in sent_ids:
-				seen_sentences.add(x)
-		rel_idx += 1
-
-
 def read_scores(search_path, collection_path):
 	doc_ids = defaultdict(lambda: defaultdict(set))
 	rerank_scores = defaultdict(list)
