@@ -57,6 +57,6 @@ python expand_query/expand.py \
  --gpus 4,5,6,7 \
  --is_distributed \
 ; \
-python expand_query/format_expand.py \
+python expand_query/format_expand_jsonl.py \
   --model_path models/${EXP_MODEL_NAME} \
-  --output_path models/${EXP_MODEL_NAME}/${SEARCH_RUN}.exp
+  --output_path models/${EXP_MODEL_NAME}/${SEARCH_RUN}.expl
