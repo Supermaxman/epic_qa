@@ -181,6 +181,7 @@ class RGQETopPredictionDataset(Dataset):
 				for question_id in seen_questions[answer_id]:
 					question_samples[question_id].append(example)
 		for question_id, q_samples in question_samples.items():
+			print(f'{question_id}: {len(q_samples)}')
 			for sample_a, sample_b in itertools.combinations(q_samples, r=2):
 				# ignore self entailment since that was already computed
 				if sample_a['answer_id'] == sample_b['answer_id']:
