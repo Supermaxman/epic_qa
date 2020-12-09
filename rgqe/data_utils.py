@@ -152,6 +152,7 @@ class RGQETopPredictionDataset(Dataset):
 
 		seen_answers = set()
 		seen_count = defaultdict(int)
+		seen_questions = defaultdict(set)
 		with open(self.search_path, 'r') as f:
 			for line in f:
 				line = line.strip()
@@ -161,6 +162,7 @@ class RGQETopPredictionDataset(Dataset):
 						continue
 					seen_count[q_id] += 1
 					seen_answers.add(full_id)
+					seen_questions[full_id].add(q_id)
 
 		self.examples = []
 		question_samples = []
@@ -173,13 +175,18 @@ class RGQETopPredictionDataset(Dataset):
 				example = {
 					'id': f'{answer_id}|{entailed_set_id}',
 					'answer_id': answer_id,
+					'question_ids': seen_questions[answer_id],
 					'entailed_set_text': entailed_set_sample_text
 				}
 				self.sets.add(entailed_set_id)
 				question_samples.append(example)
 
 			for sample_a, sample_b in itertools.combinations(question_samples, r=2):
+				# ignore self entailment since that was already computed
 				if sample_a['answer_id'] == sample_b['answer_id']:
+					continue
+				# ensure we only check top-k sample pairs for each question
+				if len(sample_a['question_ids'].intersection(sample_b['question_ids'])) == 0:
 					continue
 				example = {
 					'question_a_id': sample_a['id'],
