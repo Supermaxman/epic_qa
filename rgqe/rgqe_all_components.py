@@ -75,13 +75,14 @@ if __name__ == '__main__':
 			rerank_score = answer['score']
 			answer['rerank_score'] = rerank_score
 			entailed_sets = set(answer['entailed_sets'])
+			num_entailed = len(entailed_sets)
 			overlap_set = entailed_sets.intersection(seen_entailed_sets)
 			# 0 means all seen, 1 means all novel
 			novelty_ratio = 1.0 - (len(overlap_set) / max(len(entailed_sets), 1))
 			novel_sets = entailed_sets.difference(overlap_set)
 			novel_count = len(novel_sets)
 			if novel_count == 0:
-				new_score = ratio * rerank_score
+				new_score = (ratio**num_entailed) * rerank_score
 				num_modified += 1
 			else:
 				new_score = rerank_score
