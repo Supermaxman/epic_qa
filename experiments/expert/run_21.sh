@@ -109,6 +109,7 @@ python -m rgqe.rgqe_all_components \
   --input_path models/${RQE_MODEL_NAME}/${RUN_NAME}.rgqe_all \
   --cc_path models/${RQE_MODEL_NAME}/${RUN_NAME}.rgqe_top_cc \
   --answers_path models/${RERANK_MODEL_NAME}/${RERANK_RUN_NAME}.answers \
+  --queries_path data/${COLLECTION}/${DATASET}/questions.json \
   --output_path models/${RQE_MODEL_NAME}/${RUN_NAME}.rgqe_all_cc_scored \
   --threshold ${RQE_THRESHOLD} \
 ; \

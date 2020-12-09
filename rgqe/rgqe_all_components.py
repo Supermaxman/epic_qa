@@ -11,6 +11,7 @@ if __name__ == '__main__':
 	parser.add_argument('-i', '--input_path', required=True)
 	parser.add_argument('-c', '--cc_path', required=True)
 	parser.add_argument('-a', '--answers_path', required=True)
+	parser.add_argument('-q', '--queries_path', required=True)
 	parser.add_argument('-o', '--output_path', required=True)
 	parser.add_argument('-t', '--threshold', default=0.5, type=float)
 	parser.add_argument('-r', '--ratio', default=1.0, type=float)
@@ -20,6 +21,7 @@ if __name__ == '__main__':
 	input_path = args.input_path
 	cc_path = args.cc_path
 	answers_path = args.answers_path
+	queries_path = args.queries_path
 	output_path = args.output_path
 	threshold = args.threshold
 	ratio = args.ratio
@@ -27,9 +29,13 @@ if __name__ == '__main__':
 	with open(input_path, 'r') as f:
 		answer_sets = json.load(f)
 
+	with open(queries_path, 'r') as f:
+		queries = json.load(f)
+		queries = {q['question_id']: q for q in queries}
+
 	with open(cc_path, 'r') as f:
 		rgqe_top_cc = json.load(f)
-	entailed_sets = {e['entailed_set_id']: e['entailed_set'][0]['entailed_set_text'] for e in rgqe_top_cc['entailed_sets']}
+	entailed_sets_text = {e['entailed_set_id']: e['entailed_set'][0]['entailed_set_text'] for e in rgqe_top_cc['entailed_sets']}
 	top_answer_sets = rgqe_top_cc['answer_sets']
 
 	with open(answers_path, 'r') as f:
@@ -54,15 +60,17 @@ if __name__ == '__main__':
 				num_answers_with_set += 1
 			answer['entailed_sets'] = qa_sets
 			answer['text'] = answer_text_lookup[answer_id]
-			answer['entailed_sets_text'] = [entailed_sets[x] for x in qa_sets]
+			answer['entailed_sets_text'] = [entailed_sets_text[x] for x in qa_sets]
 		print(f'{question_id}: {num_answers_with_set/len(question_answers):.2f}% '
 					f'percent answers with at least one entailed set')
 
 	results = {}
 	seen_entailed_sets = set()
 	for question_id, question_answers in rerank_scores.items():
+		print(f'{question_id}: {queries[question_id]["question"]}')
 		for answer in question_answers:
 			answer_id = answer['answer_id']
+			text = answer['text']
 			rerank_score = answer['score']
 			answer['rerank_score'] = rerank_score
 			entailed_sets = set(answer['entailed_sets'])
@@ -70,9 +78,20 @@ if __name__ == '__main__':
 			# 0 means all seen, 1 means all novel
 			novelty_ratio = 1.0 - (len(overlap_set) / max(len(entailed_sets), 1))
 
+			print(f'seen sets: ')
+			for t in [entailed_sets_text[x] for x in seen_entailed_sets]:
+				print(f'  {t}')
+			print(f'{rerank_score:.2f} {answer_id}:')
+			print(f'  {text}')
+			print(f'new sets:')
+			for t in [entailed_sets_text[x] for x in entailed_sets]:
+				print(f'  {t}')
+			print(f'novelty_ratio: {novelty_ratio:.2f}')
+
 			answer['score'] = (0.5* novelty_ratio) * rerank_score
 
 			seen_entailed_sets = seen_entailed_sets.union(entailed_sets)
+			input()
 
 		results[question_id] = list(sorted(question_answers, key=lambda x: x['score'], reverse=True))
 
