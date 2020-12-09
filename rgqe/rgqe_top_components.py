@@ -85,7 +85,7 @@ def create_components(entail_set_pairs, answer_sets, threshold):
 
 	for merged_entailed_set in merged_entailed_sets:
 		print(f'{merged_entailed_set["entailed_set_id"]}({len(merged_entailed_set["entailed_set"])}): '
-					f'{merged_entailed_set["set_samples"][0]["entailed_set_text"]}')
+					f'{merged_entailed_set["entailed_set"][0]["entailed_set_text"]}')
 
 
 	merged_entailed_set_answer_lookup = {}
