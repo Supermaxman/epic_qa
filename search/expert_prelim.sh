@@ -51,9 +51,11 @@ python expand_query/expand.py \
  --pre_model_name ${EXP_PRE_MODEL_NAME} \
  --model_name ${EXP_MODEL_NAME} \
  --top_k 10 \
- --num_samples 1 \
- --batch_size 32 \
+ --num_samples 3 \
+ --batch_size 64 \
  --max_seq_len 256 \
+ --gpus 4,5,6,7 \
+ --is_distributed \
 ; \
 python expand_query/format_expand.py \
   --model_path models/${EXP_MODEL_NAME} \

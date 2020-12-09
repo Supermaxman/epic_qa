@@ -36,7 +36,7 @@ export EVAL_PATH=models/${RQE_MODEL_NAME}/${RUN_NAME}.eval
 #  --output_path ${ANSWERS_PATH}
 
 # create expanded questions for every answer
-#python -m expand_query.expand \
+#python expand_query./expand.py \
 # --input_path ${SEARCH_PATH} \
 # --collection_path ${COLLECTION_PATH} \
 # --pre_model_name ${EXP_PRE_MODEL_NAME} \

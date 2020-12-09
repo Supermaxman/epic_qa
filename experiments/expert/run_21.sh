@@ -17,7 +17,7 @@ python -m rerank.extract_answers \
   --output_path models/${RERANK_MODEL_NAME}/${RERANK_RUN_NAME}.answers
 
 # create expanded questions for every answer
-#python -m expand_query.expand \
+#python expand_query/expand.py \
 # --input_path models/${RERANK_MODEL_NAME}/${RERANK_RUN_NAME}.txt \
 # --collection_path data/${COLLECTION}/${DATASET}/data \
 # --pre_model_name ${EXP_PRE_MODEL_NAME} \
