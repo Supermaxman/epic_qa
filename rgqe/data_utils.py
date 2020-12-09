@@ -163,10 +163,10 @@ class RGQETopPredictionDataset(Dataset):
 					seen_answers.add(full_id)
 
 		self.examples = []
+		question_samples = []
 		for answer_id, a_sets in self.answers.items():
 			if answer_id not in seen_answers:
 				continue
-			question_samples = []
 			for entailed_set in a_sets:
 				entailed_set_id = entailed_set['entailed_set_id']
 				entailed_set_sample_text = entailed_set['entailed_set'][0]['sample_text']

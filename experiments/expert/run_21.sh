@@ -42,7 +42,7 @@ python -m rgqe.rgqe_self_components \
 
 # top_k set entailment
 python -m rgqe.rgqe \
-  --input_path models/${EXP_MODEL_NAME}/${RUN_NAME}.exp \
+  --input_path models/${RQE_MODEL_NAME}/${RUN_NAME}.rgqe_cc \
   --search_path models/${RERANK_MODEL_NAME}/${RERANK_RUN_NAME}.txt \
   --model_name models/${RQE_MODEL_NAME} \
   --mode top \
