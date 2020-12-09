@@ -27,7 +27,7 @@ export EXP_ANSWER_BATCH_SIZE=16
 
 # flags to avoid re-running certain components
 # index & search flags
-export CREATE_INDEX=true
+export CREATE_INDEX=false
 export EXPAND_INDEX=false
 export SEARCH_INDEX=true
 
@@ -165,11 +165,14 @@ if [[ ${CREATE_INDEX} = true ]]; then
 #          --collection_path ${COLLECTION_JSONL_FILE_PATH} \
 #          --output_path ${COLLECTION_JSONL_PATH}/data/data.jsonl
         # index dataset
+#        python search/convert_passages_to_json.py \
+#          --collection_path ${DATASET_PATH}/data \
+#          --json_collection_path ${DATASET_PATH}/data_json
         python -m pyserini.index \
           -collection JsonCollection \
           -generator DefaultLuceneDocumentGenerator \
           -threads 12 \
-          -input ${DATASET_PATH}/data \
+          -input ${DATASET_PATH}/data_json \
           -index ${INDEX_FILE_PATH} \
           -storePositions \
           -storeDocvectors \
