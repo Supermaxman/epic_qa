@@ -6,8 +6,8 @@ import logging
 from transformers import T5Tokenizer
 from pytorch_lightning import loggers as pl_loggers
 from torch.utils.data import DataLoader
-from expand_query.data_utils import AnswerDataset, PredictionBatchCollator
-from expand_query.model_utils import T5QueryGenerator
+from data_utils import AnswerDataset, PredictionBatchCollator
+from model_utils import T5QueryGenerator
 
 
 if __name__ == '__main__':
