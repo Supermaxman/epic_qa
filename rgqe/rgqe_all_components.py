@@ -98,9 +98,9 @@ if __name__ == '__main__':
 
 			seen_entailed_sets = seen_entailed_sets.union(entailed_sets)
 
-			print(f'{question_id}: #modified={num_modified}')
-			print(f'{question_id}: #top_100_avg_set_counts={np.mean(top_100_set_counts):.2f}')
-			print(f'{question_id}: #outside_top_100_avg_set_counts={np.mean(outside_top_100_set_counts):.2f}')
+		print(f'{question_id}: #modified={num_modified}')
+		print(f'{question_id}: #top_100_avg_set_counts={np.mean(top_100_set_counts):.2f}')
+		print(f'{question_id}: #outside_top_100_avg_set_counts={np.mean(outside_top_100_set_counts):.2f}')
 		results[question_id] = {
 			'query': query,
 			'answers': list(sorted(question_answers, key=lambda x: x['score'], reverse=True))
