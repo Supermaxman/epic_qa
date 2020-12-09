@@ -80,21 +80,14 @@ if __name__ == '__main__':
 			novelty_ratio = 1.0 - (len(overlap_set) / max(len(entailed_sets), 1))
 			novel_sets = entailed_sets.difference(overlap_set)
 			novel_count = len(novel_sets)
-			# print(f'{rerank_score:.2f} {answer_id}:')
-			# print(f'  {text}')
-			# print(f'novel sets:')
-			# for t in [entailed_sets_text[x] for x in novel_sets]:
-			# 	print(f'  {t}')
-			# print(f'novelty_count: {novel_count}')
 			if novel_count == 0:
 				new_score = ratio * rerank_score
 			else:
-				new_score = rerank_score
+				new_score = novelty_ratio * rerank_score
 
 			answer['score'] = new_score
 
 			seen_entailed_sets = seen_entailed_sets.union(entailed_sets)
-			# input()
 
 		results[question_id] = {
 			'query': query,
