@@ -6,6 +6,7 @@ from transformers import T5Tokenizer
 from tqdm import tqdm
 from multiprocessing import Pool
 import json
+import re
 
 
 parser = argparse.ArgumentParser()
@@ -20,19 +21,54 @@ output_path = args.output_path
 tokenizer_name = args.tokenizer_name
 num_processes = args.num_processes
 tokenizer = T5Tokenizer.from_pretrained(tokenizer_name)
-
+p = re.compile(r'\bc\w+d\w*\b')
+replace_set = {
+	'copvid',
+	'copid',
+	'cod',
+	'cid',
+	'covidos',
+	'covidia',
+	'comcid',
+	'comid',
+	'civid',
+	'cid',
+	'covenid',
+	'corvid',
+	'cardiovid',
+	'covizid',
+	'coincid',
+	'covied',
+	'covvid',
+}
+replace_text = 'covid'
+replace_length = len(replace_text)
 
 def encode_prediction(prediction):
 	answer_id = prediction['id']
 	# [sample_size, max_seq_len]
 	sample_seq_ids = prediction['samples']
 	samples = []
+	seen_text = set()
 	for sample_ids in sample_seq_ids:
 		sample_txt = tokenizer.decode(
 			sample_ids.tolist(),
 			skip_special_tokens=True
 		)
-		samples.append(sample_txt)
+		text = sample_txt
+		modified_offset = 0
+		for m in p.finditer(sample_txt):
+			start_idx, end_idx = m.span()
+			m_text = m.group()
+			if m_text in replace_set:
+				start_idx += modified_offset
+				end_idx += modified_offset
+				text = text[:start_idx] + replace_text + text[end_idx:]
+				modified_offset += replace_length - len(m_text)
+
+		if text not in seen_text:
+			samples.append(text)
+			seen_text.add(text)
 	return answer_id, samples
 
 
