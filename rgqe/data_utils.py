@@ -62,9 +62,11 @@ def make_id(sample):
 
 
 class RGQEAllPredictionDataset(Dataset):
-	def __init__(self, input_path, cc_path):
+	def __init__(self, input_path, qe_path, cc_path, threshold):
 		self.input_path = input_path
+		self.qe_path = qe_path
 		self.cc_path = cc_path
+		self.threshold = threshold
 
 		with open(self.input_path, 'r') as f:
 			self.top_cc = json.load(f)
@@ -72,6 +74,18 @@ class RGQEAllPredictionDataset(Dataset):
 		with open(self.cc_path, 'r') as f:
 			# [answer_id] -> list of entailed sets
 			self.answer_sets = json.load(f)
+
+		self.q_entailed_sets = defaultdict(set)
+		with open(self.qe_path, 'r') as f:
+			# [answer_id] -> list of entailed sets
+			qa_set_entailments = json.load(f)
+			for question_id, q_set_entailments in qa_set_entailments.items():
+				for answer_id, a_set_entailments in q_set_entailments.items():
+					a_entails = set()
+					for entailed_set_id, entail_prob in a_set_entailments:
+						if entail_prob < threshold:
+							continue
+						self.q_entailed_sets[answer_id].add(entailed_set_id)
 
 		# list of entailed_set_id, entailed_set with entailed_set containing samples,
 		# where entailed_set[0]['entailed_set_text'] is representative question
@@ -85,9 +99,11 @@ class RGQEAllPredictionDataset(Dataset):
 			if answer_id in self.top_answer_sets:
 				continue
 			for entailed_set_a in a_sets:
-				num_sets += 1
 				entailed_set_a_id = entailed_set_a['entailed_set_id']
+				if entailed_set_a_id not in self.q_entailed_sets[answer_id]:
+					continue
 				entailed_set_a_text = entailed_set_a['entailed_set'][0]['sample_text']
+				num_sets += 1
 				for entailed_set_b in self.entailed_sets:
 					entailed_set_b_id = entailed_set_b['entailed_set_id']
 					entailed_set_b_text = entailed_set_b['entailed_set'][0]['entailed_set_text']

@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-export RUN_NAME=HLTRI_RERANK_RQE_21
+export RUN_NAME=HLTRI_RERANK_RQE_22
 export SEARCH_RUN=passage-large
 export RERANK_RUN_NAME=HLTRI_RERANK_15
 export RERANK_MODEL_NAME=rerank-expert-${SEARCH_RUN}-${RERANK_RUN_NAME}
@@ -11,10 +11,10 @@ export DATASET=expert
 export COLLECTION=epic_qa_prelim
 export RQE_THRESHOLD=0.9
 
-python -m rerank.extract_answers \
-  --search_path models/${RERANK_MODEL_NAME}/${RERANK_RUN_NAME}.txt \
-  --collection_path data/${COLLECTION}/${DATASET}/data \
-  --output_path models/${RERANK_MODEL_NAME}/${RERANK_RUN_NAME}.answers
+#python -m rerank.extract_answers \
+#  --search_path models/${RERANK_MODEL_NAME}/${RERANK_RUN_NAME}.txt \
+#  --collection_path data/${COLLECTION}/${DATASET}/data \
+#  --output_path models/${RERANK_MODEL_NAME}/${RERANK_RUN_NAME}.answers
 
 # create expanded questions for every answer
 #python -m expand_query.expand \
@@ -56,7 +56,7 @@ python -m rgqe.rgqe \
   --model_name models/${RQE_MODEL_NAME} \
   --max_seq_len 64 \
   --mode question \
-  --top_k 100 \
+  --top_k 1000 \
 ; \
 python -m rgqe.format_rgqe_question \
   --model_path models/${RQE_MODEL_NAME} \
@@ -87,6 +87,7 @@ python -m rgqe.rgqe_top_components \
 python -m rgqe.rgqe \
   --input_path models/${RQE_MODEL_NAME}/${RUN_NAME}.rgqe_top_cc \
   --cc_path models/${RQE_MODEL_NAME}/${RUN_NAME}.rgqe_cc \
+  --qe_path models/${RQE_MODEL_NAME}/${RUN_NAME}.rgqe_question \
   --model_name models/${RQE_MODEL_NAME} \
   --mode all \
   --max_seq_len 64 \
