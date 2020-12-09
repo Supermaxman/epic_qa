@@ -62,7 +62,7 @@ python -m rgqe.rgqe \
   --model_name models/${RQE_MODEL_NAME} \
   --mode top \
   --top_k 100 \
-  --threshold 0.1 \
+  --threshold 0.01 \
 ; \
 python -m rgqe.format_rgqe_top \
   --model_path models/${RQE_MODEL_NAME} \
