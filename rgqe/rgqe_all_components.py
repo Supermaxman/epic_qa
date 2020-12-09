@@ -59,14 +59,20 @@ if __name__ == '__main__':
 					f'percent answers with at least one entailed set')
 
 	results = {}
+	seen_entailed_sets = set()
 	for question_id, question_answers in rerank_scores.items():
 		for answer in question_answers:
 			answer_id = answer['answer_id']
 			rerank_score = answer['score']
 			answer['rerank_score'] = rerank_score
-			entailed_sets = answer['entailed_sets']
+			entailed_sets = set(answer['entailed_sets'])
+			overlap_set = entailed_sets.intersection(seen_entailed_sets)
+			# 0 means all seen, 1 means all novel
+			novelty_ratio = 1.0 - (len(overlap_set) / max(len(entailed_sets), 1))
 
-			# TODO reweighting
+			answer['score'] = (1.0 + novelty_ratio) * rerank_score
+
+			seen_entailed_sets = seen_entailed_sets.union(entailed_sets)
 
 		results[question_id] = list(sorted(question_answers, key=lambda x: x['score'], reverse=True))
 
