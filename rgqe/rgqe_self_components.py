@@ -7,9 +7,10 @@ import itertools
 
 
 class DFS(object):
-	def __init__(self, nodes):
+	def __init__(self, nodes, edges):
 		self.visited = {}
 		self.nodes = nodes
+		self.edges = edges
 		for v in self.nodes:
 			self.visited[v] = False
 
@@ -25,7 +26,7 @@ class DFS(object):
 	def dfs_search(self, v, c_list):
 		self.visited[v] = True
 		c_list.append(v)
-		for c in v.entail_edges.values():
+		for c in self.edges[v].values():
 			if c in self.visited and not self.visited[c]:
 				self.dfs_search(c, c_list)
 		return c_list
@@ -166,24 +167,36 @@ class QuestionEntailmentGraph(object):
 		return reranked_answers[:top_k]
 
 
-def create_components(sample_entail_pairs, threshold):
+def create_components(sample_entail_pairs, answer_samples, threshold):
 	results = defaultdict(list)
+	entailed_set_id = 0
+	for answer_id, samples in sample_entail_pairs.items():
+		nodes = set()
+		edges = defaultdict(set)
+		for sample_a_id, sample_b_id, score in samples:
+			nodes.add(sample_a_id)
+			nodes.add(sample_b_id)
+			if score < threshold:
+				continue
+			edges[sample_a_id].add(sample_b_id)
+			edges[sample_b_id].add(sample_a_id)
 
-	for answer_id, entail_pairs in sample_entail_pairs:
-
-	for question_id, q_scores in query_results.items():
-		if question_id not in sample_entail_pairs:
-			q_samples = {}
-		else:
-			q_samples = sample_entail_pairs[question_id]
-		qe_graph = QuestionEntailmentGraph(
-			question_id,
-			q_scores,
-			q_samples,
-			threshold
+		dfs = DFS(
+			nodes=nodes,
+			edges=edges,
 		)
-		q_answers = qe_graph.prune_answers(overlap_ratio, overall_ratio, top_k)
-		results[question_id] = q_answers
+		entailed_sets = dfs.find_connected()
+		answer_sets = []
+		sample_texts = answer_samples[answer_id]
+		for entailed_nodes in entailed_sets:
+			answer_sets.append(
+				{
+					'entailed_set_id': entailed_set_id,
+					'entailed_set': [sample_texts[v] for v in entailed_nodes]
+				}
+			)
+			entailed_set_id += 1
+		results[answer_id] = answer_sets
 	return results
 
 
@@ -191,6 +204,7 @@ if __name__ == '__main__':
 
 	parser = argparse.ArgumentParser()
 	parser.add_argument('-i', '--input_path', required=True)
+	parser.add_argument('-e', '--expand_path', required=True)
 	parser.add_argument('-o', '--output_path', required=True)
 	parser.add_argument('-t', '--threshold', default=0.5, type=float)
 
@@ -198,14 +212,20 @@ if __name__ == '__main__':
 
 	sys.setrecursionlimit(10 ** 6)
 	input_path = args.input_path
+	expand_path = args.expand_path
 	output_path = args.output_path
 	threshold = args.threshold
 
 	with open(input_path) as f:
 		sample_entail_pairs = json.load(f)
 
+	with open(expand_path) as f:
+		answer_samples = json.load(f)
+
 	component_results = create_components(
-		sample_entail_pairs, threshold
+		sample_entail_pairs,
+		answer_samples,
+		threshold
 	)
 
 	with open(output_path, 'w') as f:

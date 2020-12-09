@@ -36,6 +36,7 @@ python -m rgqe.format_rgqe_self \
 
 python -m rgqe.rgqe_self_components \
   --input_path models/${RQE_MODEL_NAME}/${RUN_NAME}.rgqe_self \
+  --expand_path models/${EXP_MODEL_NAME}/${RUN_NAME}.exp \
   --output_path models/${RQE_MODEL_NAME}/${RUN_NAME}.rgqe_cc \
   --threshold 0.5
 
