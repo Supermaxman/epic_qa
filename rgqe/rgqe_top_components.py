@@ -31,56 +31,60 @@ class DFS(object):
 		return c_list
 
 
-def create_components(sample_entail_pairs, answer_samples, threshold):
-	results = defaultdict(list)
-	entailed_set_id = 0
-	for answer_id, samples in sample_entail_pairs.items():
-		nodes = set()
-		edges = defaultdict(set)
-		for sample_a_id, sample_b_id, score in samples:
-			nodes.add(sample_a_id)
-			nodes.add(sample_b_id)
-			if score < threshold:
-				continue
-			edges[sample_a_id].add(sample_b_id)
-			edges[sample_b_id].add(sample_a_id)
+def create_components(entail_set_pairs, answer_sets, threshold):
+	entailed_set_text_lookup = {}
+	new_entailed_set_id = 0
+	for answer_id, a_sets in answer_sets.items():
+		for a_set in a_sets:
+			entailed_set_id = a_set['entailed_set_id']
+			entailed_set_text = a_set['entailed_set'][0]['sample_text']
+			entailed_set_text_lookup[entailed_set_id] = entailed_set_text
 
-		dfs = DFS(
-			nodes=nodes,
-			edges=edges,
-		)
-		entailed_sets = dfs.find_connected()
-		answer_sets = []
-		sample_texts = answer_samples[answer_id]
-		for entailed_nodes in entailed_sets:
-			answer_set_samples = []
-			for v in entailed_nodes:
-				num_connected = len(edges[v].intersection(entailed_nodes))
-				answer_sample = {
-					'sample_id': v,
-					'sample_text': sample_texts[v],
-					'num_connected': num_connected
-				}
-				answer_set_samples.append(answer_sample)
-			answer_set_samples = list(sorted(answer_set_samples, key=lambda x: x['num_connected'], reverse=True))
-			answer_set = {
-				'entailed_set_id': entailed_set_id,
-				'entailed_set': answer_set_samples
+	nodes = set()
+	edges = defaultdict(set)
+	for entail_set_a_id, entail_set_b_id, entail_prob in entail_set_pairs:
+		nodes.add(entail_set_a_id)
+		nodes.add(entail_set_b_id)
+		if entail_prob < threshold:
+			continue
+		edges[entail_set_a_id].add(entail_set_b_id)
+		edges[entail_set_b_id].add(entail_set_a_id)
+
+	dfs = DFS(
+		nodes=nodes,
+		edges=edges,
+	)
+
+	entailed_sets = dfs.find_connected()
+	for entailed_nodes in entailed_sets:
+		set_samples = []
+		for v in entailed_nodes:
+			num_connected = len(edges[v].intersection(entailed_nodes))
+			set_sample = {
+				'entailed_set_id': v,
+				'entailed_set_text': entailed_set_text_lookup[v],
+				'num_connected': num_connected
 			}
+			set_samples.append(set_sample)
+		set_samples = list(sorted(set_samples, key=lambda x: x['num_connected'], reverse=True))
+		answer_set = {
+			'entailed_set_id': new_entailed_set_id,
+			'entailed_set': set_samples
+		}
 
-			answer_sets.append(
-				answer_set
-			)
-			entailed_set_id += 1
-		results[answer_id] = answer_sets
-	return results
+		answer_sets.append(
+			answer_set
+		)
+		new_entailed_set_id += 1
+
+	return answer_sets
 
 
 if __name__ == '__main__':
 
 	parser = argparse.ArgumentParser()
 	parser.add_argument('-i', '--input_path', required=True)
-	parser.add_argument('-e', '--expand_path', required=True)
+	parser.add_argument('-c', '--cc_path', required=True)
 	parser.add_argument('-o', '--output_path', required=True)
 	parser.add_argument('-t', '--threshold', default=0.5, type=float)
 
@@ -88,19 +92,19 @@ if __name__ == '__main__':
 
 	sys.setrecursionlimit(10 ** 6)
 	input_path = args.input_path
-	expand_path = args.expand_path
+	cc_path = args.cc_path
 	output_path = args.output_path
 	threshold = args.threshold
 
 	with open(input_path) as f:
-		sample_entail_pairs = json.load(f)
+		entail_set_pairs = json.load(f)
 
-	with open(expand_path) as f:
-		answer_samples = json.load(f)
+	with open(cc_path) as f:
+		answer_sets = json.load(f)
 
 	component_results = create_components(
-		sample_entail_pairs,
-		answer_samples,
+		entail_set_pairs,
+		answer_sets,
 		threshold
 	)
 

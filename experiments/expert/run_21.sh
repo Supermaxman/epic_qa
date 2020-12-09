@@ -70,7 +70,7 @@ python -m rgqe.format_rgqe_top \
 ; \
 python -m rgqe.rgqe_top_components \
   --input_path models/${RQE_MODEL_NAME}/${RUN_NAME}.rgqe_top \
-  --expand_path models/${EXP_MODEL_NAME}/${RUN_NAME}.exp \
+  --cc_path models/${RQE_MODEL_NAME}/${RUN_NAME}.rgqe_cc \
   --output_path models/${RQE_MODEL_NAME}/${RUN_NAME}.rgqe_top_cc \
   --threshold 0.5
 
