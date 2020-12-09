@@ -33,6 +33,7 @@ with Pool(processes=num_processes) as p:
 	with open(output_path, 'w') as f:
 		for doc_id, passages in tqdm(
 				p.imap_unordered(extract_passages, file_names), total=len(file_names)):
-			f.write(json.dumps(passages) + '\n')
+			for passage in passages:
+				f.write(json.dumps(passage) + '\n')
 
 
