@@ -161,7 +161,7 @@ class RGQETopPredictionDataset(Dataset):
 				line = line.strip()
 				if line:
 					question_id, _, answer_id, rank, score, run_name = line.split()
-					if question_answer_count > top_k:
+					if question_answer_count[question_id] > top_k:
 						continue
 					answer_sets = self.answers[answer_id]
 					answer_sets = {e['entailed_set_id']: e for e in answer_sets}
