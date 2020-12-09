@@ -83,12 +83,13 @@ def create_components(entail_set_pairs, answer_sets, threshold):
 		)
 		new_entailed_set_id += 1
 
-	merged_entailed_set_answer_lookup = defaultdict(set)
+	merged_entailed_set_answer_lookup = {}
 	for answer_id, a_sets in entailed_set_answer_lookup.items():
+		new_entailed_sets = set()
 		for entailed_set_id in a_sets:
 			new_entailed_set_id = merged_mapping[entailed_set_id]
-			merged_entailed_set_answer_lookup[answer_id].add(new_entailed_set_id)
-
+			new_entailed_sets.add(new_entailed_set_id)
+		merged_entailed_set_answer_lookup[answer_id] = list(new_entailed_sets)
 	results = {
 		'entailed_sets': merged_entailed_sets,
 		'answer_sets': merged_entailed_set_answer_lookup,
