@@ -44,13 +44,11 @@ class AnswerDataset(Dataset):
 						}
 						self.examples.append(example)
 		else:
-			self.ids = os.listdir(root_dir)
+			with open(self.root_dir, 'r') as f:
+				self.docs = json.load(f)
 			self.examples = []
-			for doc_name in tqdm(self.ids):
-				doc_path = os.path.join(self.root_dir, doc_name)
-				with open(doc_path) as f:
-					doc = json.load(f)
-				for passage in doc['contexts']:
+			for doc_id, passages in tqdm(self.docs.items()):
+				for passage in passages:
 					sentences = passage['sentences']
 					start_sentence = sentences[0]
 					end_sentence = sentences[-1]

@@ -43,11 +43,11 @@ python -m pyserini.index \
 
 python search/extract_collection.py \
  --collection_path data/${COLLECTION}/${DATASET}/data \
- --collection_path data/${COLLECTION}/${DATASET}/data.json
+ --output_path data/${COLLECTION}/${DATASET}/data.json
 
 
 python -m expand_query.expand \
- --collection_path data/${COLLECTION}/${DATASET}/data \
+ --collection_path data/${COLLECTION}/${DATASET}/data.json \
  --pre_model_name ${EXP_PRE_MODEL_NAME} \
  --model_name ${EXP_MODEL_NAME} \
  --top_k 10 \
