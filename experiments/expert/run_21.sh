@@ -27,7 +27,7 @@ python -m expand_query.format_expand \
 python -m expand_query.format_run \
   --input_path models/${EXP_MODEL_NAME}/${RUN_NAME}.exp \
   --scores_path models/${RERANK_MODEL_NAME}/${RERANK_RUN_NAME}.txt \
-  --output_path models/${RQE_MODEL_NAME}/${RUN_NAME}.exp_scored \
+  --output_path models/${RQE_MODEL_NAME}/${RUN_NAME}.exp_scored
 
 #
 python -m rqe.rqe \

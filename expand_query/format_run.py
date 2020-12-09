@@ -10,7 +10,7 @@ def sort_results(rerank_scores, query_answer_samples):
 		q_results = []
 		for answer_id, answer_score in q_scores:
 			try:
-				query_samples = query_answer_samples[question_id][answer_id]
+				query_samples = query_answer_samples[answer_id]
 			except KeyError:
 				query_samples = []
 			answer_results = {
