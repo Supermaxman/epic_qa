@@ -16,7 +16,7 @@ if __name__ == '__main__':
 	parser = argparse.ArgumentParser()
 	parser.add_argument('-i', '--input_path', required=True)
 	parser.add_argument('-o', '--output_path', required=True)
-	parser.add_argument('-mn', '--model_name', default='models/quora-seq-at-nboost-pt-bert-base-uncased-msmarco')
+	parser.add_argument('-mn', '--model_name', default='quora-seq-at-nboost-pt-bert-base-uncased-msmarco')
 	parser.add_argument('-pm', '--pre_model_name', default='nboost/pt-bert-base-uncased-msmarco')
 	parser.add_argument('-bs', '--batch_size', default=64, type=int)
 	parser.add_argument('-ml', '--max_seq_len', default=128, type=int)
@@ -25,6 +25,7 @@ if __name__ == '__main__':
 	parser.add_argument('-tpu', '--use_tpus', default=False, action='store_true')
 	parser.add_argument('-m', '--mode', required=True, help='all/self/top')
 	parser.add_argument('-k', '--top_k', default=100, type=int)
+	parser.add_argument('-sd', '--save_directory', default='models')
 	parser.add_argument('-sp', '--search_path', default=None)
 	parser.add_argument('-qp', '--query_path', default=None)
 	parser.add_argument('-lp', '--label_path', default=None)
@@ -37,9 +38,9 @@ if __name__ == '__main__':
 	pl.seed_everything(seed)
 
 	model_name = args.model_name
-	checkpoint_path = os.path.join(model_name, 'pytorch_model.bin')
+	save_directory = os.path.join(args.save_directory, model_name)
+	checkpoint_path = os.path.join(save_directory, 'pytorch_model.bin')
 	pre_model_name = args.pre_model_name
-	save_directory = model_name
 
 	input_path = args.input_path
 	output_path = args.output_path

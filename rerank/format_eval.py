@@ -25,9 +25,9 @@ def write_results(question_id, question_scores, run_name, f, top_k=1000, multipl
 		rel_idx += 1
 
 
-def read_scores(run_path):
+def read_scores(input_path):
 	rerank_scores = defaultdict(list)
-	with open(run_path) as f:
+	with open(input_path) as f:
 		for line in f:
 			# f'{question_id}\tQ0\t{doc_pass_id}\t{rank}\t{score:.8f}\t{run_name}\n'
 			line = line.strip().split()
@@ -46,7 +46,7 @@ def read_scores(run_path):
 if __name__ == '__main__':
 
 	parser = argparse.ArgumentParser()
-	parser.add_argument('-p', '--pred_path', required=True)
+	parser.add_argument('-i', '--input_path', required=True)
 	parser.add_argument('-o', '--output_path', required=True)
 	parser.add_argument('-k', '--top_k', default=2000, type=int)
 	parser.add_argument('-sd', '--single_per_doc', default=False, action='store_true')
@@ -55,7 +55,7 @@ if __name__ == '__main__':
 
 	args = parser.parse_args()
 
-	pred_path = args.pred_path
+	input_path = args.input_path
 	output_path = args.output_path
 	output_name = output_path.split('/')[-1].replace('.txt', '').replace('.pred', '')
 
@@ -64,7 +64,7 @@ if __name__ == '__main__':
 	top_k = args.top_k
 	threshold = args.threshold
 
-	rerank_scores = read_scores(pred_path)
+	rerank_scores = read_scores(input_path)
 	with open(output_path, 'w') as f:
 		for question_id, question_scores in rerank_scores.items():
 			write_results(

@@ -39,14 +39,12 @@ def save_predictions(question_scores, output_path, run_name):
 if __name__ == '__main__':
 	parser = argparse.ArgumentParser()
 	parser.add_argument('-l', '--label_path', required=True)
-	parser.add_argument('-s', '--search_path', required=True)
 	parser.add_argument('-o', '--output_path', required=True)
 	parser.add_argument('-ds', '--dataset', required=True)
 	parser.add_argument('-sr', '--split_ratio', default=0.9, type=float)
 	args = parser.parse_args()
 
 	label_path = args.label_path
-	search_path = args.search_path
 	output_path = args.output_path
 	split_ratio = args.split_ratio
 	dataset_prefix = 'C' if args.dataset.lower() == 'consumer' else 'E'
