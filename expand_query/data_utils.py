@@ -8,8 +8,8 @@ from tqdm import tqdm
 
 
 class AnswerDataset(Dataset):
-	def __init__(self, root_dir, input_path):
-		self.root_dir = root_dir
+	def __init__(self, collection_path, input_path):
+		self.collection_path = collection_path
 		self.input_path = input_path
 		self.ids = set()
 		if self.input_path is not None:
@@ -27,7 +27,7 @@ class AnswerDataset(Dataset):
 				self.doc_ids[doc_id][pass_id].add((sent_start_id, sent_end_id))
 			self.examples = []
 			for doc_id, doc_pass_ids in self.doc_ids.items():
-				doc_path = os.path.join(self.root_dir, f'{doc_id}.json')
+				doc_path = os.path.join(self.collection_path, f'{doc_id}.json')
 				with open(doc_path) as f:
 					doc = json.load(f)
 				for pass_id, sent_spans in doc_pass_ids.items():
@@ -45,7 +45,7 @@ class AnswerDataset(Dataset):
 						self.examples.append(example)
 		else:
 			self.passages = []
-			with open(self.root_dir, 'r') as f:
+			with open(self.collection_path, 'r') as f:
 				for line in f:
 					line = line.strip()
 					if line:
