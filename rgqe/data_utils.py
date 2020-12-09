@@ -102,3 +102,40 @@ class RGQEPredictionDataset(Dataset):
 		example = self.examples[idx]
 
 		return example
+
+
+class RGQESelfPredictionDataset(Dataset):
+	def __init__(self, input_path):
+		self.input_path = input_path
+		with open(input_path) as f:
+			self.answers = json.load(f)
+
+		self.examples = []
+		for answer_id, a_samples in self.answers.items():
+			question_samples = []
+			for sample_id, a_sample_text in enumerate(a_samples):
+				example = {
+					'id': f'{answer_id}|{sample_id}',
+					'sample_text': a_sample_text
+				}
+				question_samples.append(example)
+
+			for sample_a, sample_b in itertools.combinations(question_samples, r=2):
+				example = {
+					'question_a_id': sample_a['id'],
+					'question_b_id': sample_b['id'],
+					'question_a_text': sample_a['sample_text'],
+					'question_b_text': sample_b['sample_text'],
+				}
+				self.examples.append(example)
+
+	def __len__(self):
+		return len(self.examples)
+
+	def __getitem__(self, idx):
+		if torch.is_tensor(idx):
+			idx = idx.tolist()
+
+		example = self.examples[idx]
+
+		return example

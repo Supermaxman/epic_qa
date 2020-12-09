@@ -23,11 +23,26 @@ python -m expand_query.expand \
 python -m expand_query.format_expand \
   --model_path models/${EXP_MODEL_NAME} \
   --output_path models/${EXP_MODEL_NAME}/${RUN_NAME}.exp \
-; \
-python -m expand_query.format_run \
+
+# TODO self entailment
+python -m rgqe.rgqe_self \
   --input_path models/${EXP_MODEL_NAME}/${RUN_NAME}.exp \
-  --scores_path models/${RERANK_MODEL_NAME}/${RERANK_RUN_NAME}.txt \
-  --output_path models/${RQE_MODEL_NAME}/${RUN_NAME}.exp_scored
+  --model_name models/${RQE_MODEL_NAME} \
+; \
+python -m rgqe.format_rgqe_self \
+  --model_path models/${RQE_MODEL_NAME} \
+  --output_path models/${RQE_MODEL_NAME}/${RUN_NAME}.rgqe_self \
+; \
+python -m rgqe.rgqe_self_components \
+  --input_path models/${RQE_MODEL_NAME}/${RUN_NAME}.rgqe_self \
+  --output_path models/${RQE_MODEL_NAME}/${RUN_NAME}.rgqe_cc \
+  --threshold 0.5
+
+
+#python -m expand_query.format_run \
+#  --input_path models/${EXP_MODEL_NAME}/${RUN_NAME}.exp \
+#  --scores_path models/${RERANK_MODEL_NAME}/${RERANK_RUN_NAME}.txt \
+#  --output_path models/${RQE_MODEL_NAME}/${RUN_NAME}.exp_scored
 
 #
 python -m rqe.rqe \
