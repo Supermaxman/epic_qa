@@ -47,7 +47,7 @@ export EVAL_PATH=models/${RQE_MODEL_NAME}/${RUN_NAME}.eval
 # --batch_size 16 \
 #; \
 #python -m expand_query.format_expand \
-#  --model_path models/${EXP_MODEL_NAME} \
+#  --input_path models/${EXP_MODEL_NAME} \
 #  --output_path ${EXP_PATH}
 
 # self entailment
@@ -58,7 +58,7 @@ python -m rgqe.rgqe \
   --mode self \
 ; \
 python -m rgqe.format_rgqe_self \
-  --model_path models/${RQE_MODEL_NAME} \
+  --input_path models/${RQE_MODEL_NAME} \
   --output_path ${RGQE_SELF_PATH} \
 ; \
 python -m rgqe.rgqe_self_components \
@@ -78,7 +78,7 @@ python -m rgqe.rgqe \
   --mode question \
 ; \
 python -m rgqe.format_rgqe_question \
-  --model_path models/${RQE_MODEL_NAME} \
+  --input_path models/${RQE_MODEL_NAME} \
   --output_path ${RGQE_QUESTION_PATH}
 
 # top_k set entailment
@@ -93,7 +93,7 @@ python -m rgqe.rgqe \
   --threshold ${RQE_THRESHOLD} \
 ; \
 python -m rgqe.format_rgqe_top \
-  --model_path models/${RQE_MODEL_NAME} \
+  --input_path models/${RQE_MODEL_NAME} \
   --output_path ${RGQE_TOP_PATH} \
 ; \
 python -m rgqe.rgqe_top_components \
@@ -112,7 +112,7 @@ python -m rgqe.rgqe \
   --mode all \
 ; \
 python -m rgqe.format_rgqe_all \
-  --model_path models/${RQE_MODEL_NAME} \
+  --input_path models/${RQE_MODEL_NAME} \
   --output_path ${RGQE_ALL_PATH}
 
 python -m rgqe.rgqe_all_components \

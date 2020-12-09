@@ -10,13 +10,13 @@ import re
 
 
 parser = argparse.ArgumentParser()
-parser.add_argument('-m', '--model_path', required=True)
+parser.add_argument('-i', '--input_path', required=True)
 parser.add_argument('-o', '--output_path', required=True)
 parser.add_argument('-t', '--tokenizer_name', default='t5-base')
 parser.add_argument('-ps', '--num_processes', default=16, type=int)
 args = parser.parse_args()
 
-model_path = args.model_path
+input_path = args.input_path
 output_path = args.output_path
 tokenizer_name = args.tokenizer_name
 num_processes = args.num_processes
@@ -44,6 +44,7 @@ replace_set = {
 }
 replace_text = 'covid'
 replace_length = len(replace_text)
+
 
 def encode_prediction(prediction):
 	answer_id = prediction['id']
@@ -74,11 +75,10 @@ def encode_prediction(prediction):
 
 
 pred_list = []
-for file_name in os.listdir(model_path):
+for file_name in os.listdir(input_path):
 	if file_name.endswith('.pt'):
-		preds = torch.load(os.path.join(model_path, file_name))
+		preds = torch.load(os.path.join(input_path, file_name))
 		pred_list.extend(preds)
-answer_queries = defaultdict(list)
 
 with Pool(processes=num_processes) as p:
 	with open(output_path, 'w') as f:

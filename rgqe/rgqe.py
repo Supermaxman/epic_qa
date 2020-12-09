@@ -15,6 +15,7 @@ import torch
 if __name__ == '__main__':
 	parser = argparse.ArgumentParser()
 	parser.add_argument('-i', '--input_path', required=True)
+	parser.add_argument('-o', '--output_path', required=True)
 	parser.add_argument('-mn', '--model_name', default='models/quora-seq-at-nboost-pt-bert-base-uncased-msmarco')
 	parser.add_argument('-pm', '--pre_model_name', default='nboost/pt-bert-base-uncased-msmarco')
 	parser.add_argument('-bs', '--batch_size', default=64, type=int)
@@ -41,6 +42,7 @@ if __name__ == '__main__':
 	save_directory = model_name
 
 	input_path = args.input_path
+	output_path = args.output_path
 	tokenizer_name = model_name
 	batch_size = args.batch_size
 	max_seq_len = args.max_seq_len
@@ -64,6 +66,9 @@ if __name__ == '__main__':
 	tpu_cores = 8
 	num_workers = 4
 	deterministic = True
+
+	if not os.path.exists(output_path):
+		os.mkdir(output_path)
 
 	# Also add the stream handler so that it logs on STD out as well
 	# Ref: https://stackoverflow.com/a/46098711/4535284
@@ -150,7 +155,7 @@ if __name__ == '__main__':
 		mode=mode,
 		torch_cache_dir=torch_cache_dir,
 		predict_mode=True,
-		predict_path=save_directory
+		predict_path=output_path
 	)
 	model.load_state_dict(torch.load(checkpoint_path))
 

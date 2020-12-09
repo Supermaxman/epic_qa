@@ -59,4 +59,22 @@ python expand_query/expand.py \
 ; \
 python expand_query/format_expand_jsonl.py \
   --model_path models/${EXP_MODEL_NAME} \
-  --output_path models/${EXP_MODEL_NAME}/${SEARCH_RUN}.expl
+  --output_path models/${EXP_MODEL_NAME}/${SEARCH_RUN}.expl \
+  --num_processes 16
+
+export INDEX_NAME=passage_index_exp
+
+python search/expand_passages_jsonl.py \
+  --collection_path data/${COLLECTION}/${DATASET}/data.jsonl \
+  --output_path data/${COLLECTION}/${DATASET}/data_expanded.jsonl \
+  --expand_path models/${EXP_MODEL_NAME}/${SEARCH_RUN}.expl
+
+python -m pyserini.index \
+  -collection JsonCollection \
+  -generator DefaultLuceneDocumentGenerator \
+  -threads 12 \
+  -input data/${COLLECTION}/${DATASET}/data_expanded.jsonl \
+  -index data/${COLLECTION}/${DATASET}/indices/${INDEX_NAME} \
+  -storePositions \
+  -storeDocvectors \
+  -storeRaw

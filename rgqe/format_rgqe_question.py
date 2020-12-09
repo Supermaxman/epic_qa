@@ -12,11 +12,11 @@ def get_id(q_id):
 	return answer_id, sample_id
 
 
-def load_predictions(model_path):
+def load_predictions(input_path):
 	pred_list = []
-	for file_name in os.listdir(model_path):
+	for file_name in os.listdir(input_path):
 		if file_name.endswith('.question'):
-			preds = torch.load(os.path.join(model_path, file_name))
+			preds = torch.load(os.path.join(input_path, file_name))
 			pred_list.extend(preds)
 	sample_entail_pairs = defaultdict(lambda: defaultdict(list))
 	probs = []
@@ -38,12 +38,12 @@ def save_predictions(sample_entail_pairs, output_path):
 
 if __name__ == '__main__':
 	parser = argparse.ArgumentParser()
-	parser.add_argument('-m', '--model_path', required=True)
+	parser.add_argument('-i', '--input_path', required=True)
 	parser.add_argument('-o', '--output_path', required=True)
 	args = parser.parse_args()
 
-	model_path = args.model_path
+	input_path = args.input_path
 	output_path = args.output_path
 
-	sample_entail_pairs = load_predictions(model_path)
+	sample_entail_pairs = load_predictions(input_path)
 	save_predictions(sample_entail_pairs, output_path)

@@ -15,6 +15,7 @@ import torch
 if __name__ == '__main__':
 	parser = argparse.ArgumentParser()
 	parser.add_argument('-q', '--query_path', required=True)
+	parser.add_argument('-o', '--output_path', required=True)
 	parser.add_argument('-c', '--collection_path', required=True)
 	parser.add_argument('-ps', '--passage_search_run', default=None)
 	parser.add_argument('-ds', '--document_search_run', default=None)
@@ -46,6 +47,7 @@ if __name__ == '__main__':
 
 	collection_path = args.collection_path
 	label_path = args.label_path
+	output_path = args.output_path
 	passage_search_run = args.passage_search_run
 	document_search_run = args.document_search_run
 	query_path = args.query_path
@@ -72,6 +74,10 @@ if __name__ == '__main__':
 	deterministic = True
 
 	checkpoint_path = os.path.join(save_directory, 'pytorch_model.bin')
+
+	if not os.path.exists(output_path):
+		os.mkdir(output_path)
+
 	# Also add the stream handler so that it logs on STD out as well
 	# Ref: https://stackoverflow.com/a/46098711/4535284
 	for handler in logging.root.handlers[:]:
@@ -193,7 +199,7 @@ if __name__ == '__main__':
 		weight_decay=0.01,
 		torch_cache_dir=torch_cache_dir,
 		predict_mode=True,
-		predict_path=save_directory
+		predict_path=output_path
 	)
 
 	if load_trained_model:

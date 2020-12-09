@@ -14,6 +14,7 @@ if __name__ == '__main__':
   parser = argparse.ArgumentParser()
   parser.add_argument('-c', '--collection_path', required=True)
   parser.add_argument('-ps', '--input_path', default=None)
+  parser.add_argument('-o', '--output_path', default=None)
   parser.add_argument('-pm', '--pre_model_name', default='docT5query-base/model.ckpt-1004000')
   parser.add_argument('-tn', '--tokenizer_name', default='t5-base')
   parser.add_argument('-mn', '--model_name', default='docT5query-base')
@@ -34,10 +35,14 @@ if __name__ == '__main__':
   pl.seed_everything(seed)
   save_directory = args.save_directory
   model_name = args.model_name
+  output_path = args.output_path
   save_directory = os.path.join(save_directory, model_name)
 
   if not os.path.exists(save_directory):
     os.mkdir(save_directory)
+
+  if not os.path.exists(output_path):
+    os.mkdir(output_path)
 
   collection_path = args.collection_path
   input_path = args.input_path
@@ -107,7 +112,7 @@ if __name__ == '__main__':
     num_samples=num_samples,
     torch_cache_dir=torch_cache_dir,
     predict_mode=True,
-    predict_path=save_directory
+    predict_path=output_path
   )
 
   logger = pl_loggers.TensorBoardLogger(

@@ -26,7 +26,6 @@ if not os.path.exists(json_collection_path):
 
 
 def extract_text(doc):
-  # TODO add expanded sentence text, maybe doc title
   doc_text = ' '.join([c['text'] for c in doc['contexts']])
   if expand_docs:
     exp_text = []

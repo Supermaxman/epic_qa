@@ -53,8 +53,8 @@ python -m rerank.rerank \
   --max_seq_len 96 \
   --load_trained_model
 
-python -m rerank.format_preds \
-  --model_path models/${MODEL_NAME} \
+python -m rerank.format_rerank \
+  --input_path models/${MODEL_NAME} \
   --output_path models/${MODEL_NAME}/${RUN_NAME}.pred \
 ; \
 python -m rerank.format_eval \
