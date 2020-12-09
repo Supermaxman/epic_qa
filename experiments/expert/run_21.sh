@@ -24,21 +24,40 @@ python -m expand_query.format_expand \
   --model_path models/${EXP_MODEL_NAME} \
   --output_path models/${EXP_MODEL_NAME}/${RUN_NAME}.exp \
 
-# TODO self entailment
-python -m rgqe.rgqe_self \
+# self entailment
+python -m rgqe.rgqe \
   --input_path models/${EXP_MODEL_NAME}/${RUN_NAME}.exp \
   --model_name models/${RQE_MODEL_NAME} \
+  --mode self \
 ; \
 python -m rgqe.format_rgqe_self \
   --model_path models/${RQE_MODEL_NAME} \
-  --output_path models/${RQE_MODEL_NAME}/${RUN_NAME}.rgqe_self
-
-
+  --output_path models/${RQE_MODEL_NAME}/${RUN_NAME}.rgqe_self \
+; \
 python -m rgqe.rgqe_self_components \
   --input_path models/${RQE_MODEL_NAME}/${RUN_NAME}.rgqe_self \
   --expand_path models/${EXP_MODEL_NAME}/${RUN_NAME}.exp \
   --output_path models/${RQE_MODEL_NAME}/${RUN_NAME}.rgqe_cc \
   --threshold 0.5
+
+# top_k set entailment
+python -m rgqe.rgqe \
+  --input_path models/${EXP_MODEL_NAME}/${RUN_NAME}.exp \
+  --search_path models/${RERANK_MODEL_NAME}/${RERANK_RUN_NAME}.txt \
+  --model_name models/${RQE_MODEL_NAME} \
+  --mode top \
+  --top_k 100 \
+; \
+python -m rgqe.format_rgqe_top \
+  --model_path models/${RQE_MODEL_NAME} \
+  --output_path models/${RQE_MODEL_NAME}/${RUN_NAME}.rgqe_top \
+; \
+python -m rgqe.rgqe_top_components \
+  --input_path models/${RQE_MODEL_NAME}/${RUN_NAME}.rgqe_top \
+  --expand_path models/${EXP_MODEL_NAME}/${RUN_NAME}.exp \
+  --output_path models/${RQE_MODEL_NAME}/${RUN_NAME}.rgqe_top_cc \
+  --threshold 0.5
+
 
 
 #python -m expand_query.format_run \
@@ -69,6 +88,7 @@ python -m rqe.format_run \
 python -m rgqe.rgqe \
   --input_path models/${RQE_MODEL_NAME}/${RUN_NAME}.rqe_scored \
   --model_name models/${RQE_MODEL_NAME} \
+  --mode all \
 ; \
 python -m rgqe.format_rgqe \
   --model_path models/${RQE_MODEL_NAME} \

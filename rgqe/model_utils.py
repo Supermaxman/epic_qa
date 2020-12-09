@@ -9,9 +9,10 @@ import os
 
 class RGQEPredictionBert(pl.LightningModule):
 	def __init__(
-			self, pre_model_name, learning_rate, weight_decay, lr_warmup, updates_total,
+			self, pre_model_name, learning_rate, weight_decay, lr_warmup, updates_total, mode,
 			torch_cache_dir, predict_mode=False, predict_path=None):
 		super().__init__()
+		self.mode = mode
 		self.pre_model_name = pre_model_name
 		self.torch_cache_dir = torch_cache_dir
 		self.learning_rate = learning_rate
@@ -102,7 +103,7 @@ class RGQEPredictionBert(pl.LightningModule):
 					'question_b_id': batch['question_b_id'],
 					'entail_prob': probs.tolist()
 				},
-				filename=os.path.join(self.predict_path, f'predictions-{device_id}.ptg')
+				filename=os.path.join(self.predict_path, f'predictions-{device_id}.{self.mode}')
 			)
 			result = {}
 

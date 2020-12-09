@@ -60,7 +60,7 @@ def make_id(sample):
 	return f'{sample["question_id"]}|{sample["id"]}|{sample["sample_id"]}'
 
 
-class RGQEPredictionDataset(Dataset):
+class RGQEAllPredictionDataset(Dataset):
 	def __init__(self, input_path):
 		self.input_path = input_path
 		with open(input_path) as f:
@@ -126,6 +126,66 @@ class RGQESelfPredictionDataset(Dataset):
 					'question_b_id': sample_b['id'],
 					'question_a_text': sample_a['sample_text'],
 					'question_b_text': sample_b['sample_text'],
+				}
+				self.examples.append(example)
+
+	def __len__(self):
+		return len(self.examples)
+
+	def __getitem__(self, idx):
+		if torch.is_tensor(idx):
+			idx = idx.tolist()
+
+		example = self.examples[idx]
+
+		return example
+
+
+class RGQETopPredictionDataset(Dataset):
+	def __init__(self, input_path, search_path, top_k):
+		self.input_path = input_path
+		self.search_path = search_path
+		self.top_k = top_k
+		self.sets = set()
+		with open(input_path) as f:
+			self.answers = json.load(f)
+
+		seen_answers = set()
+		seen_count = defaultdict(int)
+		with open(self.search_path, 'r') as f:
+			for line in f:
+				line = line.strip()
+				if line:
+					q_id, _, full_id, rank, score, run_name = line.split()
+					if seen_count[q_id] > top_k:
+						continue
+					seen_count[q_id] += 1
+					seen_answers.add(full_id)
+
+		self.examples = []
+		for answer_id, a_sets in self.answers.items():
+			if answer_id not in seen_answers:
+				continue
+			question_samples = []
+			for entailed_set in a_sets:
+				entailed_set_id = entailed_set['entailed_set_id']
+				entailed_set_sample_text = entailed_set['entailed_set'][0]['sample_text']
+				example = {
+					'id': f'{answer_id}|{entailed_set_id}',
+					'answer_id': answer_id,
+					'entailed_set_text': entailed_set_sample_text
+				}
+				self.sets.add(entailed_set_id)
+				question_samples.append(example)
+
+			for sample_a, sample_b in itertools.combinations(question_samples, r=2):
+				if sample_a['answer_id'] == sample_b['answer_id']:
+					continue
+				example = {
+					'question_a_id': sample_a['id'],
+					'question_b_id': sample_b['id'],
+					'question_a_text': sample_a['entailed_set_text'],
+					'question_b_text': sample_b['entailed_set_text'],
 				}
 				self.examples.append(example)
 

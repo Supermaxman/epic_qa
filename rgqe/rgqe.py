@@ -5,7 +5,8 @@ import pytorch_lightning as pl
 from transformers import AutoTokenizer
 from torch.utils.data import DataLoader
 from rgqe.model_utils import RGQEPredictionBert
-from rgqe.data_utils import RGQEPredictionDataset, PredictionBatchCollator
+from rgqe.data_utils import RGQEAllPredictionDataset, RGQESelfPredictionDataset, RGQETopPredictionDataset, \
+	PredictionBatchCollator
 import logging
 from pytorch_lightning import loggers as pl_loggers
 import torch
@@ -21,6 +22,9 @@ if __name__ == '__main__':
 	parser.add_argument('-se', '--seed', default=0, type=int)
 	parser.add_argument('-cd', '--torch_cache_dir', default=None)
 	parser.add_argument('-tpu', '--use_tpus', default=False, action='store_true')
+	parser.add_argument('-m', '--mode', required=True, help='all/self/top')
+	parser.add_argument('-k', '--top_k', default=100, type=int)
+	parser.add_argument('-sp', '--search_path', default=None)
 
 	args = parser.parse_args()
 	seed = args.seed
@@ -36,6 +40,9 @@ if __name__ == '__main__':
 	batch_size = args.batch_size
 	max_seq_len = args.max_seq_len
 	torch_cache_dir = args.torch_cache_dir
+	mode = args.mode.lower()
+	top_k = args.top_k
+	search_path = args.search_path
 
 	is_distributed = False
 	# export TPU_IP_ADDRESS=10.155.6.34
@@ -64,11 +71,25 @@ if __name__ == '__main__':
 
 	logging.info(f'Loading tokenizer: {tokenizer_name}')
 	tokenizer = AutoTokenizer.from_pretrained(tokenizer_name)
-	logging.info(f'Loading dataset')
-
-	eval_dataset = RGQEPredictionDataset(
-		input_path
-	)
+	logging.info(f'Loading {mode} dataset...')
+	if mode == 'all':
+		eval_dataset = RGQEAllPredictionDataset(
+			input_path
+		)
+	elif mode == 'self':
+		eval_dataset = RGQESelfPredictionDataset(
+			input_path
+		)
+	elif mode == 'top':
+		eval_dataset = RGQETopPredictionDataset(
+			input_path,
+			search_path,
+			top_k
+		)
+		logging.info(f'num_sets={len(eval_dataset.sets)}')
+	else:
+		raise ValueError(f'Unknown mode: {mode}')
+	logging.info(f'num_examples={len(eval_dataset)}')
 	eval_data_loader = DataLoader(
 		eval_dataset,
 		batch_size=batch_size,
@@ -88,6 +109,7 @@ if __name__ == '__main__':
 		lr_warmup=0.1,
 		updates_total=0,
 		weight_decay=0.01,
+		mode=mode,
 		torch_cache_dir=torch_cache_dir,
 		predict_mode=True,
 		predict_path=save_directory

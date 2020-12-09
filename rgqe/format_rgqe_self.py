@@ -15,7 +15,7 @@ def get_id(q_id):
 def load_predictions(model_path):
 	pred_list = []
 	for file_name in os.listdir(model_path):
-		if file_name.endswith('.ptg'):
+		if file_name.endswith('.self'):
 			preds = torch.load(os.path.join(model_path, file_name))
 			pred_list.extend(preds)
 	sample_entail_pairs = defaultdict(list)
