@@ -47,8 +47,8 @@ python -m expand_query.expand \
  --model_name ${EXP_MODEL_NAME} \
  --top_k 10 \
  --num_samples 1 \
- --batch_size 16 \
- --max_seq_len 512
+ --batch_size 32 \
+ --max_seq_len 256
 
 python -m expand_query.format_expand \
   --model_path models/${EXP_MODEL_NAME} \
