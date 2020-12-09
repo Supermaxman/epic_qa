@@ -67,7 +67,8 @@ if __name__ == '__main__':
 	results = {}
 	seen_entailed_sets = set()
 	for question_id, question_answers in rerank_scores.items():
-		print(f'{question_id}: {queries[question_id]["question"]}')
+		query = queries[question_id]
+		# print(f'{question_id}: {queries[question_id]["question"]}')
 		for answer in question_answers:
 			answer_id = answer['answer_id']
 			text = answer['text']
@@ -79,19 +80,22 @@ if __name__ == '__main__':
 			novelty_ratio = 1.0 - (len(overlap_set) / max(len(entailed_sets), 1))
 			novel_sets = entailed_sets.difference(overlap_set)
 			novel_count = len(novel_sets)
-			print(f'{rerank_score:.2f} {answer_id}:')
-			print(f'  {text}')
-			print(f'novel sets:')
-			for t in [entailed_sets_text[x] for x in novel_sets]:
-				print(f'  {t}')
-			print(f'novelty_count: {novel_count}')
+			# print(f'{rerank_score:.2f} {answer_id}:')
+			# print(f'  {text}')
+			# print(f'novel sets:')
+			# for t in [entailed_sets_text[x] for x in novel_sets]:
+			# 	print(f'  {t}')
+			# print(f'novelty_count: {novel_count}')
 
 			answer['score'] = (novel_count) * rerank_score
 
 			seen_entailed_sets = seen_entailed_sets.union(entailed_sets)
-			input()
+			# input()
 
-		results[question_id] = list(sorted(question_answers, key=lambda x: x['score'], reverse=True))
+		results[question_id] = {
+			'query': query,
+			'answers': list(sorted(question_answers, key=lambda x: x['score'], reverse=True))
+		}
 
 	with open(output_path, 'w') as f:
 		json.dump(results, f, indent=2)

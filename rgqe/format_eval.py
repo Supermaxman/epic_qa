@@ -28,7 +28,8 @@ if __name__ == '__main__':
 	output_name = output_path.split('/')[-1].replace('.txt', '').replace('.pred', '')
 
 	with open(results_path) as f:
-		rerank_results = json.load(f)
+		results = json.load(f)
+		rerank_results = results['answers']
 
 	write_run(rerank_results, output_path, output_name)
 
