@@ -42,9 +42,12 @@ def create_components(entail_set_pairs, answer_sets, threshold):
 			entailed_set_text_lookup[entailed_set_id] = entailed_set_text
 			entailed_set_answer_lookup[answer_id].add(entailed_set_id)
 
+	seen_answers = set()
 	nodes = set()
 	edges = defaultdict(set)
-	for entail_set_a_id, entail_set_b_id, entail_prob in entail_set_pairs:
+	for answer_a_id, answer_b_id, entail_set_a_id, entail_set_b_id, entail_prob in entail_set_pairs:
+		seen_answers.add(answer_a_id)
+		seen_answers.add(answer_b_id)
 		nodes.add(entail_set_a_id)
 		nodes.add(entail_set_b_id)
 		if entail_prob < threshold:
@@ -83,9 +86,10 @@ def create_components(entail_set_pairs, answer_sets, threshold):
 
 	merged_entailed_set_answer_lookup = defaultdict(set)
 	for answer_id, a_sets in entailed_set_answer_lookup.items():
-		for entailed_set_id in a_sets:
-			new_entailed_set_id = merged_mapping[entailed_set_id]
-			merged_entailed_set_answer_lookup[answer_id].add(new_entailed_set_id)
+		if answer_id in seen_answers:
+			for entailed_set_id in a_sets:
+				new_entailed_set_id = merged_mapping[entailed_set_id]
+				merged_entailed_set_answer_lookup[answer_id].add(new_entailed_set_id)
 
 	results = {
 		'entailed_sets': merged_entailed_sets,
