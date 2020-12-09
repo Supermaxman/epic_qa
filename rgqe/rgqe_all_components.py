@@ -70,7 +70,7 @@ if __name__ == '__main__':
 			# 0 means all seen, 1 means all novel
 			novelty_ratio = 1.0 - (len(overlap_set) / max(len(entailed_sets), 1))
 
-			answer['score'] = (1.0 + novelty_ratio) * rerank_score
+			answer['score'] = (novelty_ratio) * rerank_score
 
 			seen_entailed_sets = seen_entailed_sets.union(entailed_sets)
 
