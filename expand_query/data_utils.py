@@ -44,23 +44,21 @@ class AnswerDataset(Dataset):
 						}
 						self.examples.append(example)
 		else:
-			self.passages = []
+			self.examples = []
 			with open(self.collection_path, 'r') as f:
 				for line in f:
 					line = line.strip()
 					if line:
-						self.passages.append(json.loads(line))
-			self.examples = []
-			for passage in tqdm(self.passages):
-				sentences = passage['sentences']
-				start_sentence = sentences[0]
-				end_sentence = sentences[-1]
-				text = passage['text'][start_sentence['start']:end_sentence['end']]
-				example = {
-					'id': f'{start_sentence["sentence_id"]}:{end_sentence["sentence_id"]}',
-					'text': text
-				}
-				self.examples.append(example)
+						passage = json.loads(line)
+						sentences = passage['sentences']
+						start_sentence = sentences[0]
+						end_sentence = sentences[-1]
+						text = passage['text'][start_sentence['start']:end_sentence['end']]
+						example = {
+							'id': f'{start_sentence["sentence_id"]}:{end_sentence["sentence_id"]}',
+							'text': text
+						}
+						self.examples.append(example)
 
 	def __len__(self):
 		return len(self.examples)
