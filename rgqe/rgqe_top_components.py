@@ -83,26 +83,36 @@ def create_components(entail_set_pairs, answer_sets, threshold):
 		)
 		new_entailed_set_id += 1
 
-	num_less = 0
+	unconnected_sets = set()
 	for merged_entailed_set in merged_entailed_sets:
 		if len(merged_entailed_set["entailed_set"]) < 2:
-			num_less += 1
+			unconnected_sets.add(merged_entailed_set["entailed_set"][0]['entailed_set_id'])
 		else:
 			print(f'{merged_entailed_set["entailed_set_id"]}({len(merged_entailed_set["entailed_set"])}): '
 						f'{merged_entailed_set["entailed_set"][0]["entailed_set_text"]}')
-	print(f'{num_less} sets with 1 entailed set')
+
+	print(f'{len(unconnected_sets)} unconnected sets')
 
 	merged_entailed_set_answer_lookup = {}
+	seen_answers = len(entailed_set_answer_lookup)
+	connected_answers = 0
 	for answer_id, a_sets in entailed_set_answer_lookup.items():
 		new_entailed_sets = set()
+		num_unconnected = 0
 		for entailed_set_id in a_sets:
+			if entailed_set_id in unconnected_sets:
+				num_unconnected += 1
 			new_entailed_set_id = merged_mapping[entailed_set_id]
 			new_entailed_sets.add(new_entailed_set_id)
+		if num_unconnected != len(a_sets):
+			connected_answers += 1
 		merged_entailed_set_answer_lookup[answer_id] = list(new_entailed_sets)
 	results = {
 		'entailed_sets': merged_entailed_sets,
 		'answer_sets': merged_entailed_set_answer_lookup,
 	}
+	print(f'{connected_answers/seen_answers:.2f}% answers part of at least one connected set '
+				f'({connected_answers}/{seen_answers})')
 	return results
 
 
