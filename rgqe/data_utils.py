@@ -163,9 +163,9 @@ class RGQETopPredictionDataset(Dataset):
 					question_id, _, answer_id, rank, score, run_name = line.split()
 					if question_answer_count[question_id] > top_k:
 						continue
+					question_answer_count[question_id] += 1
 					answer_sets = self.answers[answer_id]
 					answer_sets = {e['entailed_set_id']: e for e in answer_sets}
-					num_entailed = 0
 					for entailed_set_id, entail_prob in self.qa_set_entailments[question_id][answer_id]:
 						if entail_prob < threshold:
 							continue
@@ -177,9 +177,6 @@ class RGQETopPredictionDataset(Dataset):
 							'entailed_set_text': entailed_set_sample_text
 						}
 						question_samples[question_id].append(example)
-						num_entailed += 1
-					if num_entailed > 0:
-						question_answer_count[question_id] += 1
 
 		self.examples = []
 		for question_id, q_samples in question_samples.items():
