@@ -14,18 +14,17 @@ def get_id(q_id):
 
 def load_predictions(model_path):
 	sample_entail_pairs = defaultdict(list)
-	for file_name in tqdm(os.listdir(model_path)):
-		if file_name.endswith('.all'):
-			preds = torch.load(os.path.join(model_path, file_name))
-			for prediction in preds:
-				answer_a_id, entailed_set_a_id = get_id(prediction['question_a_id'])
-				entailed_set_b_id = prediction['question_b_id']
-				entail_prob = prediction['entail_prob']
-				if entail_prob < 0.5:
-					continue
-				sample_entail_pairs[answer_a_id].append(
-					(entailed_set_a_id, entailed_set_b_id, entail_prob)
-				)
+	for file_name in tqdm([x for x in os.listdir(model_path) if x.endswith('.all')]):
+		preds = torch.load(os.path.join(model_path, file_name))
+		for prediction in preds:
+			answer_a_id, entailed_set_a_id = get_id(prediction['question_a_id'])
+			entailed_set_b_id = prediction['question_b_id']
+			entail_prob = prediction['entail_prob']
+			if entail_prob < 0.5:
+				continue
+			sample_entail_pairs[answer_a_id].append(
+				(entailed_set_a_id, entailed_set_b_id, entail_prob)
+			)
 
 	return sample_entail_pairs
 
