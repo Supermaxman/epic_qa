@@ -88,8 +88,8 @@ def create_components(entail_set_pairs, answer_sets, threshold):
 			merged_entailed_set_answer_lookup[answer_id].add(new_entailed_set_id)
 
 	results = {
+		'entailed_sets': merged_entailed_sets,
 		'answer_sets': merged_entailed_set_answer_lookup,
-		'entailed_sets': merged_entailed_sets
 	}
 	return results
 
