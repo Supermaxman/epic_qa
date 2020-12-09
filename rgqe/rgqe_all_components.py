@@ -121,7 +121,7 @@ if __name__ == '__main__':
 	parser = argparse.ArgumentParser()
 	parser.add_argument('-i', '--input_path', required=True)
 	parser.add_argument('-c', '--cc_path', required=True)
-	parser.add_argument('-s', '--search_path', required=True)
+	parser.add_argument('-a', '--answers_path', required=True)
 	parser.add_argument('-o', '--output_path', required=True)
 	parser.add_argument('-t', '--threshold', default=0.5, type=float)
 
@@ -130,7 +130,7 @@ if __name__ == '__main__':
 	sys.setrecursionlimit(10 ** 6)
 	input_path = args.input_path
 	cc_path = args.cc_path
-	search_path = args.search_path
+	answers_path = args.answers_path
 	output_path = args.output_path
 	threshold = args.threshold
 
@@ -143,30 +143,26 @@ if __name__ == '__main__':
 	top_answer_sets = rgqe_top_cc['answer_sets']
 
 	results = defaultdict(list)
-	with open(search_path, 'r') as f:
-		for line in f:
-			line = line.strip()
-			if line:
-				question_id, _, answer_id, rank, score, run_name = line.split()
-				score = float(score)
-				if answer_id in top_answer_sets:
-					qa_sets = top_answer_sets[answer_id]
-				else:
-					qa_sets = set()
-					if answer_id in answer_sets:
-						for entailed_set_a_id, entailed_set_b_id, entail_prob in answer_sets[answer_id]:
-							if entail_prob < threshold:
-								continue
-							qa_sets.add(entailed_set_b_id)
-				qa_sets = list(qa_sets)
-				results[question_id].append(
-					{
-						'answer_id': answer_id,
-						'score': score,
-						'entailed_sets': qa_sets,
-						'entailed_sets_text': [entailed_sets[x] for x in qa_sets]
-					}
-				)
+	with open(answers_path, 'r') as f:
+		answers = json.load(f)
+	rerank_scores = answers['rerank_scores']
+	answer_text_lookup = answers['answer_text_lookup']
+	for question_id, question_answers in rerank_scores.items():
+		for answer in question_answers:
+			answer_id = answer['answer_id']
+			if answer_id in top_answer_sets:
+				qa_sets = top_answer_sets[answer_id]
+			else:
+				qa_sets = set()
+				if answer_id in answer_sets:
+					for entailed_set_a_id, entailed_set_b_id, entail_prob in answer_sets[answer_id]:
+						if entail_prob < threshold:
+							continue
+						qa_sets.add(entailed_set_b_id)
+			qa_sets = list(qa_sets)
+			answer['entailed_sets'] = qa_sets
+			answer['text'] = answer_text_lookup[answer_id]
+			answer['entailed_sets_text'] = [entailed_sets[x] for x in qa_sets]
 
 	with open(output_path, 'w') as f:
 		json.dump(results, f, indent=2)
