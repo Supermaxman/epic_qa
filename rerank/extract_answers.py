@@ -2,7 +2,7 @@
 from collections import defaultdict
 import json
 import os
-import sys
+from tqdm import tqdm
 import argparse
 
 
@@ -56,7 +56,7 @@ def read_scores(search_path, collection_path):
 				)
 				doc_ids[doc_id][pass_id].add((sent_start_idx, sent_end_idx))
 	answer_lookup = {}
-	for doc_id, doc_pass_ids in doc_ids.items():
+	for doc_id, doc_pass_ids in tqdm(doc_ids.items()):
 		doc_path = os.path.join(collection_path, f'{doc_id}.json')
 		with open(doc_path) as f:
 			doc = json.load(f)
