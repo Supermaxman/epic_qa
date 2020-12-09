@@ -14,12 +14,12 @@ class DFS(object):
 			self.visited[v] = False
 
 	def find_connected(self):
-		components = set()
+		components = []
 		for v in self.nodes:
 			if not self.visited[v]:
 				c_list = set()
 				c = self.dfs_search(v, c_list)
-				components.add(c)
+				components.append(c)
 		return components
 
 	def dfs_search(self, v, c_list):
