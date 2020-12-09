@@ -11,6 +11,11 @@ export DATASET=expert
 export COLLECTION=epic_qa_prelim
 export RQE_THRESHOLD=0.9
 
+python -m rerank.extract_answers \
+  --search_path models/${RERANK_MODEL_NAME}/${RERANK_RUN_NAME}.txt \
+  --collection_path data/${COLLECTION}/${DATASET}/data \
+  --output_path models/${RERANK_MODEL_NAME}/${RERANK_RUN_NAME}.answers
+
 # create expanded questions for every answer
 #python -m expand_query.expand \
 # --input_path models/${RERANK_MODEL_NAME}/${RERANK_RUN_NAME}.txt \
