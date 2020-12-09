@@ -229,7 +229,7 @@ class RGQETopPredictionDataset(Dataset):
 
 
 class RGQEQuestionPredictionDataset(Dataset):
-	def __init__(self, input_path, search_path, queries, top_k):
+	def __init__(self, input_path, search_path, queries):
 		self.input_path = input_path
 		self.search_path = search_path
 		self.queries = {q['question_id']: q for q in queries}
@@ -238,18 +238,14 @@ class RGQEQuestionPredictionDataset(Dataset):
 			self.answers = json.load(f)
 
 		seen_answers = set()
-		seen_count = defaultdict(int)
 		seen_questions = defaultdict(set)
 		with open(self.search_path, 'r') as f:
 			for line in f:
 				line = line.strip()
 				if line:
-					q_id, _, full_id, rank, score, run_name = line.split()
-					if seen_count[q_id] > top_k:
-						continue
-					seen_count[q_id] += 1
-					seen_answers.add(full_id)
-					seen_questions[full_id].add(q_id)
+					question_id, _, answer_id, rank, score, run_name = line.split()
+					seen_answers.add(answer_id)
+					seen_questions[answer_id].add(question_id)
 
 		self.examples = []
 		for answer_id, a_sets in self.answers.items():

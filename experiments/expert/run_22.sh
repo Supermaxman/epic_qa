@@ -66,7 +66,7 @@ python -m rgqe.rgqe_self_components \
   --output_path ${RGQE_CC_PATH} \
   --threshold ${RGQE_THRESHOLD}
 
-# top_k question entailment to filter out bad generated questions
+# query-question entailment to filter out bad generated questions
 python -m rgqe.rgqe \
   --input_path ${RGQE_CC_PATH} \
   --search_path ${SEARCH_PATH} \
@@ -75,7 +75,6 @@ python -m rgqe.rgqe \
   --model_name models/${RQE_MODEL_NAME} \
   --max_seq_len 64 \
   --mode question \
-  --top_k 10000 \
 ; \
 python -m rgqe.format_rgqe_question \
   --model_path models/${RQE_MODEL_NAME} \
