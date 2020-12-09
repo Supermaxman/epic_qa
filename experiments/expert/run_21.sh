@@ -29,6 +29,7 @@ export RQE_THRESHOLD=0.9
 python -m rgqe.rgqe \
   --input_path models/${EXP_MODEL_NAME}/${RUN_NAME}.exp \
   --model_name models/${RQE_MODEL_NAME} \
+  --max_seq_len 64 \
   --mode self \
 ; \
 python -m rgqe.format_rgqe_self \
@@ -48,6 +49,7 @@ python -m rgqe.rgqe \
   --query_path data/${COLLECTION}/${DATASET}/questions.json \
   --label_path data/${COLLECTION}/${DATASET}/split/val.json \
   --model_name models/${RQE_MODEL_NAME} \
+  --max_seq_len 64 \
   --mode question \
   --top_k 100 \
 ; \
@@ -61,6 +63,7 @@ python -m rgqe.rgqe \
   --qe_path models/${RQE_MODEL_NAME}/${RUN_NAME}.rgqe_question \
   --search_path models/${RERANK_MODEL_NAME}/${RERANK_RUN_NAME}.txt \
   --model_name models/${RQE_MODEL_NAME} \
+  --max_seq_len 64 \
   --mode top \
   --top_k 100 \
   --threshold 0.01 \
@@ -75,14 +78,25 @@ python -m rgqe.rgqe_top_components \
   --output_path models/${RQE_MODEL_NAME}/${RUN_NAME}.rgqe_top_cc \
   --threshold ${RQE_THRESHOLD}
 
-# all entailment against sets
+
 python -m rgqe.rgqe \
   --input_path models/${RQE_MODEL_NAME}/${RUN_NAME}.rgqe_top_cc \
   --cc_path models/${RQE_MODEL_NAME}/${RUN_NAME}.rgqe_cc \
   --model_name models/${RQE_MODEL_NAME} \
   --mode all \
+  --max_seq_len 64 \
+  --batch_size 128 \
+  --use_tpus
+
+# all entailment against sets
+python -m rgqe.rgqe \
+  --input_path models/${RQE_MODEL_NAME}/${RUN_NAME}.rgqe_top_cc \
+  --cc_path models/${RQE_MODEL_NAME}/${RUN_NAME}.rgqe_cc \
+  --model_name models/${RQE_MODEL_NAME} \
+  --max_seq_len 64 \
+  --mode all \
 ; \
-python -m rgqe.format_all_rgqe \
+python -m rgqe.format_rgqe_all \
   --model_path models/${RQE_MODEL_NAME} \
   --output_path models/${RQE_MODEL_NAME}/${RUN_NAME}.rgqe_all \
 ; \
