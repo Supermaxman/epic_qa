@@ -112,7 +112,7 @@ python -m rgqe.rgqe_all_components \
   --queries_path data/${COLLECTION}/${DATASET}/questions.json \
   --output_path models/${RQE_MODEL_NAME}/${RUN_NAME}.rgqe_all_cc_scored \
   --threshold ${RQE_THRESHOLD} \
-  --ratio 0.8 \
+  --ratio 0.0 \
 ; \
 python -m rgqe.format_eval \
   --results_path models/${RQE_MODEL_NAME}/${RUN_NAME}.rgqe_all_cc_scored \

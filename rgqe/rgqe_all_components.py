@@ -3,6 +3,7 @@ import sys
 from collections import defaultdict
 import argparse
 import json
+import numpy as np
 
 
 if __name__ == '__main__':
@@ -69,6 +70,8 @@ if __name__ == '__main__':
 		query = queries[question_id]
 		seen_entailed_sets = set()
 		num_modified = 0
+		top_100_set_counts = []
+		outside_top_100_set_counts = []
 		for answer in question_answers:
 			answer_id = answer['answer_id']
 			text = answer['text']
@@ -86,12 +89,18 @@ if __name__ == '__main__':
 				num_modified += 1
 			else:
 				new_score = rerank_score
+			if answer['rank'] <= 100:
+				top_100_set_counts.append(num_entailed)
+			else:
+				outside_top_100_set_counts.append(num_entailed)
 
 			answer['score'] = new_score
 
 			seen_entailed_sets = seen_entailed_sets.union(entailed_sets)
 
-		print(f'{question_id}: #modified={num_modified}')
+			print(f'{question_id}: #modified={num_modified}')
+			print(f'{question_id}: #top_100_avg_set_counts={np.mean(top_100_set_counts):.2f}')
+			print(f'{question_id}: #outside_top_100_avg_set_counts={np.mean(outside_top_100_set_counts):.2f}')
 		results[question_id] = {
 			'query': query,
 			'answers': list(sorted(question_answers, key=lambda x: x['score'], reverse=True))
