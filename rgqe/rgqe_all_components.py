@@ -84,7 +84,7 @@ if __name__ == '__main__':
 			print(f'{rerank_score:.2f} {answer_id}:')
 			print(f'  {text}')
 			print(f'novel sets:')
-			for t in [entailed_sets_text[x] for x in overlap_set]:
+			for t in [entailed_sets_text[x] for x in novel_sets]:
 				print(f'  {t}')
 			print(f'novelty_ratio: {novelty_ratio:.2f}')
 			print(f'novelty_count: {len(novel_sets)}')
