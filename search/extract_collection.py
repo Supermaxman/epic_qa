@@ -28,15 +28,11 @@ def extract_passages(doc_name):
 	return doc_id, doc_passages
 
 
-dataset = {}
 file_names = [d_name for d_name in os.listdir(collection_path) if d_name.endswith('.json')]
 with Pool(processes=num_processes) as p:
-	for doc_id, passages in tqdm(
-			p.imap_unordered(extract_passages, file_names), total=len(file_names)):
-		dataset[doc_id] = passages
-
-with open(output_path, 'w') as f:
-	json.dump(dataset, f, indent=2)
-
+	with open(output_path, 'w') as f:
+		for doc_id, passages in tqdm(
+				p.imap_unordered(extract_passages, file_names), total=len(file_names)):
+			f.write(json.dumps(passages) + '\n')
 
 
