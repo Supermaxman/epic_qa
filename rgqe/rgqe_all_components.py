@@ -165,7 +165,7 @@ if __name__ == '__main__':
 			answer['entailed_sets_text'] = [entailed_sets[x] for x in qa_sets]
 
 	with open(output_path, 'w') as f:
-		json.dump(results, f, indent=2)
+		json.dump(rerank_scores, f, indent=2)
 
 
 
