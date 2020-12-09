@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 
 export RUN_NAME=HLTRI_RERANK_RQE_22
+export EXP_RUN_NAME=HLTRI_RERANK_RQE_21
 export SEARCH_RUN=passage-large
 export RERANK_RUN_NAME=HLTRI_RERANK_15
 export RERANK_MODEL_NAME=rerank-expert-${SEARCH_RUN}-${RERANK_RUN_NAME}
@@ -33,7 +34,7 @@ export RQE_THRESHOLD=0.1
 
 # self entailment
 python -m rgqe.rgqe \
-  --input_path models/${EXP_MODEL_NAME}/${RUN_NAME}.exp \
+  --input_path models/${EXP_MODEL_NAME}/${EXP_RUN_NAME}.exp \
   --model_name models/${RQE_MODEL_NAME} \
   --max_seq_len 64 \
   --mode self \
@@ -44,7 +45,7 @@ python -m rgqe.format_rgqe_self \
 ; \
 python -m rgqe.rgqe_self_components \
   --input_path models/${RQE_MODEL_NAME}/${RUN_NAME}.rgqe_self \
-  --expand_path models/${EXP_MODEL_NAME}/${RUN_NAME}.exp \
+  --expand_path models/${EXP_MODEL_NAME}/${EXP_RUN_NAME}.exp \
   --output_path models/${RQE_MODEL_NAME}/${RUN_NAME}.rgqe_cc \
   --threshold ${RGQE_THRESHOLD}
 
