@@ -46,7 +46,7 @@ python search/extract_collection.py \
  --output_path data/${COLLECTION}/${DATASET}/data.jsonl
 
 
-python expanded_query/expand.py \
+python expand_query/expand.py \
  --collection_path data/${COLLECTION}/${DATASET}/data.jsonl \
  --pre_model_name ${EXP_PRE_MODEL_NAME} \
  --model_name ${EXP_MODEL_NAME} \
@@ -55,6 +55,6 @@ python expanded_query/expand.py \
  --batch_size 32 \
  --max_seq_len 256 \
 ; \
-python expanded_query/format_expand.py \
+python expand_query/format_expand.py \
   --model_path models/${EXP_MODEL_NAME} \
   --output_path models/${EXP_MODEL_NAME}/${SEARCH_RUN}.exp
