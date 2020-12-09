@@ -180,18 +180,18 @@ class RGQETopPredictionDataset(Dataset):
 				self.sets.add(entailed_set_id)
 				for question_id in seen_questions[answer_id]:
 					question_samples[question_id].append(example)
-			for question_id, q_samples in question_samples.items():
-				for sample_a, sample_b in itertools.combinations(q_samples, r=2):
-					# ignore self entailment since that was already computed
-					if sample_a['answer_id'] == sample_b['answer_id']:
-						continue
-					example = {
-						'question_a_id': sample_a['id'],
-						'question_b_id': sample_b['id'],
-						'question_a_text': sample_a['entailed_set_text'],
-						'question_b_text': sample_b['entailed_set_text'],
-					}
-					self.examples.append(example)
+		for question_id, q_samples in question_samples.items():
+			for sample_a, sample_b in itertools.combinations(q_samples, r=2):
+				# ignore self entailment since that was already computed
+				if sample_a['answer_id'] == sample_b['answer_id']:
+					continue
+				example = {
+					'question_a_id': sample_a['id'],
+					'question_b_id': sample_b['id'],
+					'question_a_text': sample_a['entailed_set_text'],
+					'question_b_text': sample_b['entailed_set_text'],
+				}
+				self.examples.append(example)
 
 	def __len__(self):
 		return len(self.examples)
