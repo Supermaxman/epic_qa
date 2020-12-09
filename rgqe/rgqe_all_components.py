@@ -65,10 +65,10 @@ if __name__ == '__main__':
 					f'percent answers with at least one entailed set')
 
 	results = {}
-	seen_entailed_sets = set()
 	for question_id, question_answers in rerank_scores.items():
 		query = queries[question_id]
 		# print(f'{question_id}: {queries[question_id]["question"]}')
+		seen_entailed_sets = set()
 		for answer in question_answers:
 			answer_id = answer['answer_id']
 			text = answer['text']
@@ -83,7 +83,7 @@ if __name__ == '__main__':
 			if novel_count == 0:
 				new_score = ratio * rerank_score
 			else:
-				new_score = novelty_ratio * rerank_score
+				new_score = rerank_score
 
 			answer['score'] = new_score
 
