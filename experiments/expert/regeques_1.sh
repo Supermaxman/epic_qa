@@ -59,7 +59,7 @@ export EVAL_RGQE=true
 export RERANK_MODEL_NAME=rerank-expert-${RERANK_RUN_NAME}
 #export RERANK_MODEL_NAME=rerank-expert-passage-large-HLTRI_RERANK_15
 export EXP_MODEL_NAME=docT5query-base
-export RQE_MODEL_NAME=models/quora-seq-nboost-pt-bert-base-uncased-msmarco
+export RQE_MODEL_NAME=quora-seq-nboost-pt-bert-base-uncased-msmarco
 
 export RERANK_PRE_MODEL_NAME=nboost/pt-biobert-base-msmarco
 export EXP_PRE_MODEL_NAME=models/docT5query-base/model.ckpt-1004000

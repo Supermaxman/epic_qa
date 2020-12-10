@@ -44,7 +44,7 @@ if __name__ == '__main__':
 
 	input_path = args.input_path
 	output_path = args.output_path
-	tokenizer_name = model_name
+	tokenizer_name = pre_model_name
 	batch_size = args.batch_size
 	max_seq_len = args.max_seq_len
 	torch_cache_dir = args.torch_cache_dir
