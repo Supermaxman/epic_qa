@@ -41,6 +41,9 @@ class AnswerDataset(Dataset):
 				passage_lookup = {c['context_id']: c for c in doc['contexts']}
 				for pass_id, sent_spans in doc_pass_ids.items():
 					passage = passage_lookup[f'{doc_id}-{pass_id}']
+					if passage['context_id'] == '4ab9fdeb-ea37-4a2b-813b-0760b1550574-C000':
+						print('4ab9fdeb-ea37-4a2b-813b-0760b1550574-C000')
+						print(sent_spans)
 					for sent_start_id, sent_end_id in sent_spans:
 						sent_start_idx = int(sent_start_id[1:])
 						sent_end_idx = int(sent_end_id[1:])
