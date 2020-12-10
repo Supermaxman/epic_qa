@@ -23,13 +23,17 @@ class AnswerDataset(Dataset):
 		self.input_path = input_path
 		if self.input_path is not None:
 			self.doc_ids = defaultdict(lambda: defaultdict(list))
+			self.seen_answers = set()
 			with open(self.input_path, 'r') as f:
 				for line in f:
 					line = line.strip()
 					if line:
 						q_id, _, answer_id, rank, score, run_name = line.split()
+						if answer_id in self.seen_answers:
+							continue
 						doc_id, pass_id, sent_start_id, sent_end_id = parse_id(answer_id)
 						self.doc_ids[doc_id][pass_id].append((sent_start_id, sent_end_id))
+						self.seen_answers.add(answer_id)
 			self.examples = []
 			for doc_id, doc_pass_ids in self.doc_ids.items():
 				doc_path = os.path.join(self.collection_path, f'{doc_id}.json')
