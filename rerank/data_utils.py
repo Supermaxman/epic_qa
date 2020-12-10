@@ -71,6 +71,7 @@ class QueryPassageDataset(Dataset):
 		self.n_gram_max = n_gram_max
 		self.only_passages = only_passages
 		warned = False
+		self.question_example_count = defaultdict(int)
 		for d_name in tqdm(self.file_names):
 			if not d_name.endswith('.json'):
 				continue
@@ -117,6 +118,7 @@ class QueryPassageDataset(Dataset):
 								# 'query': query['question'] + ' ' + query['query'] + ', ' + query['background']
 							}
 							self.examples.append(example)
+							self.question_example_count[question_id] += 1
 							context_examples.append(example)
 						if self.multi_sentence:
 							# generate sentence n-grams from 2 to n_gram_max of contiguous sentence spans

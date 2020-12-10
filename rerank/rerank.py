@@ -151,6 +151,8 @@ if __name__ == '__main__':
 		passage_qrels,
 		only_passages
 	)
+	for question_id, q_example_count in eval_dataset.question_example_count.items():
+		print(f'{question_id}: #examples={q_example_count}')
 	logging.info(f'Loaded dataset, #examples={len(eval_dataset)}')
 	eval_data_loader = DataLoader(
 		eval_dataset,
