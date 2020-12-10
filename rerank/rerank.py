@@ -205,7 +205,7 @@ if __name__ == '__main__':
 	)
 
 	if load_trained_model:
-		logging.warning('Loading weights from trained checkpoint...')
+		logging.warning(f'Loading weights from trained checkpoint: {checkpoint_path}...')
 		model.load_state_dict(torch.load(checkpoint_path))
 
 	logger = pl_loggers.TensorBoardLogger(
