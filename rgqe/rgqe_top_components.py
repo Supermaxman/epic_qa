@@ -68,7 +68,7 @@ def create_components(question_entail_set_pairs, answer_sets, threshold):
 			set_samples = []
 			for v in entailed_nodes:
 				merged_mapping[v] = new_entailed_set_id
-				num_connected = set(edges[v]).intersection(set(entailed_nodes))
+				num_connected = len(set(edges[v]).intersection(set(entailed_nodes)))
 				set_sample = {
 					'entailed_set_id': v,
 					'entailed_set_text': entailed_set_text_lookup[v],
@@ -111,7 +111,7 @@ def create_components(question_entail_set_pairs, answer_sets, threshold):
 				connected_answers += 1
 			merged_entailed_set_answer_lookup[answer_id] = sorted(list(new_entailed_sets))
 		results[question_id] = {
-			# 'entailed_sets': merged_entailed_sets,
+			'entailed_sets': merged_entailed_sets,
 			'answer_sets': merged_entailed_set_answer_lookup,
 		}
 		print(f'{connected_answers/seen_answers:.2f}% answers part of at least one connected set '
