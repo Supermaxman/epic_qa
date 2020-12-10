@@ -43,6 +43,8 @@ class AnswerDataset(Dataset):
 					for sent_start_id, sent_end_id in sent_spans:
 						sent_start_idx = int(sent_start_id[1:])
 						sent_end_idx = int(sent_end_id[1:])
+						if len(doc['contexts']) <= pass_idx:
+							print(f'PASS_IDX ERROR: {doc_id}-{pass_id}-{sent_start_id}')
 						passage = doc['contexts'][pass_idx]
 						sentences = passage['sentences'][sent_start_idx:sent_end_idx+1]
 						text = passage['text'][sentences[0]['start']:sentences[-1]['end']]

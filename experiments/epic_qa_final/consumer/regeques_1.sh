@@ -37,9 +37,7 @@ export SEARCH_INDEX=false
 
 # rerank flags
 # RERANK run rerank using trained model on validation set
-export RUN_RERANK=true
-# RERANK run evaluation script on validation set
-export EVAL_RERANK=true
+export RUN_RERANK=false
 
 # rerank answer query expansion flags
 export RUN_EXPAND_ANSWERS=true
@@ -54,8 +52,6 @@ export RUN_RGQE_TOP=true
 export RUN_RGQE_ALL=true
 # RGQE rerank answers based on generated question entailment sets
 export RUN_RGQE_RERANK=true
-# RGQE run evaluation script on validation set
-export EVAL_RGQE=true
 
 export RERANK_MODEL_NAME=rerank-${DATASET}-${RERANK_RUN_MODEL_NAME}
 export EXP_MODEL_NAME=docT5query-base
