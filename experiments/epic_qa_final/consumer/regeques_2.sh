@@ -26,7 +26,7 @@ export EXP_ANSWER_TOP_K=20
 export EXP_ANSWER_NUM_SAMPLES=20
 export EXP_ANSWER_BATCH_SIZE=16
 
-export GPUS=7
+export GPUS=4,5,6,7
 
 # flags to avoid re-running certain components
 # index & search flags
