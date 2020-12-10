@@ -15,7 +15,7 @@ export COLLECTION=epic_qa_prelim
 export DATASET=expert
 
 # major hyper-parameters for system
-export SEARCH_TOP_K=1000
+export SEARCH_TOP_K=500
 export NEGATIVE_SAMPLES=800
 export RGQE_TOP_K=100
 export RGQE_SELF_THRESHOLD=0.8
@@ -32,18 +32,18 @@ export EXP_ANSWER_BATCH_SIZE=16
 # index & search flags
 export CREATE_INDEX=false
 export EXPAND_INDEX=false
-export SEARCH_INDEX=false
+export SEARCH_INDEX=true
 
 # rerank flags
 # RERANK fine-tune reranking model using training set
-export TRAIN_RERANK=false
+export TRAIN_RERANK=true
 # RERANK run rerank using trained model on validation set
-export RUN_RERANK=false
+export RUN_RERANK=true
 # RERANK run evaluation script on validation set
-export EVAL_RERANK=false
+export EVAL_RERANK=true
 
 # rerank answer query expansion flags
-export RUN_EXPAND_ANSWERS=false
+export RUN_EXPAND_ANSWERS=true
 
 # RGQE pairwise self-entailment to find entailed sets for each answer
 export RUN_RGQE_SELF=true
