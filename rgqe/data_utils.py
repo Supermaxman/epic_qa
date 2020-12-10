@@ -93,11 +93,13 @@ class RGQEAllPredictionDataset(Dataset):
 			# [answer_id] -> merged_entailed_sets for top_k answers
 			top_answer_sets = q_top_cc['answer_sets']
 			num_sets = 0
+			num_possible_sets = 0
 			for answer_id, a_sets in self.answer_sets.items():
 				if answer_id in top_answer_sets:
 					continue
 				for entailed_set_a in a_sets:
 					entailed_set_a_id = entailed_set_a['entailed_set_id']
+					num_possible_sets += 1
 					if entailed_set_a_id not in self.q_entailed_sets[question_id][answer_id]:
 						continue
 					entailed_set_a_text = entailed_set_a['entailed_set'][0]['sample_text']
@@ -112,7 +114,7 @@ class RGQEAllPredictionDataset(Dataset):
 							'question_b_text': entailed_set_b_text,
 						}
 						self.examples.append(example)
-			print(f'{question_id}: {len(entailed_sets)} entailed sets with {num_sets} total sets')
+			print(f'{question_id}: {len(entailed_sets)} entailed sets with {num_sets} total sets (possible {num_possible_sets})')
 
 	def __len__(self):
 		return len(self.examples)
