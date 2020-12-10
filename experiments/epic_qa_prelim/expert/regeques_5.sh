@@ -350,6 +350,7 @@ if [[ ${RUN_RGQE_ALL} = true ]]; then
       --model_name ${RQE_MODEL_NAME} \
       --max_seq_len ${MAX_RQE_SEQ_LEN} \
       --mode all \
+      --threshold ${RQE_THRESHOLD} \
     ; \
     python rgqe/format_rgqe_all.py \
       --input_path ${RGQE_ALL_PATH} \
