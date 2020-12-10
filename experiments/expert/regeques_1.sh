@@ -214,6 +214,8 @@ fi
 
 if [[ ${RUN_RERANK} = true ]]; then
     echo "Running rerank model..."
+    # TODO
+#      --load_trained_model \
     python -m rerank.rerank \
       --query_path ${QUERY_PATH} \
       --collection_path ${COLLECTION_PATH} \
@@ -223,7 +225,6 @@ if [[ ${RUN_RERANK} = true ]]; then
       --pre_model_name ${RERANK_PRE_MODEL_NAME} \
       --model_name ${RERANK_MODEL_NAME} \
       --max_seq_len 96 \
-      --load_trained_model \
     ; \
     python -m rerank.format_rerank \
       --input_path ${RERANK_PATH} \
