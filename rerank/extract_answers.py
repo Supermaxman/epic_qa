@@ -52,7 +52,7 @@ def read_scores(search_path, collection_path):
 		context_lookup = {c['context_id']: c for c in doc['contexts']}
 		for pass_id, sent_spans in doc_pass_ids.items():
 			for sent_start_idx, sent_end_idx in sent_spans:
-				passage = context_lookup[pass_id]
+				passage = context_lookup[f'{doc_id}-{pass_id}']
 				sentences = passage['sentences'][sent_start_idx:sent_end_idx + 1]
 				text = passage['text'][sentences[0]['start']:sentences[-1]['end']]
 				answer_id = f'{sentences[0]["sentence_id"]}:{sentences[-1]["sentence_id"]}'
