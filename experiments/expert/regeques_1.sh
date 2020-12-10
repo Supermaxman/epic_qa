@@ -2,7 +2,9 @@
 
 # run names
 export EXP_DATA_RUN_NAME=HLTRI_REGEQUES_EXP_DATA_1
-export INDEX_NAME=HLTRI_REGEQUES_EXP_INDEX_1
+# 1 is expanded, 2 is not expanded
+#export INDEX_NAME=HLTRI_REGEQUES_EXP_INDEX_1
+export INDEX_NAME=HLTRI_REGEQUES_EXP_INDEX_2
 export SEARCH_RUN_NAME=HLTRI_REGEQUES_SEARCH_1
 export RERANK_RUN_NAME=HLTRI_REGEQUES_RERANK_1
 export EXP_ANSWER_RUN_NAME=HLTRI_REGEQUES_EXP_ANSWER_1
@@ -212,8 +214,6 @@ fi
 
 if [[ ${RUN_RERANK} = true ]]; then
     echo "Running rerank model..."
-    # TODO add back after fixed
-#      --load_trained_model \
     python -m rerank.rerank \
       --query_path ${QUERY_PATH} \
       --collection_path ${COLLECTION_PATH} \
@@ -223,6 +223,7 @@ if [[ ${RUN_RERANK} = true ]]; then
       --pre_model_name ${RERANK_PRE_MODEL_NAME} \
       --model_name ${RERANK_MODEL_NAME} \
       --max_seq_len 96 \
+      --load_trained_model \
     ; \
     python -m rerank.format_rerank \
       --input_path ${RERANK_PATH} \
