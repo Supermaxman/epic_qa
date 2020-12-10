@@ -36,7 +36,7 @@ export SEARCH_INDEX=false
 
 # rerank flags
 # RERANK run rerank using trained model on validation set
-export RUN_RERANK=true
+export RUN_RERANK=false
 
 # rerank answer query expansion flags
 export RUN_EXPAND_ANSWERS=true
