@@ -5,12 +5,13 @@ export EXP_DATA_RUN_NAME=HLTRI_REGEQUES_EXP_DATA_1
 export INDEX_NAME=HLTRI_REGEQUES_EXP_INDEX_1
 export SEARCH_RUN_NAME=HLTRI_REGEQUES_SEARCH_1
 export RERANK_RUN_NAME=HLTRI_REGEQUES_RERANK_1
+export RERANK_RUN_MODEL_NAME=HLTRI_REGEQUES_RERANK_1
 export EXP_ANSWER_RUN_NAME=HLTRI_REGEQUES_EXP_ANSWER_1
 export RQE_RUN_NAME=HLTRI_REGEQUES_1
 
 # collection and task names
-export COLLECTION=epic_qa_prelim
-export DATASET=consumer
+export COLLECTION=epic_qa_final
+export DATASET=expert
 
 # major hyper-parameters for system
 export SEARCH_TOP_K=500
@@ -33,8 +34,6 @@ export EXPAND_INDEX=false
 export SEARCH_INDEX=true
 
 # rerank flags
-# RERANK fine-tune reranking model using training set
-export TRAIN_RERANK=true
 # RERANK run rerank using trained model on validation set
 export RUN_RERANK=true
 # RERANK run evaluation script on validation set
@@ -56,8 +55,7 @@ export RUN_RGQE_RERANK=true
 # RGQE run evaluation script on validation set
 export EVAL_RGQE=true
 
-export RERANK_MODEL_NAME=rerank-${DATASET}-${RERANK_RUN_NAME}
-#export RERANK_MODEL_NAME=rerank-expert-passage-large-HLTRI_RERANK_15
+export RERANK_MODEL_NAME=rerank-${DATASET}-${RERANK_RUN_MODEL_NAME}
 export EXP_MODEL_NAME=docT5query-base
 export RQE_MODEL_NAME=quora-seq-nboost-pt-bert-base-uncased-msmarco
 
@@ -65,9 +63,7 @@ export RERANK_PRE_MODEL_NAME=nboost/pt-biobert-base-msmarco
 export EXP_PRE_MODEL_NAME=models/docT5query-base/model.ckpt-1004000
 
 export DATASET_PATH=data/${COLLECTION}/${DATASET}
-export JUDGEMENTS_PATH=data/${COLLECTION}/prelim_judgments_corrected.json
 export QUERY_PATH=${DATASET_PATH}/questions.json
-export LABEL_PATH=${DATASET_PATH}/split/val.json
 export COLLECTION_PATH=${DATASET_PATH}/data
 export COLLECTION_JSONL_PATH=${DATASET_PATH}/data_jsonl
 export COLLECTION_JSONL_FILE_PATH=${COLLECTION_JSONL_PATH}/data.jsonl
@@ -111,12 +107,6 @@ export EVAL_PATH=${RGQE_ALL_PATH}/${RQE_RUN_NAME}.eval
 
 if [[ ${CREATE_INDEX} = true ]]; then
     echo "Creating index..."
-    # create dataset split
-    python rerank/split_data.py \
-      --label_path data/${COLLECTION}/prelim_judgments_corrected.json \
-      --output_path ${DATASET_PATH}/split \
-      --dataset ${DATASET}
-
     if [[ ${EXPAND_INDEX} = true ]]; then
         mkdir ${COLLECTION_JSONL_PATH}
         # setup dataset
@@ -186,28 +176,8 @@ if [[ ${SEARCH_INDEX} = true ]]; then
     python search/search_index.py \
       --index_path ${INDEX_FILE_PATH} \
       --query_path ${QUERY_PATH} \
-      --label_path ${JUDGEMENTS_PATH} \
       --output_path ${SEARCH_PATH} \
       --top_k ${SEARCH_TOP_K}
-fi
-
-if [[ ${TRAIN_RERANK} = true ]]; then
-    echo "Training rerank model..."
-    python -m rerank.rerank_train \
-      --query_path ${QUERY_PATH} \
-      --collection_path ${COLLECTION_PATH} \
-      --passage_search_run ${SEARCH_PATH} \
-      --label_path ${JUDGEMENTS_PATH} \
-      --split_path ${DATASET_PATH}/split \
-      --pre_model_name ${RERANK_PRE_MODEL_NAME} \
-      --model_name ${RERANK_MODEL_NAME} \
-      --max_seq_len 96 \
-      --batch_size 32 \
-      --negative_samples ${NEGATIVE_SAMPLES} \
-      --add_all_labels \
-      --weighted_loss \
-      --learning_rate 5e-6 \
-      --epochs 5
 fi
 
 if [[ ${RUN_RERANK} = true ]]; then
@@ -216,7 +186,6 @@ if [[ ${RUN_RERANK} = true ]]; then
       --query_path ${QUERY_PATH} \
       --collection_path ${COLLECTION_PATH} \
       --passage_search_run ${SEARCH_PATH} \
-      --label_path ${LABEL_PATH} \
       --output_path ${RERANK_PATH} \
       --pre_model_name ${RERANK_PRE_MODEL_NAME} \
       --model_name ${RERANK_MODEL_NAME} \
@@ -236,23 +205,6 @@ if [[ ${RUN_RERANK} = true ]]; then
       --search_path ${RERANK_RUN_PATH} \
       --collection_path ${COLLECTION_PATH} \
       --output_path ${ANSWERS_PATH}
-fi
-
-
-if [[ ${EVAL_RERANK} = true ]]; then
-    echo "Evaluating rerank model..."
-    python rerank/epic_eval.py \
-      ${LABEL_PATH} \
-      ${RERANK_RUN_PATH} \
-      rerank/.${DATASET}_ideal_ranking_scores.tsv \
-      --task ${DATASET} \
-      > ${RERANK_EVAL_PATH} \
-      ; \
-      tail -n 3 ${RERANK_EVAL_PATH} \
-      | awk \
-        '{ for (i=1; i<=NF; i++) RtoC[i]= (RtoC[i]? RtoC[i] FS $i: $i) }
-        END{ for (i in RtoC) print RtoC[i] }' \
-      | tail -n 2
 fi
 
 
@@ -302,7 +254,6 @@ if [[ ${RUN_RGQE_QUESTION} = true ]]; then
       --output_path ${RGQE_QUESTION_PATH} \
       --search_path ${RERANK_RUN_PATH} \
       --query_path ${QUERY_PATH} \
-      --label_path ${LABEL_PATH} \
       --model_name ${RQE_MODEL_NAME} \
       --max_seq_len ${MAX_RQE_SEQ_LEN} \
       --mode question \
@@ -369,20 +320,3 @@ if [[ ${RUN_RGQE_RERANK} = true ]]; then
       --results_path ${RGQE_ALL_RERANK_FILE_PATH} \
       --output_path ${RUN_PATH}
 fi
-
-if [[ ${EVAL_RGQE} = true ]]; then
-    echo "Evaluating RGQE model..."
-    python rerank/epic_eval.py \
-      ${LABEL_PATH} \
-      ${RUN_PATH} \
-      rerank/.${DATASET}_ideal_ranking_scores.tsv \
-      --task ${DATASET} \
-      > ${EVAL_PATH} \
-      ; \
-      tail -n 3 ${EVAL_PATH} \
-      | awk \
-        '{ for (i=1; i<=NF; i++) RtoC[i]= (RtoC[i]? RtoC[i] FS $i: $i) }
-        END{ for (i in RtoC) print RtoC[i] }' \
-      | tail -n 2
-fi
-
