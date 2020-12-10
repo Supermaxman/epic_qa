@@ -44,11 +44,11 @@ export EVAL_RERANK=false
 export RUN_EXPAND_ANSWERS=false
 
 # RGQE pairwise self-entailment to find entailed sets for each answer
-export RUN_RGQE_SELF=true
+export RUN_RGQE_SELF=false
 # RGQE query-generated question entailment to filter poor generated questions
-export RUN_RGQE_QUESTION=true
+export RUN_RGQE_QUESTION=false
 # RGQE full set-pairwise entailment for top_k answers for each query
-export RUN_RGQE_TOP=true
+export RUN_RGQE_TOP=false
 # RGQE top_k set entailment to all set entailment to find entailed sets for all answers
 export RUN_RGQE_ALL=true
 # RGQE rerank answers based on generated question entailment sets
@@ -342,7 +342,7 @@ if [[ ${RUN_RGQE_ALL} = true ]]; then
     # all entailment against sets
     python -m rgqe.rgqe \
       --input_path ${RGQE_TOP_CC_FILE_PATH} \
-      --output_path ${RGQE_ALL_FILE_PATH} \
+      --output_path ${RGQE_ALL_PATH} \
       --cc_path ${RGQE_CC_FILE_PATH} \
       --qe_path ${RGQE_QUESTION_FILE_PATH} \
       --model_name ${RQE_MODEL_NAME} \
@@ -350,7 +350,7 @@ if [[ ${RUN_RGQE_ALL} = true ]]; then
       --mode all \
     ; \
     python -m rgqe.format_rgqe_all \
-      --input_path ${RGQE_ALL_FILE_PATH} \
+      --input_path ${RGQE_ALL_PATH} \
       --output_path ${RGQE_ALL_FILE_PATH}
 fi
 
