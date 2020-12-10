@@ -118,12 +118,12 @@ if [[ ${CREATE_INDEX} = true ]]; then
       --dataset ${DATASET}
 
     if [[ ${EXPAND_INDEX} = true ]]; then
+        mkdir ${COLLECTION_JSONL_PATH}
         # setup dataset
         python search/extract_collection.py \
          --collection_path ${COLLECTION_PATH} \
          --output_path ${COLLECTION_JSONL_FILE_PATH}
 
-        mkdir ${COLLECTION_JSONL_PATH}
 
         # expand dataset for indexing
         python expand_query/expand.py \
