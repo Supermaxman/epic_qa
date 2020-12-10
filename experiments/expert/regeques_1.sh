@@ -34,27 +34,27 @@ export SEARCH_INDEX=false
 
 # rerank flags
 # RERANK fine-tune reranking model using training set
-export TRAIN_RERANK=true
+export TRAIN_RERANK=false
 # RERANK run rerank using trained model on validation set
-export RUN_RERANK=true
+export RUN_RERANK=false
 # RERANK run evaluation script on validation set
-export EVAL_RERANK=true
+export EVAL_RERANK=false
 
 # rerank answer query expansion flags
-export RUN_EXPAND_ANSWERS=false
+export RUN_EXPAND_ANSWERS=true
 
 # RGQE pairwise self-entailment to find entailed sets for each answer
-export RUN_RGQE_SELF=false
+export RUN_RGQE_SELF=true
 # RGQE query-generated question entailment to filter poor generated questions
-export RUN_RGQE_QUESTION=false
+export RUN_RGQE_QUESTION=true
 # RGQE full set-pairwise entailment for top_k answers for each query
-export RUN_RGQE_TOP=false
+export RUN_RGQE_TOP=true
 # RGQE top_k set entailment to all set entailment to find entailed sets for all answers
-export RUN_RGQE_ALL=false
+export RUN_RGQE_ALL=true
 # RGQE rerank answers based on generated question entailment sets
-export RUN_RGQE_RERANK=false
+export RUN_RGQE_RERANK=true
 # RGQE run evaluation script on validation set
-export EVAL_RGQE=false
+export EVAL_RGQE=true
 
 export RERANK_MODEL_NAME=rerank-expert-${RERANK_RUN_NAME}
 #export RERANK_MODEL_NAME=rerank-expert-passage-large-HLTRI_RERANK_15
