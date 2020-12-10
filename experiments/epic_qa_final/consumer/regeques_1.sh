@@ -15,7 +15,6 @@ export DATASET=consumer
 
 # major hyper-parameters for system
 export SEARCH_TOP_K=500
-export NEGATIVE_SAMPLES=800
 export RGQE_TOP_K=100
 export RGQE_SELF_THRESHOLD=0.8
 export RGQE_TOP_C_THRESHOLD=0.8
@@ -40,12 +39,12 @@ export SEARCH_INDEX=false
 export RUN_RERANK=false
 
 # rerank answer query expansion flags
-export RUN_EXPAND_ANSWERS=true
+export RUN_EXPAND_ANSWERS=false
 
 # RGQE pairwise self-entailment to find entailed sets for each answer
-export RUN_RGQE_SELF=true
+export RUN_RGQE_SELF=false
 # RGQE query-generated question entailment to filter poor generated questions
-export RUN_RGQE_QUESTION=true
+export RUN_RGQE_QUESTION=false
 # RGQE full set-pairwise entailment for top_k answers for each query
 export RUN_RGQE_TOP=true
 # RGQE top_k set entailment to all set entailment to find entailed sets for all answers
@@ -198,11 +197,6 @@ if [[ ${RUN_RERANK} = true ]]; then
       --input_path ${RERANK_FILE_PATH} \
       --output_path ${RERANK_RUN_PATH} \
       --top_k 1000
-
-    python rerank/extract_answers.py \
-      --search_path ${RERANK_RUN_PATH} \
-      --collection_path ${COLLECTION_PATH} \
-      --output_path ${ANSWERS_PATH}
 fi
 
 
@@ -309,6 +303,10 @@ if [[ ${RUN_RGQE_ALL} = true ]]; then
 fi
 
 if [[ ${RUN_RGQE_RERANK} = true ]]; then
+    python rerank/extract_answers.py \
+      --search_path ${RERANK_RUN_PATH} \
+      --collection_path ${COLLECTION_PATH} \
+      --output_path ${ANSWERS_PATH}
     echo "Running RGQE rerank..."
     python rgqe/rgqe_rerank.py \
       --input_path ${RGQE_ALL_FILE_PATH} \
