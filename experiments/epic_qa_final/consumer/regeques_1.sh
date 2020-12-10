@@ -26,7 +26,7 @@ export EXP_ANSWER_TOP_K=20
 export EXP_ANSWER_NUM_SAMPLES=20
 export EXP_ANSWER_BATCH_SIZE=16
 
-export GPUS=4,5,6,7
+export GPUS=7
 
 # flags to avoid re-running certain components
 # index & search flags
@@ -36,7 +36,7 @@ export SEARCH_INDEX=false
 
 # rerank flags
 # RERANK run rerank using trained model on validation set
-export RUN_RERANK=false
+export RUN_RERANK=true
 
 # rerank answer query expansion flags
 export RUN_EXPAND_ANSWERS=true
