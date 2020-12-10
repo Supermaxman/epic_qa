@@ -38,14 +38,12 @@ class AnswerDataset(Dataset):
 				doc_path = os.path.join(self.collection_path, f'{doc_id}.json')
 				with open(doc_path) as f:
 					doc = json.load(f)
+				passage_lookup = {c['context_id']: c for c in doc['contexts']}
 				for pass_id, sent_spans in doc_pass_ids.items():
-					pass_idx = int(pass_id[1:])
+					passage = passage_lookup[f'{doc_id}-{pass_id}']
 					for sent_start_id, sent_end_id in sent_spans:
 						sent_start_idx = int(sent_start_id[1:])
 						sent_end_idx = int(sent_end_id[1:])
-						if len(doc['contexts']) <= pass_idx:
-							print(f'PASS_IDX ERROR: {doc_id}-{pass_id}-{sent_start_id}')
-						passage = doc['contexts'][pass_idx]
 						sentences = passage['sentences'][sent_start_idx:sent_end_idx+1]
 						text = passage['text'][sentences[0]['start']:sentences[-1]['end']]
 						example = {
