@@ -5,7 +5,7 @@ import xml.etree.ElementTree as ET
 import torch
 from torch.utils.data import Dataset
 from tqdm import tqdm
-from rerank.sample_utils import NegativeSampler
+from .sample_utils import NegativeSampler
 import random
 from collections import defaultdict
 
