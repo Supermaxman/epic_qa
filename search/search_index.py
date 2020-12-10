@@ -11,7 +11,7 @@ parser.add_argument('-r', '--output_path', required=True)
 parser.add_argument('-k', '--top_k', default=2000, type=int)
 parser.add_argument('-bk1', '--bm25_k1', default=0.82, type=float)
 parser.add_argument('-bb', '--bm25_b', default=0.68, type=float)
-parser.add_argument('-l', '--label_path', default='data/prelim_judgments.json')
+parser.add_argument('-l', '--label_path', default=None)
 
 args = parser.parse_args()
 

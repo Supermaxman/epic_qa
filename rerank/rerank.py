@@ -19,7 +19,7 @@ if __name__ == '__main__':
 	parser.add_argument('-c', '--collection_path', required=True)
 	parser.add_argument('-ps', '--passage_search_run', default=None)
 	parser.add_argument('-ds', '--document_search_run', default=None)
-	parser.add_argument('-l', '--label_path', default='data/prelim_judgments.json')
+	parser.add_argument('-l', '--label_path', default=None)
 	parser.add_argument('-pm', '--pre_model_name', default='nboost/pt-biobert-base-msmarco')
 	parser.add_argument('-mn', '--model_name', default='pt-biobert-base-msmarco')
 	parser.add_argument('-sd', '--save_directory', default='models')
