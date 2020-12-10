@@ -45,7 +45,7 @@ class QueryPassageDataset(Dataset):
 				for doc_id in question_files:
 					file_names.add(f'{doc_id}.json')
 					self.query_docs[doc_id].add(question_id)
-			self.file_names = list(file_names)
+			self.file_names = sorted(list(file_names))
 
 		elif passage_qrels is not None:
 			file_names = set()
@@ -59,7 +59,7 @@ class QueryPassageDataset(Dataset):
 					file_names.add(f'{doc_id}.json')
 					self.query_docs[doc_id].add(question_id)
 					self.query_doc_pass[question_id][doc_id].add(doc_pass_id)
-			self.file_names = list(file_names)
+			self.file_names = sorted(list(file_names))
 
 		else:
 			self.file_names = os.listdir(root_dir)
@@ -87,7 +87,7 @@ class QueryPassageDataset(Dataset):
 			if self.query_docs is None:
 				doc_queries = queries
 			else:
-				doc_queries = [self.query_lookup[q_id] for q_id in self.query_docs[d_id]]
+				doc_queries = [self.query_lookup[q_id] for q_id in sorted(self.query_docs[d_id])]
 			for query in doc_queries:
 				question_id = query['question_id']
 				if self.query_doc_pass is None:
@@ -95,7 +95,7 @@ class QueryPassageDataset(Dataset):
 				else:
 					context_lookup = {c['context_id']: c for c in doc['contexts']}
 					doc_contexts = []
-					for p_id in self.query_doc_pass[question_id][d_id]:
+					for p_id in sorted(self.query_doc_pass[question_id][d_id]):
 						if p_id in context_lookup:
 							doc_contexts.append(context_lookup[p_id])
 						else:
@@ -408,10 +408,10 @@ class QueryPassageLabeledDataset(Dataset):
 					file_names.add(f'{doc_id}.json')
 					self.query_docs[doc_id].add(question_id)
 					self.query_doc_pass[question_id][doc_id].add(doc_pass_id)
-			self.file_names = list(file_names)
+			self.file_names = sorted(list(file_names))
 
 		else:
-			self.file_names = os.listdir(root_dir)
+			self.file_names = sorted(os.listdir(root_dir))
 			self.query_docs = None
 			self.query_doc_pass = None
 		self.examples = []
