@@ -31,9 +31,9 @@ export GPUS=4,5,6,7
 
 # flags to avoid re-running certain components
 # index & search flags
-export CREATE_INDEX=true
+export CREATE_INDEX=false
 export EXPAND_INDEX=false
-export SEARCH_INDEX=true
+export SEARCH_INDEX=false
 
 # rerank flags
 # RERANK run rerank using trained model on validation set
