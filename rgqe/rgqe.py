@@ -32,6 +32,7 @@ if __name__ == '__main__':
 	parser.add_argument('-qe', '--qe_path', default=None)
 	parser.add_argument('-cc', '--cc_path', default=None)
 	parser.add_argument('-te', '--threshold', default=0.5, type=float)
+	parser.add_argument('-gpu', '--gpus', default='0')
 
 	args = parser.parse_args()
 	seed = args.seed
@@ -57,10 +58,11 @@ if __name__ == '__main__':
 	cc_path = args.cc_path
 	threshold = args.threshold
 
-	is_distributed = False
 	# export TPU_IP_ADDRESS=10.155.6.34
 	# export XRT_TPU_CONFIG="tpu_worker;0;$TPU_IP_ADDRESS:8470"
-	gpus = [0]
+	gpus = [int(x) for x in args.gpus.split(',')]
+
+	is_distributed = len(gpus) > 1
 	use_tpus = args.use_tpus
 	precision = 16 if use_tpus else 32
 	# precision = 32

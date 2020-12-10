@@ -27,6 +27,8 @@ export EXP_ANSWER_TOP_K=20
 export EXP_ANSWER_NUM_SAMPLES=20
 export EXP_ANSWER_BATCH_SIZE=16
 
+export GPUS=0
+
 # flags to avoid re-running certain components
 # index & search flags
 export CREATE_INDEX=true
@@ -125,8 +127,7 @@ if [[ ${CREATE_INDEX} = true ]]; then
          --num_samples 3 \
          --batch_size 64 \
          --max_seq_len 256 \
-         --gpus 4,5,6,7 \
-         --is_distributed \
+         --gpus ${GPUS} \
         ; \
         python expand_query/format_expand_jsonl.py \
           --input_path ${EXP_DATA_PATH} \
@@ -191,6 +192,7 @@ if [[ ${RUN_RERANK} = true ]]; then
       --model_name ${RERANK_MODEL_NAME} \
       --max_seq_len 96 \
       --load_trained_model \
+      --gpus ${GPUS} \
     ; \
     python -m rerank.format_rerank \
       --input_path ${RERANK_PATH} \
@@ -219,6 +221,7 @@ if [[ ${RUN_EXPAND_ANSWERS} = true ]]; then
      --top_k ${EXP_ANSWER_TOP_K} \
      --num_samples ${EXP_ANSWER_NUM_SAMPLES} \
      --batch_size ${EXP_ANSWER_BATCH_SIZE} \
+     --gpus ${GPUS} \
     ; \
     python -m expand_query.format_expand \
       --input_path ${EXP_ANSWER_PATH} \
@@ -233,6 +236,7 @@ if [[ ${RUN_RGQE_SELF} = true ]]; then
       --output_path ${RGQE_SELF_PATH} \
       --model_name ${RQE_MODEL_NAME} \
       --max_seq_len ${MAX_RQE_SEQ_LEN} \
+      --gpus ${GPUS} \
       --mode self \
     ; \
     python -m rgqe.format_rgqe_self \
@@ -256,6 +260,7 @@ if [[ ${RUN_RGQE_QUESTION} = true ]]; then
       --query_path ${QUERY_PATH} \
       --model_name ${RQE_MODEL_NAME} \
       --max_seq_len ${MAX_RQE_SEQ_LEN} \
+      --gpus ${GPUS} \
       --mode question \
     ; \
     python -m rgqe.format_rgqe_question \
@@ -275,6 +280,7 @@ if [[ ${RUN_RGQE_TOP} = true ]]; then
       --max_seq_len ${MAX_RQE_SEQ_LEN} \
       --mode top \
       --top_k ${RGQE_TOP_K} \
+      --gpus ${GPUS} \
       --threshold ${RQE_THRESHOLD} \
     ; \
     python -m rgqe.format_rgqe_top \
@@ -298,6 +304,7 @@ if [[ ${RUN_RGQE_ALL} = true ]]; then
       --qe_path ${RGQE_QUESTION_FILE_PATH} \
       --model_name ${RQE_MODEL_NAME} \
       --max_seq_len ${MAX_RQE_SEQ_LEN} \
+      --gpus ${GPUS} \
       --mode all \
     ; \
     python -m rgqe.format_rgqe_all \

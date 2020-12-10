@@ -27,7 +27,6 @@ if __name__ == '__main__':
   parser.add_argument('-k', '--top_k', default=10, type=int)
   parser.add_argument('-s', '--num_samples', default=10, type=int)
   parser.add_argument('-tpu', '--use_tpus', default=False, action='store_true')
-  parser.add_argument('-dis', '--is_distributed', default=False, action='store_true')
   parser.add_argument('-gpu', '--gpus', default='0')
 
   args = parser.parse_args()
@@ -56,11 +55,10 @@ if __name__ == '__main__':
   top_k = args.top_k
   num_samples = args.num_samples
 
-  is_distributed = args.is_distributed
   # export TPU_IP_ADDRESS=10.155.6.34
   # export XRT_TPU_CONFIG="tpu_worker;0;$TPU_IP_ADDRESS:8470"
-  gpus = args.gpus
-  gpus = [int(x) for x in gpus.split(',')]
+  gpus = [int(x) for x in args.gpus.split(',')]
+  is_distributed = len(gpus) > 1
   use_tpus = args.use_tpus
   precision = 16 if use_tpus else 32
   # precision = 32
