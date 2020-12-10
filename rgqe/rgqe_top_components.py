@@ -26,7 +26,7 @@ class DFS(object):
 	def dfs_search(self, v, c_list):
 		self.visited[v] = True
 		c_list.add(v)
-		for c in self.edges[v]:
+		for c in sorted(self.edges[v]):
 			if c in self.visited and not self.visited[c]:
 				self.dfs_search(c, c_list)
 		return c_list
@@ -57,7 +57,6 @@ def create_components(question_entail_set_pairs, answer_sets, threshold):
 			edges[entail_set_b_id].add(entail_set_a_id)
 
 		nodes = sorted(list(nodes))
-		edges = {answer_id: sorted(list(answer_edges)) for answer_id, answer_edges in edges.items()}
 		dfs = DFS(
 			nodes=nodes,
 			edges=edges,
