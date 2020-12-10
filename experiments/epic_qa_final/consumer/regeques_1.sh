@@ -36,15 +36,15 @@ export SEARCH_INDEX=false
 
 # rerank flags
 # RERANK run rerank using trained model on validation set
-export RUN_RERANK=false
+export RUN_RERANK=true
 
 # rerank answer query expansion flags
-export RUN_EXPAND_ANSWERS=false
+export RUN_EXPAND_ANSWERS=true
 
 # RGQE pairwise self-entailment to find entailed sets for each answer
-export RUN_RGQE_SELF=false
+export RUN_RGQE_SELF=true
 # RGQE query-generated question entailment to filter poor generated questions
-export RUN_RGQE_QUESTION=false
+export RUN_RGQE_QUESTION=true
 # RGQE full set-pairwise entailment for top_k answers for each query
 export RUN_RGQE_TOP=true
 # RGQE top_k set entailment to all set entailment to find entailed sets for all answers
