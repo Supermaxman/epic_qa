@@ -7,22 +7,22 @@ import json
 
 
 def get_id(q_id):
-	answer_id, sample_id = q_id.split('|')
+	question_id, answer_id, sample_id = q_id.split('|')
 	sample_id = int(sample_id)
-	return answer_id, sample_id
+	return question_id, answer_id, sample_id
 
 
 def load_predictions(input_path):
-	sample_entail_pairs = defaultdict(list)
+	sample_entail_pairs = defaultdict(lambda: defaultdict(list))
 	for file_name in tqdm([x for x in os.listdir(input_path) if x.endswith('.all')]):
 		preds = torch.load(os.path.join(input_path, file_name))
 		for prediction in preds:
-			answer_a_id, entailed_set_a_id = get_id(prediction['question_a_id'])
+			question_id, answer_a_id, entailed_set_a_id = get_id(prediction['question_a_id'])
 			entailed_set_b_id = prediction['question_b_id']
 			entail_prob = prediction['entail_prob']
 			if entail_prob < 0.5:
 				continue
-			sample_entail_pairs[answer_a_id].append(
+			sample_entail_pairs[question_id][answer_a_id].append(
 				(entailed_set_a_id, entailed_set_b_id, entail_prob)
 			)
 

@@ -7,9 +7,9 @@ import json
 
 
 def get_id(q_id):
-	answer_id, sample_id = q_id.split('|')
+	question_id, answer_id, sample_id = q_id.split('|')
 	sample_id = int(sample_id)
-	return answer_id, sample_id
+	return question_id, answer_id, sample_id
 
 
 def load_predictions(input_path):
@@ -18,14 +18,14 @@ def load_predictions(input_path):
 		if file_name.endswith('.top'):
 			preds = torch.load(os.path.join(input_path, file_name))
 			pred_list.extend(preds)
-	sample_entail_pairs = []
+	sample_entail_pairs = defaultdict(list)
 	probs = []
 	for prediction in tqdm(pred_list):
-		answer_a_id, entailed_set_a_id = get_id(prediction['question_a_id'])
-		answer_b_id, entailed_set_b_id = get_id(prediction['question_b_id'])
+		question_id, answer_a_id, entailed_set_a_id = get_id(prediction['question_a_id'])
+		_, answer_b_id, entailed_set_b_id = get_id(prediction['question_b_id'])
 		entail_prob = prediction['entail_prob']
 		probs.append(entail_prob)
-		sample_entail_pairs.append(
+		sample_entail_pairs[question_id].append(
 			(answer_a_id, answer_b_id, entailed_set_a_id, entailed_set_b_id, entail_prob)
 		)
 	print(f'min={min(probs)}')

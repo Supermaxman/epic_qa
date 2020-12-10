@@ -75,7 +75,7 @@ class RGQEAllPredictionDataset(Dataset):
 			# [answer_id] -> list of entailed sets
 			self.answer_sets = json.load(f)
 
-		self.q_entailed_sets = defaultdict(set)
+		self.q_entailed_sets = defaultdict(lambda: defaultdict(set))
 		with open(self.qe_path, 'r') as f:
 			# [answer_id] -> list of entailed sets
 			qa_set_entailments = json.load(f)
@@ -84,36 +84,35 @@ class RGQEAllPredictionDataset(Dataset):
 					for entailed_set_id, entail_prob in a_set_entailments:
 						if entail_prob < threshold:
 							continue
-						self.q_entailed_sets[answer_id].add(entailed_set_id)
-
-		# list of entailed_set_id, entailed_set with entailed_set containing samples,
-		# where entailed_set[0]['entailed_set_text'] is representative question
-		self.entailed_sets = self.top_cc['entailed_sets']
-		# [answer_id] -> merged_entailed_sets for top_k answers
-		self.top_answer_sets = self.top_cc['answer_sets']
+						self.q_entailed_sets[question_id][answer_id].add(entailed_set_id)
 		self.examples = []
-		num_sets = 0
-
-		for answer_id, a_sets in self.answer_sets.items():
-			if answer_id in self.top_answer_sets:
-				continue
-			for entailed_set_a in a_sets:
-				entailed_set_a_id = entailed_set_a['entailed_set_id']
-				if entailed_set_a_id not in self.q_entailed_sets[answer_id]:
+		for question_id, q_top_cc in self.top_cc.items():
+			# list of entailed_set_id, entailed_set with entailed_set containing samples,
+			# where entailed_set[0]['entailed_set_text'] is representative question
+			entailed_sets = q_top_cc['entailed_sets']
+			# [answer_id] -> merged_entailed_sets for top_k answers
+			top_answer_sets = q_top_cc['answer_sets']
+			num_sets = 0
+			for answer_id, a_sets in self.answer_sets.items():
+				if answer_id in top_answer_sets:
 					continue
-				entailed_set_a_text = entailed_set_a['entailed_set'][0]['sample_text']
-				num_sets += 1
-				for entailed_set_b in self.entailed_sets:
-					entailed_set_b_id = entailed_set_b['entailed_set_id']
-					entailed_set_b_text = entailed_set_b['entailed_set'][0]['entailed_set_text']
-					example = {
-						'question_a_id': f'{answer_id}|{entailed_set_a_id}',
-						'question_b_id': entailed_set_b_id,
-						'question_a_text': entailed_set_a_text,
-						'question_b_text': entailed_set_b_text,
-					}
-					self.examples.append(example)
-		print(f'{len(self.entailed_sets)} entailed sets with {num_sets} total sets')
+				for entailed_set_a in a_sets:
+					entailed_set_a_id = entailed_set_a['entailed_set_id']
+					if entailed_set_a_id not in self.q_entailed_sets[question_id][answer_id]:
+						continue
+					entailed_set_a_text = entailed_set_a['entailed_set'][0]['sample_text']
+					num_sets += 1
+					for entailed_set_b in entailed_sets:
+						entailed_set_b_id = entailed_set_b['entailed_set_id']
+						entailed_set_b_text = entailed_set_b['entailed_set'][0]['entailed_set_text']
+						example = {
+							'question_a_id': f'{question_id}|{answer_id}|{entailed_set_a_id}',
+							'question_b_id': entailed_set_b_id,
+							'question_a_text': entailed_set_a_text,
+							'question_b_text': entailed_set_b_text,
+						}
+						self.examples.append(example)
+			print(f'{question_id}: {len(entailed_sets)} entailed sets with {num_sets} total sets')
 
 	def __len__(self):
 		return len(self.examples)
@@ -195,7 +194,7 @@ class RGQETopPredictionDataset(Dataset):
 						entailed_set = answer_sets[entailed_set_id]
 						entailed_set_sample_text = entailed_set['entailed_set'][0]['sample_text']
 						example = {
-							'id': f'{answer_id}|{entailed_set_id}',
+							'id': f'{question_id}|{answer_id}|{entailed_set_id}',
 							'answer_id': answer_id,
 							'entailed_set_text': entailed_set_sample_text
 						}
@@ -250,6 +249,7 @@ class RGQEQuestionPredictionDataset(Dataset):
 			if answer_id not in seen_answers:
 				continue
 			for entailed_set in a_sets:
+				# TODO filter by which answers for which query
 				entailed_set_id = entailed_set['entailed_set_id']
 				entailed_set_sample_text = entailed_set['entailed_set'][0]['sample_text']
 				for question_id, query in self.queries.items():

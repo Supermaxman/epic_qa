@@ -28,22 +28,31 @@ if __name__ == '__main__':
 	ratio = args.ratio
 
 	with open(input_path, 'r') as f:
-		answer_sets = json.load(f)
+		# [question_id][answer_id] -> entailed sets
+		question_answer_sets = json.load(f)
 
 	with open(queries_path, 'r') as f:
 		queries = json.load(f)
+		# [question_id] -> query
 		queries = {q['question_id']: q for q in queries}
 
 	with open(cc_path, 'r') as f:
-		rgqe_top_cc = json.load(f)
-	entailed_sets_text = {e['entailed_set_id']: e['entailed_set'][0]['entailed_set_text'] for e in rgqe_top_cc['entailed_sets']}
-	top_answer_sets = rgqe_top_cc['answer_sets']
+		# [question_id] -> entailed_sets
+		rgqe_top_q_cc = json.load(f)
 
 	with open(answers_path, 'r') as f:
+		# [answer_id] -> answer
 		answers = json.load(f)
 	rerank_scores = answers['rerank_scores']
 	answer_text_lookup = answers['answer_text_lookup']
 	for question_id, question_answers in rerank_scores.items():
+		answer_sets = question_answer_sets[question_id]
+		rgqe_top_cc = rgqe_top_q_cc[question_id]
+		top_answer_sets = rgqe_top_cc['answer_sets']
+		entailed_sets_text = {
+			e['entailed_set_id']: e['entailed_set'][0]['entailed_set_text'] for e in
+			rgqe_top_cc['entailed_sets']
+		}
 		num_answers_with_set = 0
 		for answer in question_answers:
 			answer_id = answer['answer_id']
