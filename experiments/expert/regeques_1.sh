@@ -13,9 +13,8 @@ export COLLECTION=epic_qa_prelim
 export DATASET=expert
 
 # major hyper-parameters for system
-export SEARCH_TOP_K=1200
-#export NEGATIVE_SAMPLES=800
-export NEGATIVE_SAMPLES=400
+export SEARCH_TOP_K=1000
+export NEGATIVE_SAMPLES=800
 export RGQE_TOP_K=100
 export RGQE_THRESHOLD=0.8
 export RQE_THRESHOLD=0.01
