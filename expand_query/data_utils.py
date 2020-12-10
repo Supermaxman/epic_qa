@@ -21,18 +21,15 @@ class AnswerDataset(Dataset):
 	def __init__(self, collection_path, input_path):
 		self.collection_path = collection_path
 		self.input_path = input_path
-		self.ids = set()
 		if self.input_path is not None:
+			self.doc_ids = defaultdict(lambda: defaultdict(list))
 			with open(self.input_path, 'r') as f:
 				for line in f:
 					line = line.strip()
 					if line:
-						q_id, _, full_id, rank, score, run_name = line.split()
-						self.ids.add(full_id)
-			self.doc_ids = defaultdict(lambda: defaultdict(set))
-			for f_id in self.ids:
-				doc_id, pass_id, sent_start_id, sent_end_id = parse_id(f_id)
-				self.doc_ids[doc_id][pass_id].add((sent_start_id, sent_end_id))
+						q_id, _, answer_id, rank, score, run_name = line.split()
+						doc_id, pass_id, sent_start_id, sent_end_id = parse_id(answer_id)
+						self.doc_ids[doc_id][pass_id].append((sent_start_id, sent_end_id))
 			self.examples = []
 			for doc_id, doc_pass_ids in self.doc_ids.items():
 				doc_path = os.path.join(self.collection_path, f'{doc_id}.json')
@@ -41,9 +38,6 @@ class AnswerDataset(Dataset):
 				passage_lookup = {c['context_id']: c for c in doc['contexts']}
 				for pass_id, sent_spans in doc_pass_ids.items():
 					passage = passage_lookup[f'{doc_id}-{pass_id}']
-					if passage['context_id'] == '4ab9fdeb-ea37-4a2b-813b-0760b1550574-C000':
-						print('4ab9fdeb-ea37-4a2b-813b-0760b1550574-C000')
-						print(sent_spans)
 					for sent_start_id, sent_end_id in sent_spans:
 						sent_start_idx = int(sent_start_id[1:])
 						sent_end_idx = int(sent_end_id[1:])

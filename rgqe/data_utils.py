@@ -186,9 +186,6 @@ class RGQETopPredictionDataset(Dataset):
 					question_id, _, answer_id, rank, score, run_name = line.split()
 					if question_answer_count[question_id] > top_k:
 						continue
-					if answer_id not in self.answers:
-
-						continue
 					question_answer_count[question_id] += 1
 					answer_sets = self.answers[answer_id]
 					answer_sets = {e['entailed_set_id']: e for e in answer_sets}
@@ -241,14 +238,12 @@ class RGQEQuestionPredictionDataset(Dataset):
 			self.answers = json.load(f)
 
 		seen_answers = set()
-		seen_questions = defaultdict(set)
 		with open(self.search_path, 'r') as f:
 			for line in f:
 				line = line.strip()
 				if line:
 					question_id, _, answer_id, rank, score, run_name = line.split()
 					seen_answers.add(answer_id)
-					seen_questions[answer_id].add(question_id)
 
 		self.examples = []
 		for answer_id, a_sets in self.answers.items():
