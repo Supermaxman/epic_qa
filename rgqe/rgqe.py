@@ -4,8 +4,8 @@ import os
 import pytorch_lightning as pl
 from transformers import AutoTokenizer
 from torch.utils.data import DataLoader
-from rgqe.model_utils import RGQEPredictionBert
-from rgqe.data_utils import RGQEAllPredictionDataset, RGQESelfPredictionDataset, RGQETopPredictionDataset, \
+from model_utils import RGQEPredictionBert
+from data_utils import RGQEAllPredictionDataset, RGQESelfPredictionDataset, RGQETopPredictionDataset, \
 	RGQEQuestionPredictionDataset, PredictionBatchCollator
 import logging
 from pytorch_lightning import loggers as pl_loggers

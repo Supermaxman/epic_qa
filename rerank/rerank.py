@@ -5,8 +5,8 @@ from collections import defaultdict
 import pytorch_lightning as pl
 from transformers import AutoTokenizer
 from torch.utils.data import DataLoader
-from rerank.model_utils import RerankBert
-from rerank.data_utils import QueryPassageDataset, PredictionBatchCollator
+from model_utils import RerankBert
+from data_utils import QueryPassageDataset, PredictionBatchCollator
 import logging
 from pytorch_lightning import loggers as pl_loggers
 import torch

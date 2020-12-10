@@ -183,7 +183,7 @@ fi
 
 if [[ ${RUN_RERANK} = true ]]; then
     echo "Running rerank model..."
-    python -m rerank.rerank \
+    python rerank/rerank.py \
       --query_path ${QUERY_PATH} \
       --collection_path ${COLLECTION_PATH} \
       --passage_search_run ${SEARCH_PATH} \
@@ -194,16 +194,16 @@ if [[ ${RUN_RERANK} = true ]]; then
       --load_trained_model \
       --gpus ${GPUS} \
     ; \
-    python -m rerank.format_rerank \
+    python rerank/format_rerank.py \
       --input_path ${RERANK_PATH} \
       --output_path ${RERANK_FILE_PATH} \
     ; \
-    python -m rerank.format_eval \
+    python rerank/format_eval.py \
       --input_path ${RERANK_FILE_PATH} \
       --output_path ${RERANK_RUN_PATH} \
       --top_k 1000
 
-    python -m rerank.extract_answers \
+    python rerank/extract_answers.py \
       --search_path ${RERANK_RUN_PATH} \
       --collection_path ${COLLECTION_PATH} \
       --output_path ${ANSWERS_PATH}
@@ -223,7 +223,7 @@ if [[ ${RUN_EXPAND_ANSWERS} = true ]]; then
      --batch_size ${EXP_ANSWER_BATCH_SIZE} \
      --gpus ${GPUS} \
     ; \
-    python -m expand_query.format_expand \
+    python expand_query/format_expand.py \
       --input_path ${EXP_ANSWER_PATH} \
       --output_path ${EXP_ANSWER_FILE_PATH}
 fi
@@ -231,7 +231,7 @@ fi
 if [[ ${RUN_RGQE_SELF} = true ]]; then
     echo "Running self RGQE..."
     # self entailment
-    python -m rgqe.rgqe \
+    python rgqe/rgqe.py \
       --input_path ${EXP_ANSWER_FILE_PATH} \
       --output_path ${RGQE_SELF_PATH} \
       --model_name ${RQE_MODEL_NAME} \
@@ -239,11 +239,11 @@ if [[ ${RUN_RGQE_SELF} = true ]]; then
       --gpus ${GPUS} \
       --mode self \
     ; \
-    python -m rgqe.format_rgqe_self \
+    python rgqe/format_rgqe_self.py \
       --input_path ${RGQE_SELF_PATH} \
       --output_path ${RGQE_SELF_FILE_PATH} \
     ; \
-    python -m rgqe.rgqe_self_components \
+    python rgqe/rgqe_self_components.py \
       --input_path ${RGQE_SELF_FILE_PATH} \
       --expand_path ${EXP_ANSWER_FILE_PATH} \
       --output_path ${RGQE_CC_FILE_PATH} \
@@ -253,7 +253,7 @@ fi
 if [[ ${RUN_RGQE_QUESTION} = true ]]; then
     echo "Running question RGQE..."
     # query-question entailment to filter out bad generated questions
-    python -m rgqe.rgqe \
+    python rgqe/rgqe.py \
       --input_path ${RGQE_CC_FILE_PATH} \
       --output_path ${RGQE_QUESTION_PATH} \
       --search_path ${RERANK_RUN_PATH} \
@@ -263,7 +263,7 @@ if [[ ${RUN_RGQE_QUESTION} = true ]]; then
       --gpus ${GPUS} \
       --mode question \
     ; \
-    python -m rgqe.format_rgqe_question \
+    python rgqe/format_rgqe_question.py \
       --input_path ${RGQE_QUESTION_PATH} \
       --output_path ${RGQE_QUESTION_FILE_PATH}
 fi
@@ -271,7 +271,7 @@ fi
 if [[ ${RUN_RGQE_TOP} = true ]]; then
     echo "Running top RGQE..."
     # top_k set entailment
-    python -m rgqe.rgqe \
+    python rgqe/rgqe.py \
       --input_path ${RGQE_CC_FILE_PATH} \
       --output_path ${RGQE_TOP_PATH} \
       --qe_path ${RGQE_QUESTION_FILE_PATH} \
@@ -283,11 +283,11 @@ if [[ ${RUN_RGQE_TOP} = true ]]; then
       --gpus ${GPUS} \
       --threshold ${RQE_THRESHOLD} \
     ; \
-    python -m rgqe.format_rgqe_top \
+    python rgqe/format_rgqe_top.py \
       --input_path ${RGQE_TOP_PATH} \
       --output_path ${RGQE_TOP_FILE_PATH} \
     ; \
-    python -m rgqe.rgqe_top_components \
+    python rgqe/rgqe_top_components.py \
       --input_path ${RGQE_TOP_FILE_PATH} \
       --cc_path ${RGQE_CC_FILE_PATH} \
       --output_path ${RGQE_TOP_CC_FILE_PATH} \
@@ -297,7 +297,7 @@ fi
 if [[ ${RUN_RGQE_ALL} = true ]]; then
     echo "Running all RGQE..."
     # all entailment against sets
-    python -m rgqe.rgqe \
+    python rgqe/rgqe.py \
       --input_path ${RGQE_TOP_CC_FILE_PATH} \
       --output_path ${RGQE_ALL_PATH} \
       --cc_path ${RGQE_CC_FILE_PATH} \
@@ -307,14 +307,14 @@ if [[ ${RUN_RGQE_ALL} = true ]]; then
       --gpus ${GPUS} \
       --mode all \
     ; \
-    python -m rgqe.format_rgqe_all \
+    python rgqe/format_rgqe_all.py \
       --input_path ${RGQE_ALL_PATH} \
       --output_path ${RGQE_ALL_FILE_PATH}
 fi
 
 if [[ ${RUN_RGQE_RERANK} = true ]]; then
     echo "Running RGQE rerank..."
-    python -m rgqe.rgqe_rerank \
+    python rgqe/rgqe_rerank.py \
       --input_path ${RGQE_ALL_FILE_PATH} \
       --cc_path ${RGQE_TOP_CC_FILE_PATH} \
       --answers_path ${ANSWERS_PATH} \
@@ -323,7 +323,7 @@ if [[ ${RUN_RGQE_RERANK} = true ]]; then
       --threshold ${RGQE_ALL_THRESHOLD} \
       --ratio ${RGQE_RATIO} \
     ; \
-    python -m rgqe.format_eval \
+    python rgqe/format_eval.py \
       --results_path ${RGQE_ALL_RERANK_FILE_PATH} \
       --output_path ${RUN_PATH}
 fi
