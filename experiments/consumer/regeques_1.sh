@@ -29,7 +29,7 @@ export EXP_ANSWER_BATCH_SIZE=16
 # flags to avoid re-running certain components
 # index & search flags
 export CREATE_INDEX=true
-export EXPAND_INDEX=true
+export EXPAND_INDEX=false
 export SEARCH_INDEX=true
 
 # rerank flags
