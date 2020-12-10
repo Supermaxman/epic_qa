@@ -95,9 +95,9 @@ if __name__ == '__main__':
 			novel_count = len(novel_sets)
 			if novel_count == 0:
 				if rerank_score > 0:
-					new_score = (ratio**(num_entailed + 1)) * rerank_score
+					new_score = (ratio**(num_entailed)) * rerank_score
 				else:
-					new_score = ((1.0-ratio)**(num_entailed + 1)) * rerank_score
+					new_score = ((1.0-ratio)**(num_entailed)) * rerank_score
 				num_modified += 1
 			else:
 				new_score = rerank_score
