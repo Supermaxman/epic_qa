@@ -112,19 +112,20 @@ export EVAL_PATH=${RGQE_ALL_PATH}/${RQE_RUN_NAME}.eval
 
 if [[ ${CREATE_INDEX} = true ]]; then
     echo "Creating index..."
-    # setup dataset
-    python search/extract_collection.py \
-     --collection_path ${COLLECTION_PATH} \
-     --output_path ${COLLECTION_JSONL_FILE_PATH}
-
-    mkdir ${COLLECTION_JSONL_PATH}
-
     # create dataset split
     python rerank/split_data.py \
       --label_path data/${COLLECTION}/prelim_judgments_corrected.json \
       --output_path ${DATASET_PATH}/split \
       --dataset ${DATASET}
+
     if [[ ${EXPAND_INDEX} = true ]]; then
+        # setup dataset
+        python search/extract_collection.py \
+         --collection_path ${COLLECTION_PATH} \
+         --output_path ${COLLECTION_JSONL_FILE_PATH}
+
+        mkdir ${COLLECTION_JSONL_PATH}
+
         # expand dataset for indexing
         python expand_query/expand.py \
          --collection_path ${COLLECTION_JSONL_FILE_PATH} \
