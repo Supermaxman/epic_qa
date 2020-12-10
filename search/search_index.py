@@ -48,8 +48,7 @@ print(f'Running search and writing results to {output_path}...')
 with open(output_path, 'w') as fo:
 	for query in tqdm(queries):
 		question_id = query['question_id']
-		query_text = query['question']
-		# query_text = query['question'] + ' ' + query['query'] + ' ' + query['background']
+		query_text = query['question'] + ' ' + query['query'] + ' ' + query['background']
 		hits = searcher.search(query_text, k=top_k)
 		for rank, hit in enumerate(hits[:top_k], start=1):
 			line = f'{question_id}\tQ0\t{hit.docid}\t{rank}\t{hit.score:.8f}\t{output_name}\n'
