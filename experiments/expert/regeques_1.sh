@@ -18,7 +18,9 @@ export DATASET=expert
 export SEARCH_TOP_K=1000
 export NEGATIVE_SAMPLES=800
 export RGQE_TOP_K=100
-export RGQE_THRESHOLD=0.8
+export RGQE_SELF_THRESHOLD=0.8
+export RGQE_TOP_C_THRESHOLD=0.9
+export RGQE_ALL_THRESHOLD=0.5
 export RQE_THRESHOLD=0.01
 export RGQE_RATIO=0.8
 export MAX_RQE_SEQ_LEN=64
@@ -291,7 +293,7 @@ if [[ ${RUN_RGQE_SELF} = true ]]; then
       --input_path ${RGQE_SELF_FILE_PATH} \
       --expand_path ${EXP_ANSWER_FILE_PATH} \
       --output_path ${RGQE_CC_FILE_PATH} \
-      --threshold ${RGQE_THRESHOLD}
+      --threshold ${RGQE_SELF_THRESHOLD}
 fi
 
 if [[ ${RUN_RGQE_QUESTION} = true ]]; then
@@ -334,7 +336,7 @@ if [[ ${RUN_RGQE_TOP} = true ]]; then
       --input_path ${RGQE_TOP_FILE_PATH} \
       --cc_path ${RGQE_CC_FILE_PATH} \
       --output_path ${RGQE_TOP_CC_FILE_PATH} \
-      --threshold ${RGQE_THRESHOLD}
+      --threshold ${RGQE_TOP_C_THRESHOLD}
 fi
 
 if [[ ${RUN_RGQE_ALL} = true ]]; then
@@ -362,7 +364,7 @@ if [[ ${RUN_RGQE_RERANK} = true ]]; then
       --answers_path ${ANSWERS_PATH} \
       --queries_path ${QUERY_PATH} \
       --output_path ${RGQE_ALL_RERANK_FILE_PATH} \
-      --threshold ${RGQE_THRESHOLD} \
+      --threshold ${RGQE_ALL_THRESHOLD} \
       --ratio ${RGQE_RATIO} \
     ; \
     python -m rgqe.format_eval \

@@ -125,7 +125,7 @@ python -m rgqe.format_rgqe_all \
   --model_path models/${RQE_MODEL_NAME} \
   --output_path ${RGQE_ALL_PATH}
 
-python -m rgqe.rgqe_all_components \
+python -m rgqe.rgqe_rerank \
   --input_path ${RGQE_ALL_PATH} \
   --cc_path ${RGQE_TOP_CC_PATH} \
   --answers_path ${ANSWERS_PATH} \
