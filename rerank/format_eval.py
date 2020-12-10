@@ -25,6 +25,16 @@ def write_results(question_id, question_scores, run_name, f, top_k=1000, multipl
 		rel_idx += 1
 
 
+def parse_id(doc_pass_sent_id):
+	start_id, end_id = doc_pass_sent_id.split(':')
+	id_list = start_id.split('-')
+	doc_id = '-'.join(id_list[:-2])
+	pass_id = id_list[-2]
+	sent_start_id = id_list[-1]
+	sent_end_id = end_id.split('-')[-1]
+	return doc_id, pass_id, sent_start_id, sent_end_id
+
+
 def read_scores(input_path):
 	rerank_scores = defaultdict(list)
 	with open(input_path) as f:
@@ -33,9 +43,7 @@ def read_scores(input_path):
 			line = line.strip().split()
 			if len(line) == 6:
 				question_id, _, doc_pass_sent_id, rank, score, _ = line
-				start_id, end_id = doc_pass_sent_id.split(':')
-				doc_id, pass_id, sent_start_id = start_id.split('-')
-				_, _, sent_end_id = end_id.split('-')
+				doc_id, pass_id, sent_start_id, sent_end_id = parse_id(doc_pass_sent_id)
 				sent_start_idx = int(sent_start_id[1:])
 				sent_end_idx = int(sent_end_id[1:])
 				score = float(score)

@@ -7,6 +7,16 @@ from collections import defaultdict
 from tqdm import tqdm
 
 
+def parse_id(doc_pass_sent_id):
+	start_id, end_id = doc_pass_sent_id.split(':')
+	id_list = start_id.split('-')
+	doc_id = '-'.join(id_list[:-2])
+	pass_id = id_list[-2]
+	sent_start_id = id_list[-1]
+	sent_end_id = end_id.split('-')[-1]
+	return doc_id, pass_id, sent_start_id, sent_end_id
+
+
 class AnswerDataset(Dataset):
 	def __init__(self, collection_path, input_path):
 		self.collection_path = collection_path
@@ -21,9 +31,7 @@ class AnswerDataset(Dataset):
 						self.ids.add(full_id)
 			self.doc_ids = defaultdict(lambda: defaultdict(set))
 			for f_id in self.ids:
-				start_id, end_id = f_id.split(':')
-				doc_id, pass_id, sent_start_id = start_id.split('-')
-				_, _, sent_end_id = end_id.split('-')
+				doc_id, pass_id, sent_start_id, sent_end_id = parse_id(f_id)
 				self.doc_ids[doc_id][pass_id].add((sent_start_id, sent_end_id))
 			self.examples = []
 			for doc_id, doc_pass_ids in self.doc_ids.items():

@@ -6,6 +6,16 @@ from tqdm import tqdm
 import argparse
 
 
+def parse_id(doc_pass_sent_id):
+	start_id, end_id = doc_pass_sent_id.split(':')
+	id_list = start_id.split('-')
+	doc_id = '-'.join(id_list[:-2])
+	pass_id = id_list[-2]
+	sent_start_id = id_list[-1]
+	sent_end_id = end_id.split('-')[-1]
+	return doc_id, pass_id, sent_start_id, sent_end_id
+
+
 def read_scores(search_path, collection_path):
 	doc_ids = defaultdict(lambda: defaultdict(set))
 	rerank_scores = defaultdict(list)
@@ -14,9 +24,7 @@ def read_scores(search_path, collection_path):
 			line = line.strip().split()
 			if len(line) == 6:
 				question_id, _, answer_id, rank, score, run_name = line
-				start_id, end_id = answer_id.split(':')
-				doc_id, pass_id, sent_start_id = start_id.split('-')
-				_, _, sent_end_id = end_id.split('-')
+				doc_id, pass_id, sent_start_id, sent_end_id = parse_id(answer_id)
 				sent_start_idx = int(sent_start_id[1:])
 				sent_end_idx = int(sent_end_id[1:])
 				score = float(score)

@@ -45,6 +45,7 @@ replace_set = {
 replace_text = 'covid'
 replace_length = len(replace_text)
 
+
 def encode_prediction(prediction):
 	answer_id = prediction['id']
 	# [sample_size, max_seq_len]

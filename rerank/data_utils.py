@@ -55,7 +55,7 @@ class QueryPassageDataset(Dataset):
 				if question_id not in self.query_lookup:
 					continue
 				for doc_pass_id in question_files:
-					doc_id, pass_id = doc_pass_id.split('-')
+					doc_id = '-'.join(doc_pass_id.split('-')[:-1])
 					file_names.add(f'{doc_id}.json')
 					self.query_docs[doc_id].add(question_id)
 					self.query_doc_pass[question_id][doc_id].add(doc_pass_id)
