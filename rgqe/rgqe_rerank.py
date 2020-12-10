@@ -95,12 +95,16 @@ if __name__ == '__main__':
 			novel_count = len(novel_sets)
 			if novel_count == 0:
 				if rerank_score > 0:
-					new_score = (ratio**(num_entailed)) * rerank_score
+					new_score = (ratio**(num_entailed + 1)) * rerank_score
 				else:
-					new_score = ((1.0-ratio)**(num_entailed)) * rerank_score
+					new_score = ((1.0-ratio)**(num_entailed + 1)) * rerank_score
 				num_modified += 1
 			else:
-				new_score = rerank_score
+				if rerank_score > 0:
+					new_score = ((1.0-ratio)**(num_entailed)) * rerank_score
+				else:
+					new_score = (ratio**(num_entailed)) * rerank_score
+				# new_score = rerank_score
 			if answer['rank'] <= 100:
 				top_100_set_counts.append(num_entailed)
 			else:
