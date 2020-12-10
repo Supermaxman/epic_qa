@@ -60,13 +60,16 @@ if __name__ == '__main__':
 	parser.add_argument('-r', '--rqe_path', required=True)
 	parser.add_argument('-s', '--scores_path', required=True)
 	parser.add_argument('-o', '--output_path', required=True)
+	parser.add_argument('-rn', '--run_name', default=None)
 
 	args = parser.parse_args()
 
 	rqe_path = args.rqe_path
 	scores_path = args.scores_path
 	output_path = args.output_path
-	output_name = output_path.split('/')[-1].replace('.txt', '').replace('.pred', '')
+	run_name = args.run_name
+	if run_name is None:
+		run_name = output_path.split('/')[-1].replace('.txt', '').replace('.pred', '')
 
 	threshold = args.threshold
 
@@ -79,7 +82,7 @@ if __name__ == '__main__':
 	with open(output_path) as f:
 		query_answer_samples = json.load(f)
 
-	write_run(rerank_results, output_path, output_name)
+	write_run(rerank_results, output_path, run_name)
 
 
 

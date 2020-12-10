@@ -60,12 +60,15 @@ if __name__ == '__main__':
 	parser.add_argument('-sd', '--single_per_doc', default=False, action='store_true')
 	parser.add_argument('-ao', '--allow_overlap', default=False, action='store_true')
 	parser.add_argument('-t', '--threshold', default=None, type=float)
+	parser.add_argument('-r', '--run_name', default=None)
 
 	args = parser.parse_args()
 
 	input_path = args.input_path
 	output_path = args.output_path
-	output_name = output_path.split('/')[-1].replace('.txt', '').replace('.pred', '')
+	run_name = args.run_name
+	if run_name is None:
+		run_name = output_path.split('/')[-1].replace('.txt', '').replace('.pred', '')
 
 	allow_overlap = args.allow_overlap
 	single_per_doc = args.single_per_doc
@@ -78,7 +81,7 @@ if __name__ == '__main__':
 			write_results(
 				question_id,
 				question_scores,
-				output_name,
+				run_name,
 				f,
 				top_k=top_k,
 				multiple_per_doc=not single_per_doc,
