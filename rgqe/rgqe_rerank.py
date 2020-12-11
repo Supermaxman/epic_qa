@@ -86,7 +86,6 @@ if __name__ == '__main__':
 	for question_id, question_answers in rerank_scores.items():
 		query = queries[question_id]
 		seen_entailed_sets = set()
-		num_modified = 0
 		top_100_set_counts = []
 		outside_top_100_set_counts = []
 		answer_count = len(question_answers)
@@ -132,7 +131,6 @@ if __name__ == '__main__':
 				qa_entailed_set_scores[entailed_set_id] = ratio ** qa_entailed_set_counts[entailed_set_id]
 			seen_entailed_sets = seen_entailed_sets.union(entailed_sets)
 
-		print(f'{question_id}: #modified={num_modified}')
 		print(f'{question_id}: #top_100_avg_set_counts={np.mean(top_100_set_counts):.2f}')
 		print(f'{question_id}: #outside_top_100_avg_set_counts={np.mean(outside_top_100_set_counts):.2f}')
 		results[question_id] = {
