@@ -119,24 +119,22 @@ if __name__ == '__main__':
 			novelty_ratio = 1.0 - (num_overlapped / max(num_entailed, 1))
 			novel_sets = entailed_sets.difference(overlap_set)
 			novel_count = len(novel_sets)
-			if 'ndns_score' in answer:
-				new_score = answer['ndns_score']
-			else:
-				new_score = 0.0
 
-			# if novel_count == 0:
-			# 	num_seen = 0
-			# 	for entailed_set in entailed_sets:
-			# 		pass
-			# 	# if positive score make less positive by %ratio ^ (num_entailed + 1)
-			# 	if rerank_score > 0:
-			# 		new_score = (ratio ** (num_overlapped + 1)) * rerank_score
-			# 	# if negative score make more negative by %(1.0 + (1.0 - ratio) ^ (num_entailed + 1)
-			# 	else:
-			# 		new_score = ((1.0 + (1.0 - ratio)) ** (num_overlapped + 1)) * rerank_score
-			# 	num_modified += 1
-			# else:
-			# 	new_score = rerank_score
+			if novel_count == 0:
+				num_seen = 0
+				# if positive score make less positive by %ratio ^ (num_overlapped + 1)
+				if rerank_score > 0:
+					new_score = (ratio ** (num_overlapped + 1)) * rerank_score
+				# if negative score make more negative by %(1.0 + (1.0 - ratio) ^ (num_overlapped + 1)
+				else:
+					new_score = ((1.0 + (1.0 - ratio)) ** (num_overlapped + 1)) * rerank_score
+				num_modified += 1
+			else:
+				ndns_score = 0.0
+				if 'ndns_score' in answer:
+					ndns_score = answer['ndns_score']
+
+				new_score = rerank_score + ndns_score
 			if answer['rank'] <= 100:
 				top_100_set_counts.append(num_entailed)
 			else:
