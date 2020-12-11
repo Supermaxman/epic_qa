@@ -19,15 +19,16 @@ export DATASET=expert
 export SEARCH_TOP_K=500
 export NEGATIVE_SAMPLES=800
 export RGQE_TOP_K=100
-export RGQE_SELF_THRESHOLD=0.85
-export RGQE_TOP_C_THRESHOLD=0.85
-export RGQE_ALL_THRESHOLD=0.85
+export RGQE_SELF_THRESHOLD=0.8
+export RGQE_TOP_C_THRESHOLD=0.8
+export RGQE_ALL_THRESHOLD=0.8
 export RQE_TOP_THRESHOLD=0.01
 export RQE_ALL_THRESHOLD=0.1
 export RGQE_RATIO=0.9
 export MAX_RQE_SEQ_LEN=64
+export RGQE_BATCH_SIZE=128
 export EXP_ANSWER_TOP_K=20
-export EXP_ANSWER_NUM_SAMPLES=20
+export EXP_ANSWER_NUM_SAMPLES=10
 export EXP_ANSWER_BATCH_SIZE=16
 export EXP_ANSWER_SEQ_LEN=96
 
@@ -49,7 +50,7 @@ export RUN_RERANK=false
 export EVAL_RERANK=false
 
 # rerank answer query expansion flags
-export RUN_EXPAND_ANSWERS=false
+export RUN_EXPAND_ANSWERS=true
 
 # RGQE pairwise self-entailment to find entailed sets for each answer
 export RUN_RGQE_SELF=true
@@ -292,6 +293,7 @@ if [[ ${RUN_RGQE_SELF} = true ]]; then
       --output_path ${RGQE_SELF_PATH} \
       --model_name ${RQE_MODEL_NAME} \
       --max_seq_len ${MAX_RQE_SEQ_LEN} \
+      --batch_size ${RGQE_BATCH_SIZE} \
       --mode self \
     ; \
     python rgqe/format_rgqe_self.py \
@@ -316,6 +318,7 @@ if [[ ${RUN_RGQE_QUESTION} = true ]]; then
       --label_path ${LABEL_PATH} \
       --model_name ${RQE_MODEL_NAME} \
       --max_seq_len ${MAX_RQE_SEQ_LEN} \
+      --batch_size ${RGQE_BATCH_SIZE} \
       --top_k ${RGQE_TOP_K} \
       --mode question \
     ; \
@@ -334,6 +337,7 @@ if [[ ${RUN_RGQE_TOP} = true ]]; then
       --search_path ${RERANK_RUN_PATH} \
       --model_name ${RQE_MODEL_NAME} \
       --max_seq_len ${MAX_RQE_SEQ_LEN} \
+      --batch_size ${RGQE_BATCH_SIZE} \
       --mode top \
       --top_k ${RGQE_TOP_K} \
       --threshold ${RQE_TOP_THRESHOLD} \
