@@ -116,16 +116,14 @@ if __name__ == '__main__':
 			novel_count = len(novel_sets)
 			new_score = 0.0
 			# set_score = rerank_score / max(num_entailed, 1)
-			if novel_count > 0:
-				set_score = rerank_score / num_entailed
-				for entailed_set_id in entailed_sets:
-					novelty_score = qa_entailed_set_scores[entailed_set_id]
-					if rerank_score > 0:
-						new_score += novelty_score * set_score
-					else:
-						new_score += (1.0 - (1.0 - novelty_score)) * set_score
-			else:
-				new_score = rerank_score
+			set_score = rerank_score / num_entailed
+			for entailed_set_id in entailed_sets:
+				novelty_score = qa_entailed_set_scores[entailed_set_id]
+				if rerank_score > 0:
+					new_score += 0.5 * set_score + 0.5 * novelty_score * set_score
+				else:
+					new_score += 0.5 * set_score + (1.0 - (1.0 - novelty_score)) * set_score
+
 			if answer['rank'] <= 100:
 				top_100_set_counts.append(num_entailed)
 			else:
