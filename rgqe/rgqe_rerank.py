@@ -102,7 +102,6 @@ if __name__ == '__main__':
 			for (entailed_set_id, entailed_set_df) in q_set_counts.items()
 		}
 
-		score_factor = 0.1
 		for answer in question_answers:
 			answer_id = answer['answer_id']
 			text = answer['text']
@@ -117,13 +116,10 @@ if __name__ == '__main__':
 			novel_sets = entailed_sets.difference(overlap_sets)
 			novel_count = len(novel_sets)
 			new_score = 0.0
-			set_fraction = rerank_score / max(num_entailed, 1)
-			for novel_set_id in novel_sets:
-				novel_score = qa_entailed_set_scores[novel_set_id]
-				new_score += novel_score * set_fraction
-			for overlap_set_id in overlap_sets:
-				overlap_score = qa_entailed_set_scores[overlap_set_id]
-				new_score += ratio * overlap_score * set_fraction
+			set_score = rerank_score / max(num_entailed, 1)
+			for entailed_set_id in entailed_sets:
+				novelty_score = qa_entailed_set_scores[entailed_set_id]
+				new_score += novelty_score * set_score
 
 			if answer['rank'] <= 100:
 				top_100_set_counts.append(num_entailed)
@@ -133,7 +129,7 @@ if __name__ == '__main__':
 			answer['score'] = new_score
 			for entailed_set_id in entailed_sets:
 				qa_entailed_set_counts[entailed_set_id] += 1
-				qa_entailed_set_scores[entailed_set_id] = score_factor ** qa_entailed_set_counts[entailed_set_id]
+				qa_entailed_set_scores[entailed_set_id] = ratio ** qa_entailed_set_counts[entailed_set_id]
 			seen_entailed_sets = seen_entailed_sets.union(entailed_sets)
 
 		print(f'{question_id}: #modified={num_modified}')
