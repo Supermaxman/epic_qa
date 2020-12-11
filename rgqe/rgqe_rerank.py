@@ -91,6 +91,7 @@ if __name__ == '__main__':
 			answer['text'] = answer_text_lookup[answer_id]
 			answer['entailed_sets_text'] = [entailed_sets_text[x] for x in qa_sets]
 
+		total_top_set_answers = len(top_seen_set_answers)
 		ndns_rank = 0
 		while len(top_seen_set_answers) > 0:
 			ranking = get_ranking(question_id, top_answers, entailed_sets_text, top_seen_set_answers)
@@ -110,7 +111,7 @@ if __name__ == '__main__':
 				# 	num_top_zero += 1
 				# goes from 1.0 to 0.0
 				# add max non top answer score to make sure ndns is ranked higher
-				answer['ndns_score'] = (1.0 - (ndns_rank / len(top_seen_set_answers))) + max_non_top_score
+				answer['ndns_score'] = (1.0 - (ndns_rank / total_top_set_answers)) + max_non_top_score
 				ndns_rank += 1
 
 		print(f'{question_id}: {num_answers_with_set / len(question_answers):.2f}% '
