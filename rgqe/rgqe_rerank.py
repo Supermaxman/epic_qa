@@ -118,7 +118,10 @@ if __name__ == '__main__':
 			set_score = rerank_score / max(num_entailed, 1)
 			for entailed_set_id in entailed_sets:
 				novelty_score = qa_entailed_set_scores[entailed_set_id]
-				new_score += novelty_score * set_score
+				if rerank_score > 0:
+					new_score += novelty_score * set_score
+				else:
+					new_score += (2.0 - (1.0 - novelty_score)) * set_score
 
 			if answer['rank'] <= 100:
 				top_100_set_counts.append(num_entailed)
