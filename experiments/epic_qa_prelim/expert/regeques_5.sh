@@ -6,9 +6,10 @@ export EXP_DATA_RUN_NAME=HLTRI_REGEQUES_EXP_DATA_1
 #export INDEX_NAME=HLTRI_REGEQUES_EXP_INDEX_1
 export INDEX_NAME=HLTRI_REGEQUES_EXP_INDEX_2
 export SEARCH_RUN_NAME=HLTRI_REGEQUES_SEARCH_1
-export RERANK_RUN_NAME=HLTRI_REGEQUES_RERANK_1
-export EXP_ANSWER_RUN_NAME=HLTRI_REGEQUES_EXP_ANSWER_1
-export RQE_RUN_NAME=HLTRI_REGEQUES_SEP_1
+export RERANK_RUN_NAME=HLTRI_REGEQUES_RERANK_3
+export RERANK_RUN_MODEL_NAME=HLTRI_REGEQUES_RERANK_1
+export EXP_ANSWER_RUN_NAME=HLTRI_REGEQUES_EXP_ANSWER_3
+export RQE_RUN_NAME=HLTRI_REGEQUES_SEP_3
 
 # collection and task names
 export COLLECTION=epic_qa_prelim
@@ -18,9 +19,9 @@ export DATASET=expert
 export SEARCH_TOP_K=500
 export NEGATIVE_SAMPLES=800
 export RGQE_TOP_K=100
-export RGQE_SELF_THRESHOLD=0.9
-export RGQE_TOP_C_THRESHOLD=0.9
-export RGQE_ALL_THRESHOLD=0.9
+export RGQE_SELF_THRESHOLD=0.8
+export RGQE_TOP_C_THRESHOLD=0.8
+export RGQE_ALL_THRESHOLD=0.8
 export RQE_TOP_THRESHOLD=0.01
 export RQE_ALL_THRESHOLD=0.1
 export RGQE_RATIO=0.8
@@ -28,6 +29,11 @@ export MAX_RQE_SEQ_LEN=64
 export EXP_ANSWER_TOP_K=20
 export EXP_ANSWER_NUM_SAMPLES=20
 export EXP_ANSWER_BATCH_SIZE=16
+export EXP_ANSWER_SEQ_LEN=256
+
+export RERANK_SEQ_LEN=256
+export RERANK_BATCH_SIZE=16
+export RERANK_N_GRAM_MAX=3
 
 # flags to avoid re-running certain components
 # index & search flags
@@ -39,12 +45,12 @@ export SEARCH_INDEX=false
 # RERANK fine-tune reranking model using training set
 export TRAIN_RERANK=false
 # RERANK run rerank using trained model on validation set
-export RUN_RERANK=false
+export RUN_RERANK=true
 # RERANK run evaluation script on validation set
-export EVAL_RERANK=false
+export EVAL_RERANK=true
 
 # rerank answer query expansion flags
-export RUN_EXPAND_ANSWERS=false
+export RUN_EXPAND_ANSWERS=true
 
 # RGQE pairwise self-entailment to find entailed sets for each answer
 export RUN_RGQE_SELF=true
@@ -59,7 +65,7 @@ export RUN_RGQE_RERANK=true
 # RGQE run evaluation script on validation set
 export EVAL_RGQE=true
 
-export RERANK_MODEL_NAME=rerank-expert-${RERANK_RUN_NAME}
+export RERANK_MODEL_NAME=rerank-${DATASET}-${RERANK_RUN_MODEL_NAME}
 #export RERANK_MODEL_NAME=rerank-expert-passage-large-HLTRI_RERANK_15
 export EXP_MODEL_NAME=docT5query-base
 export RQE_MODEL_NAME=quora-seq-nboost-pt-bert-base-uncased-msmarco
@@ -223,7 +229,10 @@ if [[ ${RUN_RERANK} = true ]]; then
       --output_path ${RERANK_PATH} \
       --pre_model_name ${RERANK_PRE_MODEL_NAME} \
       --model_name ${RERANK_MODEL_NAME} \
-      --max_seq_len 96 \
+      --max_seq_len ${RERANK_SEQ_LEN} \
+      --batch_size ${RERANK_BATCH_SIZE} \
+      --multi_sentence \
+      --n_gram_max ${RERANK_N_GRAM_MAX} \
       --load_trained_model \
     ; \
     python rerank/format_rerank.py \
@@ -270,6 +279,7 @@ if [[ ${RUN_EXPAND_ANSWERS} = true ]]; then
      --top_k ${EXP_ANSWER_TOP_K} \
      --num_samples ${EXP_ANSWER_NUM_SAMPLES} \
      --batch_size ${EXP_ANSWER_BATCH_SIZE} \
+     --max_seq_len ${EXP_ANSWER_SEQ_LEN} \
     ; \
     python expand_query/format_expand.py \
       --input_path ${EXP_ANSWER_PATH} \
