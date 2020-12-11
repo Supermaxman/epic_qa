@@ -228,7 +228,8 @@ if __name__ == '__main__':
 		)
 	else:
 		if len(gpus) > 1:
-			backend = 'ddp' if is_distributed else 'dp'
+			# backend = 'ddp' if is_distributed else 'dp'
+			backend = 'dp'
 		else:
 			backend = None
 		trainer = pl.Trainer(
