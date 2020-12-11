@@ -105,7 +105,7 @@ if __name__ == '__main__':
 			if 'ndns_score' not in answer:
 				answer['ndns_score'] = 0.0
 				# answer['ndns_score'] = answer['score']
-			answer['score'] = answer['ndns_score']
+			answer['score'] = answer['score'] + answer['ndns_score']
 
 	results = {}
 	for question_id, question_answers in rerank_scores.items():
