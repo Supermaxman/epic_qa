@@ -100,7 +100,7 @@ if __name__ == '__main__':
 			# TODO two ideas:
 			# TODO 1. use bert score if gain is 0, not arbitrary ranking
 			#
-			if ndns_gain == 0:
+			if ndns_gain == 1:
 				max_non_top_score = max(max_non_top_score, answer['score'])
 				num_top_zero += 1
 			# goes from 1.0 to 0.0
