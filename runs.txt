@@ -6,7 +6,7 @@ HLTRI_2 -> HLTRI_REGEQUES_RERANK_1
     Passage index -> BM25 -> Fine-Tuned BERT Reranker
 
 HLTRI_3 -> HLTRI_REGEQUES_1
-    CURRENT: Passage index -> BM25 -> Fine-Tuned BERT Reranker -> REcognizing GEnerated QUestion Entailment Search (REGEQUES) with modified final weighting and entailment thresholds
+    CURRENT: Passage index -> BM25 -> Fine-Tuned BERT Reranker -> REcognizing GEnerated QUestion Entailment Search (REGEQUES) for NDNS
 
 
 expert:
@@ -17,5 +17,5 @@ HLTRI_2 -> HLTRI_REGEQUES_RERANK_1
     Passage index -> BM25 -> Fine-Tuned BERT Reranker
 
 HLTRI_3 -> HLTRI_REGEQUES_1
-    CURRENT: Passage index -> BM25 -> Fine-Tuned BERT Reranker -> REcognizing GEnerated QUestion Entailment Search (REGEQUES) with modified final weighting and entailment thresholds
+    CURRENT: Passage index -> BM25 -> Fine-Tuned BERT Reranker -> REcognizing GEnerated QUestion Entailment Search (REGEQUES) for NDNS
 
