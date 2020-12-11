@@ -45,6 +45,7 @@ if __name__ == '__main__':
 		answers = json.load(f)
 	rerank_scores = answers['rerank_scores']
 	answer_text_lookup = answers['answer_text_lookup']
+	entailed_set_counts = defaultdict(lambda: defaultdict(int))
 	for question_id, question_answers in rerank_scores.items():
 		if question_id not in question_answer_sets:
 			answer_sets = {}
@@ -75,6 +76,9 @@ if __name__ == '__main__':
 			answer['entailed_sets'] = qa_sets
 			answer['text'] = answer_text_lookup[answer_id]
 			answer['entailed_sets_text'] = [entailed_sets_text[x] for x in qa_sets]
+			for entailed_set in qa_sets:
+				entailed_set_counts[question_id][entailed_set] += 1
+
 		print(f'{question_id}: {num_answers_with_set/len(question_answers):.2f}% '
 					f'percent answers with at least one entailed set')
 
@@ -85,6 +89,19 @@ if __name__ == '__main__':
 		num_modified = 0
 		top_100_set_counts = []
 		outside_top_100_set_counts = []
+		answer_count = len(question_answers)
+		q_set_counts = entailed_set_counts[question_id]
+		# overall scores for each entailed_set
+		q_set_score = {
+			entailed_set_id: np.log(answer_count / entailed_set_df)
+			for (entailed_set_id, entailed_set_df) in q_set_counts.items()
+		}
+		qa_entailed_set_counts = defaultdict(int)
+		qa_entailed_set_scores = {
+			entailed_set_id: np.log(answer_count / 1.0)
+			for (entailed_set_id, _) in q_set_counts.items()
+		}
+
 		for answer in question_answers:
 			answer_id = answer['answer_id']
 			text = answer['text']
@@ -92,12 +109,13 @@ if __name__ == '__main__':
 			answer['rerank_score'] = rerank_score
 			entailed_sets = set(answer['entailed_sets'])
 			num_entailed = len(entailed_sets)
-			overlap_set = entailed_sets.intersection(seen_entailed_sets)
-			num_overlap = len(overlap_set)
+			overlap_sets = entailed_sets.intersection(seen_entailed_sets)
+			num_overlap = len(overlap_sets)
 			# 0 means all seen, 1 means all novel
 			novelty_ratio = 1.0 - (num_overlap / max(num_entailed, 1))
-			novel_sets = entailed_sets.difference(overlap_set)
+			novel_sets = entailed_sets.difference(overlap_sets)
 			novel_count = len(novel_sets)
+			# TODO calculate rarity of sets
 			if novel_count == 0:
 				# if positive score make less positive by %ratio ^ (num_entailed + 1)
 				if rerank_score > 0:
@@ -107,15 +125,20 @@ if __name__ == '__main__':
 					new_score = ((1.0+(1.0 - ratio))**(num_overlap + 1)) * rerank_score
 				num_modified += 1
 			else:
-				# TODO
 				new_score = rerank_score
+				for novel_set_id in novel_sets:
+					novel_score = q_set_score[novel_set_id]
+					new_score = new_score + novel_score
+
 			if answer['rank'] <= 100:
 				top_100_set_counts.append(num_entailed)
 			else:
 				outside_top_100_set_counts.append(num_entailed)
 
 			answer['score'] = new_score
-
+			for entailed_set_id in entailed_sets:
+				qa_entailed_set_counts[entailed_set_id] += 1
+				qa_entailed_set_scores[entailed_set_id] = np.log(answer_count / (1.0 + qa_entailed_set_counts[entailed_set_id]))
 			seen_entailed_sets = seen_entailed_sets.union(entailed_sets)
 
 		print(f'{question_id}: #modified={num_modified}')
