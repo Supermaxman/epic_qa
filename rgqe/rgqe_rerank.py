@@ -65,7 +65,7 @@ if __name__ == '__main__':
 		num_answers_with_set = 0
 		answer_lookup = {}
 		top_answers = []
-		top_seen_answers = set()
+		top_seen_set_answers = set()
 		max_non_top_score = 0.0
 		for answer in question_answers:
 			answer_id = answer['answer_id']
@@ -73,7 +73,8 @@ if __name__ == '__main__':
 			if answer_id in top_answer_sets:
 				qa_sets = top_answer_sets[answer_id]
 				top_answers.append(answer)
-				top_seen_answers.add(answer_id)
+				if len(qa_sets) > 0:
+					top_seen_set_answers.add(answer_id)
 			else:
 				max_non_top_score = max(max_non_top_score, answer['score'])
 				qa_sets = set()
@@ -91,8 +92,8 @@ if __name__ == '__main__':
 			answer['entailed_sets_text'] = [entailed_sets_text[x] for x in qa_sets]
 
 		ndns_rank = 0
-		while len(top_seen_answers) > 0:
-			ranking = get_ranking(question_id, top_answers, entailed_sets_text, top_seen_answers)
+		while len(top_seen_set_answers) > 0:
+			ranking = get_ranking(question_id, top_answers, entailed_sets_text, top_seen_set_answers)
 			for idx, ndns_scored_answer in enumerate(ranking.answers):
 				a_answer = ndns_scored_answer.answer
 				answer_id = f'{a_answer.start_sent_id}:{a_answer.end_sent_id}'
