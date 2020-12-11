@@ -105,14 +105,13 @@ if __name__ == '__main__':
 			if novel_count == 0:
 				# if positive score make less positive by %ratio ^ (num_entailed + 1)
 				if rerank_score > 0:
-					if num_overlapped > 0:
-						print(f'{num_overlapped}/{num_entailed}')
 					new_score = (ratio**(num_overlapped + 1)) * rerank_score
 				# if negative score make more negative by %(1.0 + (1.0 - ratio) ^ (num_entailed + 1)
 				else:
 					new_score = ((1.0+(1.0 - ratio))**(num_overlapped + 1)) * rerank_score
 				num_modified += 1
 			else:
+				print(f'{novel_count}')
 				new_score = rerank_score
 			if answer['rank'] <= 100:
 				top_100_set_counts.append(num_entailed)
