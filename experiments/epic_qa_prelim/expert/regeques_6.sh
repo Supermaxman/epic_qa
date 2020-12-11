@@ -19,19 +19,18 @@ export DATASET=expert
 export SEARCH_TOP_K=500
 export NEGATIVE_SAMPLES=800
 export RGQE_TOP_K=100
-export RGQE_SELF_THRESHOLD=0.7
-export RGQE_TOP_C_THRESHOLD=0.7
-export RGQE_ALL_THRESHOLD=0.7
-export RQE_TOP_THRESHOLD=0.0001
+export RGQE_SELF_THRESHOLD=0.8
+export RGQE_TOP_C_THRESHOLD=0.8
+export RGQE_ALL_THRESHOLD=0.8
+export RQE_TOP_THRESHOLD=0.01
 export RQE_ALL_THRESHOLD=0.1
 export RGQE_RATIO=0.9
-export RGQE_SEQ_LEN=128
+export RGQE_SEQ_LEN=96
 export RGQE_BATCH_SIZE=64
-export EXP_ANSWER_TOP_K=10
-export EXP_ANSWER_NUM_SAMPLES=3
+export EXP_ANSWER_TOP_K=20
+export EXP_ANSWER_NUM_SAMPLES=20
 export EXP_ANSWER_BATCH_SIZE=16
-export EXP_ANSWER_SEQ_LEN=128
-export EXP_ANSWER_OUT_SEQ_LEN=64
+export EXP_ANSWER_SEQ_LEN=96
 
 export RERANK_SEQ_LEN=96
 export RERANK_BATCH_SIZE=32
@@ -279,7 +278,6 @@ if [[ ${RUN_EXPAND_ANSWERS} = true ]]; then
      --num_samples ${EXP_ANSWER_NUM_SAMPLES} \
      --batch_size ${EXP_ANSWER_BATCH_SIZE} \
      --max_seq_len ${EXP_ANSWER_SEQ_LEN} \
-     --max_output_length ${EXP_ANSWER_OUT_SEQ_LEN} \
      --run_top_k ${RGQE_TOP_K} \
     ; \
     python expand_query/format_expand.py \

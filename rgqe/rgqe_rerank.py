@@ -97,8 +97,9 @@ if __name__ == '__main__':
 			entailed_sets = set(answer['entailed_sets'])
 			num_entailed = len(entailed_sets)
 			overlap_set = entailed_sets.intersection(seen_entailed_sets)
+			num_overlapped = len(overlap_set)
 			# 0 means all seen, 1 means all novel
-			novelty_ratio = 1.0 - (len(overlap_set) / max(len(entailed_sets), 1))
+			novelty_ratio = 1.0 - (num_overlapped / max(num_entailed, 1))
 			novel_sets = entailed_sets.difference(overlap_set)
 			novel_count = len(novel_sets)
 			if novel_count == 0:
