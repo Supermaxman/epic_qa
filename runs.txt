@@ -19,3 +19,24 @@ HLTRI_2 -> HLTRI_REGEQUES_RERANK_1
 HLTRI_3 -> HLTRI_REGEQUES_1
     CURRENT: Passage index -> BM25 -> Fine-Tuned BERT Reranker -> REcognizing GEnerated QUestion Entailment Search (REGEQUES) for NDNS
 
+
+
+Query: what is the origin of covid?
+
+Answer:
+1   COVID originated in the province of wuhan, china from wet market
+    1 - where did covid come from?
+    2 - what province in china is covid from?
+
+2   COVID is from a bat and a pengalin in china
+    1 - where did covid come from?
+    3 - what animals did covid originate from?
+3   COVID .....
+    4
+    5
+
+
+1 - where did covid come from?
+    1, 2, 5, 8, 11, 21
+2 - what province in china is covid from?
+    1, 43 33 4, 6
