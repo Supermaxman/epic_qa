@@ -23,7 +23,7 @@ export RGQE_SELF_THRESHOLD=0.8
 export RGQE_TOP_C_THRESHOLD=0.8
 export RGQE_ALL_THRESHOLD=0.8
 export RQE_TOP_THRESHOLD=0.01
-export RQE_ALL_THRESHOLD=0.1
+export RQE_ALL_THRESHOLD=0.01
 #export RGQE_RATIO=0.8
 export RGQE_RATIO=10.0
 export MAX_RQE_SEQ_LEN=64
@@ -59,7 +59,7 @@ export RUN_RGQE_QUESTION=false
 # RGQE full set-pairwise entailment for top_k answers for each query
 export RUN_RGQE_TOP=false
 # RGQE top_k set entailment to all set entailment to find entailed sets for all answers
-export RUN_RGQE_ALL=false
+export RUN_RGQE_ALL=true
 # RGQE rerank answers based on generated question entailment sets
 export RUN_RGQE_RERANK=true
 # RGQE run evaluation script on validation set
