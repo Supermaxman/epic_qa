@@ -88,7 +88,7 @@ if __name__ == '__main__':
 					f'percent answers with at least one entailed set')
 
 		print(f'{question_id}: running NDNS...')
-		ranking = get_ranking(top_answers, top_answer_sets)
+		ranking = get_ranking(question_id, top_answers, top_answer_sets)
 		print(f'{question_id}: NDNS SCORE: {ranking.score:.4f}')
 		for idx, ndns_scored_answer in enumerate(ranking.answers):
 			a_answer = ndns_scored_answer.answer
