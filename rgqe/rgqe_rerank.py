@@ -89,6 +89,7 @@ if __name__ == '__main__':
 		num_modified = 0
 		top_100_set_counts = []
 		outside_top_100_set_counts = []
+		seen_entailed_set_counts = defaultdict(int)
 		for answer in question_answers:
 			answer_id = answer['answer_id']
 			text = answer['text']
@@ -103,6 +104,9 @@ if __name__ == '__main__':
 			novel_sets = entailed_sets.difference(overlap_set)
 			novel_count = len(novel_sets)
 			if novel_count == 0:
+				num_seen = 0
+				for entailed_set in entailed_sets:
+					pass
 				# if positive score make less positive by %ratio ^ (num_entailed + 1)
 				if rerank_score > 0:
 					new_score = (ratio**(num_overlapped + 1)) * rerank_score
@@ -119,7 +123,8 @@ if __name__ == '__main__':
 				outside_top_100_set_counts.append(num_entailed)
 
 			answer['score'] = new_score
-
+			for entailed_set in entailed_sets:
+				seen_entailed_set_counts[entailed_set] += 1
 			seen_entailed_sets = seen_entailed_sets.union(entailed_sets)
 
 		print(f'{question_id}: #modified={num_modified}')
