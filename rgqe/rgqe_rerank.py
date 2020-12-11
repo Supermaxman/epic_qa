@@ -64,6 +64,7 @@ if __name__ == '__main__':
 		num_answers_with_set = 0
 		answer_lookup = {}
 		top_answers = []
+		max_non_top_score = 0.0
 		for answer in question_answers:
 			answer_id = answer['answer_id']
 			answer_lookup[answer_id] = answer
@@ -71,6 +72,7 @@ if __name__ == '__main__':
 				qa_sets = top_answer_sets[answer_id]
 				top_answers.append(answer)
 			else:
+				max_non_top_score = max(max_non_top_score, answer['score'])
 				qa_sets = set()
 				if all_path is not None:
 					if answer_id in answer_sets:
@@ -88,63 +90,78 @@ if __name__ == '__main__':
 					f'percent answers with at least one entailed set')
 
 		ranking = get_ranking(question_id, top_answers, entailed_sets_text)
+		ndns_rank = 0
 		for idx, ndns_scored_answer in enumerate(ranking.answers):
 			a_answer = ndns_scored_answer.answer
 			answer_id = f'{a_answer.start_sent_id}:{a_answer.end_sent_id}'
 			answer = answer_lookup[answer_id]
-			answer['ndns_score'] = ndns_scored_answer.gain
-			answer['ndns_rank'] = idx + 1
+			answer['ndns_gain'] = ndns_scored_answer.gain
+			# goes from 1.0 to 0.0
+			# add max non top answer score to make sure ndns is ranked higher
+			answer['ndns_score'] = (1.0 - ((ndns_rank + 1) / len(ranking.answers))) + max_non_top_score
+			ndns_rank += 1
+		ndns_score_offset = 1.0 - ((ndns_rank + 1) / len(ranking.answers))
+		for answer in question_answers:
+			if 'ndns_score' not in answer:
+				answer['ndns_score'] = answer['score']
+			answer['score'] = answer['ndns_score']
 
 	results = {}
-	for question_id, question_answers in rerank_scores.items():
-		query = queries[question_id]
-		seen_entailed_sets = set()
-		num_modified = 0
-		top_100_set_counts = []
-		outside_top_100_set_counts = []
-		seen_entailed_set_counts = defaultdict(int)
-
-		for answer in question_answers:
-			answer_id = answer['answer_id']
-			text = answer['text']
-			rerank_score = answer['score']
-			answer['rerank_score'] = rerank_score
-			entailed_sets = set(answer['entailed_sets'])
-			num_entailed = len(entailed_sets)
-			overlap_set = entailed_sets.intersection(seen_entailed_sets)
-			num_overlapped = len(overlap_set)
-			# 0 means all seen, 1 means all novel
-			novelty_ratio = 1.0 - (num_overlapped / max(num_entailed, 1))
-			novel_sets = entailed_sets.difference(overlap_set)
-			novel_count = len(novel_sets)
-
-			if novel_count == 0:
-				num_seen = 0
-				# if positive score make less positive by %ratio ^ (num_overlapped + 1)
-				if rerank_score > 0:
-					new_score = (ratio ** (num_overlapped + 1)) * rerank_score
-				# if negative score make more negative by %(1.0 + (1.0 - ratio) ^ (num_overlapped + 1)
-				else:
-					new_score = ((1.0 + (1.0 - ratio)) ** (num_overlapped + 1)) * rerank_score
-				num_modified += 1
-			else:
-				ndns_score = 1.0
-				if 'ndns_score' in answer:
-					ndns_score = answer['ndns_score']
-				new_score = rerank_score
-			if answer['rank'] <= 100:
-				top_100_set_counts.append(num_entailed)
-			else:
-				outside_top_100_set_counts.append(num_entailed)
-
-			answer['score'] = new_score
-			for entailed_set in entailed_sets:
-				seen_entailed_set_counts[entailed_set] += 1
-			seen_entailed_sets = seen_entailed_sets.union(entailed_sets)
-
-		print(f'{question_id}: #modified={num_modified}')
-		print(f'{question_id}: #top_100_avg_set_counts={np.mean(top_100_set_counts):.2f}')
-		print(f'{question_id}: #outside_top_100_avg_set_counts={np.mean(outside_top_100_set_counts):.2f}')
+	# for question_id, question_answers in rerank_scores.items():
+	# 	query = queries[question_id]
+	# 	seen_entailed_sets = set()
+	# 	num_modified = 0
+	# 	top_100_set_counts = []
+	# 	outside_top_100_set_counts = []
+	# 	seen_entailed_set_counts = defaultdict(int)
+	#
+	# 	for answer in question_answers:
+	# 		answer_id = answer['answer_id']
+	# 		text = answer['text']
+	# 		rerank_score = answer['score']
+	# 		answer['rerank_score'] = rerank_score
+	# 		entailed_sets = set(answer['entailed_sets'])
+	# 		num_entailed = len(entailed_sets)
+	# 		overlap_set = entailed_sets.intersection(seen_entailed_sets)
+	# 		num_overlapped = len(overlap_set)
+	# 		# 0 means all seen, 1 means all novel
+	# 		novelty_ratio = 1.0 - (num_overlapped / max(num_entailed, 1))
+	# 		novel_sets = entailed_sets.difference(overlap_set)
+	# 		novel_count = len(novel_sets)
+	# 		if 'ndns_score' not in answer:
+	# 			new_score = (1.0 - ((ndns_rank + 1) / len(ranking.answers)))
+	# 		else:
+	# 			new_score = answer['']
+	# 		new_score = ndns_score
+	#
+	# 		# if novel_count == 0:
+	# 		# 	num_seen = 0
+	# 		# 	# if positive score make less positive by %ratio ^ (num_overlapped + 1)
+	# 		# 	if rerank_score > 0:
+	# 		# 		new_score = (ratio ** (num_overlapped + 1)) * rerank_score
+	# 		# 	# if negative score make more negative by %(1.0 + (1.0 - ratio) ^ (num_overlapped + 1)
+	# 		# 	else:
+	# 		# 		new_score = ((1.0 + (1.0 - ratio)) ** (num_overlapped + 1)) * rerank_score
+	# 		# 	num_modified += 1
+	# 		# else:
+	# 		# 	ndns_score = 1.0
+	# 		# 	if 'ndns_rank' in answer:
+	# 		# 		ndns_score = 1.0 - (float(answer['ndns_rank']) / 100.0)
+	# 		# 	new_score = ndns_score
+	#
+	# 		if answer['rank'] <= 100:
+	# 			top_100_set_counts.append(num_entailed)
+	# 		else:
+	# 			outside_top_100_set_counts.append(num_entailed)
+	#
+	# 		answer['score'] = new_score
+	# 		for entailed_set in entailed_sets:
+	# 			seen_entailed_set_counts[entailed_set] += 1
+	# 		seen_entailed_sets = seen_entailed_sets.union(entailed_sets)
+	#
+	# 	print(f'{question_id}: #modified={num_modified}')
+	# 	print(f'{question_id}: #top_100_avg_set_counts={np.mean(top_100_set_counts):.2f}')
+	# 	print(f'{question_id}: #outside_top_100_avg_set_counts={np.mean(outside_top_100_set_counts):.2f}')
 		results[question_id] = {
 			'query': query,
 			'answers': list(sorted(question_answers, key=lambda x: x['score'], reverse=True))
