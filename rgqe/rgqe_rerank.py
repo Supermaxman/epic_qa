@@ -1,9 +1,23 @@
-
 import sys
 from collections import defaultdict
 import argparse
 import json
 import numpy as np
+
+import functools
+import math
+import json
+import logging
+import operator
+import heapq
+import argparse
+
+from collections import defaultdict
+from dataclasses import dataclass, field
+from statistics import mean
+from typing import Dict, Set, List, Tuple, Callable, Iterable, Optional, Mapping
+
+
 
 
 if __name__ == '__main__':
@@ -79,7 +93,7 @@ if __name__ == '__main__':
 			answer['entailed_sets'] = qa_sets
 			answer['text'] = answer_text_lookup[answer_id]
 			answer['entailed_sets_text'] = [entailed_sets_text[x] for x in qa_sets]
-		print(f'{question_id}: {num_answers_with_set/len(question_answers):.2f}% '
+		print(f'{question_id}: {num_answers_with_set / len(question_answers):.2f}% '
 					f'percent answers with at least one entailed set')
 
 	results = {}
@@ -109,10 +123,10 @@ if __name__ == '__main__':
 					pass
 				# if positive score make less positive by %ratio ^ (num_entailed + 1)
 				if rerank_score > 0:
-					new_score = (ratio**(num_overlapped + 1)) * rerank_score
+					new_score = (ratio ** (num_overlapped + 1)) * rerank_score
 				# if negative score make more negative by %(1.0 + (1.0 - ratio) ^ (num_entailed + 1)
 				else:
-					new_score = ((1.0+(1.0 - ratio))**(num_overlapped + 1)) * rerank_score
+					new_score = ((1.0 + (1.0 - ratio)) ** (num_overlapped + 1)) * rerank_score
 				num_modified += 1
 			else:
 				print(f'{novel_count}')
@@ -137,9 +151,3 @@ if __name__ == '__main__':
 
 	with open(output_path, 'w') as f:
 		json.dump(results, f, indent=2)
-
-
-
-
-
-
