@@ -238,7 +238,6 @@ def get_ideal_ranking(question: JudgedQuestion,
 						candidates.append((ranking, scored_answer, dcg))
 		# If none of the answers increase the score for any ranking in the beam, we stop early
 		if not candidates:
-			print('Exhausted all answers by rank %d', r + 1)
 			break
 		# Take the top K scoring rankings from all candidates
 		top_k = heapq.nlargest(k, candidates, key=operator.itemgetter(2))
