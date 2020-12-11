@@ -107,8 +107,8 @@ if __name__ == '__main__':
 			answer['score'] = answer['ndns_score']
 
 	results = {}
-	# for question_id, question_answers in rerank_scores.items():
-	# 	query = queries[question_id]
+	for question_id, question_answers in rerank_scores.items():
+		query = queries[question_id]
 	# 	seen_entailed_sets = set()
 	# 	num_modified = 0
 	# 	top_100_set_counts = []
