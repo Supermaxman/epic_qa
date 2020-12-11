@@ -17,11 +17,11 @@ export DATASET=expert
 # major hyper-parameters for system
 export SEARCH_TOP_K=500
 export NEGATIVE_SAMPLES=800
-export RGQE_TOP_K=100
+export RGQE_TOP_K=50
 export RGQE_SELF_THRESHOLD=0.8
 export RGQE_TOP_C_THRESHOLD=0.8
 export RGQE_ALL_THRESHOLD=0.8
-export RQE_TOP_THRESHOLD=0.001
+export RQE_TOP_THRESHOLD=0.01
 export RQE_ALL_THRESHOLD=0.1
 export RGQE_RATIO=0.8
 export MAX_RQE_SEQ_LEN=64
