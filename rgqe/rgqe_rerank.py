@@ -48,6 +48,7 @@ if __name__ == '__main__':
 		answers = json.load(f)
 	rerank_scores = answers['rerank_scores']
 	answer_text_lookup = answers['answer_text_lookup']
+	results = {}
 	for question_id, question_answers in rerank_scores.items():
 		if all_path is not None:
 			if question_id not in question_answer_sets:
@@ -105,40 +106,8 @@ if __name__ == '__main__':
 			if 'ndns_score' not in answer:
 				# answer['ndns_score'] = 0.0
 				answer['ndns_score'] = answer['score']
-			# answer['score'] = answer['ndns_score']
-
-	results = {}
-	for question_id, question_answers in rerank_scores.items():
+			answer['score'] = answer['ndns_score']
 		query = queries[question_id]
-		seen_entailed_sets = set()
-		seen_entailed_set_counts = defaultdict(int)
-
-		for answer in question_answers:
-			answer_id = answer['answer_id']
-			text = answer['text']
-			rerank_score = answer['score']
-			answer['rerank_score'] = rerank_score
-			entailed_sets = set(answer['entailed_sets'])
-			num_entailed = len(entailed_sets)
-			overlap_set = entailed_sets.intersection(seen_entailed_sets)
-			num_overlapped = len(overlap_set)
-			# 0 means all seen, 1 means all novel
-			novelty_ratio = 1.0 - (num_overlapped / max(num_entailed, 1))
-			novel_sets = entailed_sets.difference(overlap_set)
-			novel_count = len(novel_sets)
-			if novel_count == 0:
-				num_seen = 0
-				# if positive score make less positive by %ratio ^ (num_overlapped + 1)
-				if rerank_score > 0:
-					new_score = (ratio ** (num_overlapped + 1)) * rerank_score
-				# if negative score make more negative by %(1.0 + (1.0 - ratio) ^ (num_overlapped + 1)
-				else:
-					new_score = ((1.0 + (1.0 - ratio)) ** (num_overlapped + 1)) * rerank_score
-			else:
-				new_score = rerank_score
-
-			answer['score'] = new_score
-
 		results[question_id] = {
 			'query': query,
 			'answers': list(sorted(question_answers, key=lambda x: x['score'], reverse=True))
