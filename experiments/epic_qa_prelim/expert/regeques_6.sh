@@ -61,7 +61,7 @@ export RUN_RGQE_TOP=false
 # RGQE top_k set entailment to all set entailment to find entailed sets for all answers
 export RUN_RGQE_ALL=false
 # RGQE rerank answers based on generated question entailment sets
-export RUN_RGQE_RERANK=false
+export RUN_RGQE_RERANK=true
 # RGQE run evaluation script on validation set
 export EVAL_RGQE=true
 
