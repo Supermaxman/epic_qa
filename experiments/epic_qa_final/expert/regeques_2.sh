@@ -19,7 +19,8 @@ export RGQE_TOP_K=100
 export RGQE_SELF_THRESHOLD=0.8
 export RGQE_TOP_C_THRESHOLD=0.8
 export RGQE_ALL_THRESHOLD=0.8
-export RQE_THRESHOLD=0.01
+export RQE_TOP_THRESHOLD=0.01
+export RQE_ALL_THRESHOLD=0.1
 export RGQE_RATIO=0.8
 export MAX_RQE_SEQ_LEN=64
 export EXP_ANSWER_TOP_K=20
@@ -277,7 +278,7 @@ if [[ ${RUN_RGQE_TOP} = true ]]; then
       --mode top \
       --top_k ${RGQE_TOP_K} \
       --gpus ${GPUS} \
-      --threshold ${RQE_THRESHOLD} \
+      --threshold ${RQE_TOP_THRESHOLD} \
     ; \
     python rgqe/format_rgqe_top.py \
       --input_path ${RGQE_TOP_PATH} \
@@ -301,7 +302,7 @@ if [[ ${RUN_RGQE_ALL} = true ]]; then
       --model_name ${RQE_MODEL_NAME} \
       --max_seq_len ${MAX_RQE_SEQ_LEN} \
       --batch_size ${RQE_BATCH_SIZE} \
-      --threshold ${RQE_THRESHOLD} \
+      --threshold ${RQE_ALL_THRESHOLD} \
       --gpus ${GPUS} \
       --mode all \
     ; \
