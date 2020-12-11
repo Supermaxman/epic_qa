@@ -1,21 +1,11 @@
-import sys
-from collections import defaultdict
-import argparse
-import json
-import numpy as np
 
 import functools
 import math
-import json
-import logging
 import operator
 import heapq
-import argparse
 
-from collections import defaultdict
 from dataclasses import dataclass, field
-from statistics import mean
-from typing import Dict, Set, List, Tuple, Callable, Iterable, Optional, Mapping
+from typing import Dict, Set, List
 
 
 @dataclass
@@ -41,22 +31,22 @@ class JudgedSentence:
 class JudgedContext:
 	""" Holds the sentence annotations for a single context. """
 	context_id: str
-	sentences: Dict[str, JudgedSentence] = field(default_factory=dict)  # Sentence ID -> Sentence Annotations
+	sentences: Dict[str, JudgedSentence] = field(default_factory=dict)	# Sentence ID -> Sentence Annotations
 
 	def sentence_idx2id(self, sentence_idx: int) -> str:
 		"""
-        Converts a numeric sentence index to its corresponding ID
-        :param sentence_idx: numeric sentence index
-        :return: corresponding sentence ID
-        """
+				Converts a numeric sentence index to its corresponding ID
+				:param sentence_idx: numeric sentence index
+				:return: corresponding sentence ID
+				"""
 		return f'{self.context_id}-S{sentence_idx:0>3d}'
 
 	def sentence_for_index(self, sentence_idx: int) -> JudgedSentence:
 		"""
-        Get the annotations for the sentence at the given numeric index
-        :param sentence_idx: numeric sentence index
-        :return: sentence annotations
-        """
+				Get the annotations for the sentence at the given numeric index
+				:param sentence_idx: numeric sentence index
+				:return: sentence annotations
+				"""
 		sentence_id = self.sentence_idx2id(sentence_idx)
 		return self.sentences.get(sentence_id, JudgedSentence(sentence_id))
 
@@ -64,8 +54,8 @@ class JudgedContext:
 @dataclass
 class JudgedQuestion:
 	question_id: str
-	nuggets: Dict[str, str] = field(default_factory=dict)  # Nugget ID -> Nugget Name
-	contexts: Dict[str, JudgedContext] = field(default_factory=dict)  # Context ID -> Context Annotations
+	nuggets: Dict[str, str] = field(default_factory=dict)	# Nugget ID -> Nugget Name
+	contexts: Dict[str, JudgedContext] = field(default_factory=dict)	# Context ID -> Context Annotations
 
 
 @dataclass
@@ -111,39 +101,39 @@ def score_answer(answer: Answer,
 								 merge_novel_sentences: bool = False,
 								 ignore_sentence_factor: bool = False):
 	"""
-    Compute the novelty score of an answer given previously seen nuggets and the judgments for the answer's context
+		Compute the novelty score of an answer given previously seen nuggets and the judgments for the answer's context
 
-    (Novelty Score) = (# of nuggets) * (# of nuggets + 1) / ((# of nuggets) + (sentence factor))
+		(Novelty Score) = (# of nuggets) * (# of nuggets + 1) / ((# of nuggets) + (sentence factor))
 
-    where (# of nuggets) is restricted to only novel nuggets if count_only_novel_nuggets=True
-    and the sentence factor is defined as:
-    (sentence factor) =
-      ((# of redundant sentences) if count_redundant_sentences=True) +
-      ((# of filler sentences) if count_filler_sentences=True) +
-      (max((# of novel sentences), 1) if merge_novel_sentences=True,
-       (# of novel sentences), otherwise)
+		where (# of nuggets) is restricted to only novel nuggets if count_only_novel_nuggets=True
+		and the sentence factor is defined as:
+		(sentence factor) =
+			((# of redundant sentences) if count_redundant_sentences=True) +
+			((# of filler sentences) if count_filler_sentences=True) +
+			(max((# of novel sentences), 1) if merge_novel_sentences=True,
+			 (# of novel sentences), otherwise)
 
-    and "redundant sentences" are sentences containing only nuggets retrieved in earlier ranked answers,
-    "filler sentences" are sentences with no nuggets at all, and
-    "novel sentences" are sentences with novel (i.e., previously unseen) nuggets.
+		and "redundant sentences" are sentences containing only nuggets retrieved in earlier ranked answers,
+		"filler sentences" are sentences with no nuggets at all, and
+		"novel sentences" are sentences with novel (i.e., previously unseen) nuggets.
 
 
-    :param answer: Answer to score
-    :param seen_nuggets: Nuggets seen previously in the ranked list of answers
-    :param context: Annotated context with sentence-level nugget judgments
-    :param count_redundant_sentences: If True, the number of sentences with previously-seen nuggets will be
-    added to the sentence factor for scoring, used for Partial scoring
-    :param count_only_novel_nuggets: If True, only novel nuggets will contribute to the score, defaults to True
-    (setting this to False reduces the measure to NDCG)
-    :param count_filler_sentences: If True, sentences without any nuggets will be added to the sentence factor,
-    this is included mostly for debugging purposes and should be left as True
-    :param merge_novel_sentences: If True, the number of sentences with novel nuggets will be reduced to a maximum
-    of 1, with the idea being to not penalize providing multiple sentences as evidence of a new nugget,
-    used for Relaxed scoring
-    :param ignore_sentence_factor: If True, the sentence factor is ignored and the score is just the number of nuggets
-    in the answer, primarily included for debugging purposes
-    :return:
-    """
+		:param answer: Answer to score
+		:param seen_nuggets: Nuggets seen previously in the ranked list of answers
+		:param context: Annotated context with sentence-level nugget judgments
+		:param count_redundant_sentences: If True, the number of sentences with previously-seen nuggets will be
+		added to the sentence factor for scoring, used for Partial scoring
+		:param count_only_novel_nuggets: If True, only novel nuggets will contribute to the score, defaults to True
+		(setting this to False reduces the measure to NDCG)
+		:param count_filler_sentences: If True, sentences without any nuggets will be added to the sentence factor,
+		this is included mostly for debugging purposes and should be left as True
+		:param merge_novel_sentences: If True, the number of sentences with novel nuggets will be reduced to a maximum
+		of 1, with the idea being to not penalize providing multiple sentences as evidence of a new nugget,
+		used for Relaxed scoring
+		:param ignore_sentence_factor: If True, the sentence factor is ignored and the score is just the number of nuggets
+		in the answer, primarily included for debugging purposes
+		:return:
+		"""
 	start_idx = JudgedSentence.id2idx(answer.start_sent_id)
 	end_idx = JudgedSentence.id2idx(answer.end_sent_id)
 
@@ -208,59 +198,21 @@ def score_answer(answer: Answer,
 	return ScoredAnswer(answer, score, answer_nuggets)
 
 
-def min_max(x: Iterable[int]) -> Tuple[int, int]:
-	"""
-    Jointly compute min and maximum of an iterable in a single pass
-
-    :param x: Iterable of integers
-    :return: Tuple of (min, max) integers in x
-    """
-	maximum = -math.inf
-	minimum = math.inf
-	for i in x:
-		if i > maximum:
-			maximum = i
-		if i < minimum:
-			minimum = i
-	return minimum, maximum
-
-
-
-def get_potential_answers(context: JudgedContext) -> Iterable[Answer]:
-	"""
-    Generate potential answers for a judged context. Note: we skip any answers that begin before the first annotated
-    sentence or continue beyond the last annotated sentence in the context, as those answers will always be worse than
-    answers that begin with the first or end with the last annotated sentence.
-
-    TODO: We could prune any answers that don't start and end on an annotated sentence to speed this up
-
-    :param context: JudgedContext
-    :return: Iterable of *most* potential answers in that context
-    """
-	indices = map(operator.attrgetter('sentence_idx'), context.sentences.values())
-	min_idx, max_idx = min_max(indices)
-
-	for i in range(min_idx, max_idx + 1):
-		sent_i_id = context.sentence_idx2id(i)
-		for j in range(i, max_idx + 1):
-			yield Answer(sent_i_id, context.sentence_idx2id(j))
-
-
 def get_ideal_ranking(question: JudgedQuestion,
 											answers: List[Answer],
-											score_fn: Callable[[Answer, Set[str], JudgedContext], ScoredAnswer] = score_answer,
+											score_fn,
 											max_len: int = 1000,
 											k: int = 10) -> Ranking:
 	"""
-    Perform a beam-search over candidate answers to produce an "ideal" ranking of answers to the given question
-    based on its judgments and the given scoring function
-    :param question: Judgments for a single question
-    :param answers: Candidate answers for that question (i.e., from  `get_potential_answers`)
-    :param score_fn: scoring function (used to compute the gain of an answer)
-    :param max_len: maximum ranking length
-    :param k: beam-width
-    :return: Optimal ranking for the question based on the given score_fn and judgments
-    """
+		Perform a beam-search over candidate answers to produce an "ideal" ranking of answers to the given question
+		based on its judgments and the given scoring function
+		:param question: Judgments for a single question
+		:param answers: Candidate answers for that question (i.e., from	`get_potential_answers`)
+		:param score_fn: scoring function (used to compute the gain of an answer)
+		:param max_len: maximum ranking length
+		:param k: beam-width
+		:return: Optimal ranking for the question based on the given score_fn and judgments
+		"""
 
 	# Candidate rankings in the beam, initialize with a single empty ranking
 	rankings = [Ranking()]
@@ -293,53 +245,49 @@ def get_ideal_ranking(question: JudgedQuestion,
 		# Update our current beam candidates!
 		rankings = []
 		for p, a, dcg in top_k:
-			rankings.append(Ranking(answers=p.answers + [a],  # Add the best answer to its candidate ranking
-															nuggets=p.nuggets.union(a.nuggets),  # Update the nuggets in the new ranking
-															score=dcg))
+			rankings.append(
+				Ranking(
+					answers=p.answers + [a],	# Add the best answer to its candidate ranking
+					nuggets=p.nuggets.union(a.nuggets),	# Update the nuggets in the new ranking
+					score=dcg
+				)
+			)
 
 	# Return the best ranking from our beam
 	return max(rankings, key=operator.attrgetter('score'))
 
 
-def load_judgments(path) -> Dict[str, JudgedQuestion]:
-	"""
-    Load judgment json file
-    :param path: path to json file (gzipped or extracted)
-    :return: Mapping from Question IDs to Question Judgments
-    """
-	if path.endswith('.gz'):
-		# Un-gzip if the path ends in .gz
-		import gzip
-		with gzip.open(path, 'rb') as in_file:
-			judgments = json.load(in_file)
-	else:
-		# Else assume regular json  file
+def get_ranking(question_id, question_answers, top_answer_sets):
+	question = JudgedQuestion(question_id)
+	question.nuggets = {
+		nugget['entailed_set_id']: nugget['entailed_set'][0]['entailed_set_text'] for nugget in top_answer_sets
+	}
+	answer_list = []
+	for answer in question_answers:
+		a = Answer.from_string(answer['answer_id'])
+		sentence_id = a.start_sent_id
+		answer_list.append(a)
+		context_id = JudgedSentence.get_context_id(sentence_id)
+		if context_id not in question.contexts:
+			question.contexts[context_id] = JudgedContext(context_id)
+		context = question.contexts[context_id]
+		# TODO re-write this later for multi-sentence spans
+		if sentence_id not in context.sentences:
+			context.sentences[sentence_id] = JudgedSentence(
+				sentence_id,
+				nugget_ids=set(answer['entailed_sets'])
+			)
+		else:
+			context.sentences[sentence_id].nugget_ids.update(answer['entailed_sets'])
 
-		with open(path, 'r') as in_file:
-			judgments = json.load(in_file)
-	# Dictionary to hold our judgments
-	questions: Dict[str, JudgedQuestion] = {}
-	for j_question in judgments:
-		qid = j_question['question_id']
-		assert qid not in questions, f'{qid} encountered twice in judgment file'
-
-		# Create a Question object to hold judgments for this question
-		question = questions[qid] = JudgedQuestion(qid)
-
-		# Parse the dictionary of nugget IDs -> nugget names
-		question.nuggets = {nugget['nugget_id']: nugget['nugget'] for nugget in j_question['nuggets']}
-
-		# Load sentence-level annotations
-		for annotation in j_question['annotations']:
-			sentence_id = annotation['sentence_id']
-			context_id = JudgedSentence.get_context_id(sentence_id)
-
-			if context_id not in question.contexts:
-				question.contexts[context_id] = JudgedContext(context_id)
-			context = question.contexts[context_id]
-
-			if sentence_id not in context.sentences:
-				context.sentences[sentence_id] = JudgedSentence(sentence_id, nugget_ids=set(annotation['nugget_ids']))
-			else:
-				context.sentences[sentence_id].nugget_ids.update(annotation['nugget_ids'])
-	return questions
+	ideal_ranking = get_ideal_ranking(
+		question,
+		answers=answer_list,
+		score_fn=functools.partial(
+			score_answer,
+			count_redundant_sentences=True
+		),
+		k=10
+	)
+	# Save the score of the ideal ranking for this metric for this question
+	return ideal_ranking

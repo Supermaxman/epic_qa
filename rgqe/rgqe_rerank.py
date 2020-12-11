@@ -1,23 +1,10 @@
-import sys
-from collections import defaultdict
-import argparse
-import json
+
 import numpy as np
-
-import functools
-import math
 import json
-import logging
-import operator
-import heapq
 import argparse
-
 from collections import defaultdict
-from dataclasses import dataclass, field
-from statistics import mean
-from typing import Dict, Set, List, Tuple, Callable, Iterable, Optional, Mapping
 
-
+from ndns_utils import get_ranking
 
 
 if __name__ == '__main__':
@@ -75,8 +62,10 @@ if __name__ == '__main__':
 			rgqe_top_cc['entailed_sets']
 		}
 		num_answers_with_set = 0
+		answer_lookup = {}
 		for answer in question_answers:
 			answer_id = answer['answer_id']
+			answer_lookup = answer
 			if answer_id in top_answer_sets:
 				qa_sets = top_answer_sets[answer_id]
 			else:
@@ -96,6 +85,16 @@ if __name__ == '__main__':
 		print(f'{question_id}: {num_answers_with_set / len(question_answers):.2f}% '
 					f'percent answers with at least one entailed set')
 
+		print(f'{question_id}: running NDNS...')
+		ranking = get_ranking(question_answers, top_answer_sets)
+		print(f'{question_id}: NDNS SCORE: {ranking.score:.4f}')
+		for idx, ndns_scored_answer in enumerate(ranking.answers):
+			a_answer = ndns_scored_answer.answer
+			answer_id = f'{a_answer.start_sent_id}:{a_answer.end_sent_id}'
+			answer = answer_lookup[answer_id]
+			answer['ndns_score'] = ndns_scored_answer.gain
+			answer['ndns_rank'] = idx + 1
+
 	results = {}
 	for question_id, question_answers in rerank_scores.items():
 		query = queries[question_id]
@@ -104,6 +103,7 @@ if __name__ == '__main__':
 		top_100_set_counts = []
 		outside_top_100_set_counts = []
 		seen_entailed_set_counts = defaultdict(int)
+
 		for answer in question_answers:
 			answer_id = answer['answer_id']
 			text = answer['text']
@@ -129,7 +129,6 @@ if __name__ == '__main__':
 					new_score = ((1.0 + (1.0 - ratio)) ** (num_overlapped + 1)) * rerank_score
 				num_modified += 1
 			else:
-				print(f'{novel_count}')
 				new_score = rerank_score
 			if answer['rank'] <= 100:
 				top_100_set_counts.append(num_entailed)
