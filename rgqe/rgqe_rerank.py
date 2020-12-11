@@ -47,7 +47,7 @@ if __name__ == '__main__':
 	answer_text_lookup = answers['answer_text_lookup']
 	for question_id, question_answers in rerank_scores.items():
 		if question_id not in question_answer_sets:
-			answer_sets = []
+			answer_sets = {}
 			print(f'WARNING: {question_id} has no sets outside top 100')
 		else:
 			answer_sets = question_answer_sets[question_id]
