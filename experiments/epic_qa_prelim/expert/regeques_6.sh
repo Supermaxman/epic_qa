@@ -19,12 +19,12 @@ export DATASET=expert
 export SEARCH_TOP_K=500
 export NEGATIVE_SAMPLES=800
 export RGQE_TOP_K=100
-export RGQE_SELF_THRESHOLD=0.8
-export RGQE_TOP_C_THRESHOLD=0.8
-export RGQE_ALL_THRESHOLD=0.8
+export RGQE_SELF_THRESHOLD=0.85
+export RGQE_TOP_C_THRESHOLD=0.85
+export RGQE_ALL_THRESHOLD=0.85
 export RQE_TOP_THRESHOLD=0.01
 export RQE_ALL_THRESHOLD=0.1
-export RGQE_RATIO=0.8
+export RGQE_RATIO=0.9
 export MAX_RQE_SEQ_LEN=64
 export EXP_ANSWER_TOP_K=20
 export EXP_ANSWER_NUM_SAMPLES=20
@@ -49,7 +49,7 @@ export RUN_RERANK=false
 export EVAL_RERANK=false
 
 # rerank answer query expansion flags
-export RUN_EXPAND_ANSWERS=true
+export RUN_EXPAND_ANSWERS=false
 
 # RGQE pairwise self-entailment to find entailed sets for each answer
 export RUN_RGQE_SELF=true
@@ -358,7 +358,7 @@ if [[ ${RUN_RGQE_RERANK} = true ]]; then
       --queries_path ${QUERY_PATH} \
       --output_path ${RGQE_ALL_RERANK_FILE_PATH} \
       --threshold ${RGQE_ALL_THRESHOLD} \
-      --ratio 0.9 \
+      --ratio ${RGQE_RATIO} \
     ; \
     python rgqe/format_eval.py \
       --results_path ${RGQE_ALL_RERANK_FILE_PATH} \
