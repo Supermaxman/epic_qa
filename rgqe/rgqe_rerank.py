@@ -128,7 +128,7 @@ if __name__ == '__main__':
 			# 	num_modified += 1
 			# else:
 			new_score = 0.0
-			set_fraction = rerank_score / num_entailed
+			set_fraction = rerank_score / max(num_entailed, 1)
 			for novel_set_id in novel_sets:
 				novel_score = qa_entailed_set_scores[novel_set_id]
 				new_score += novel_score * set_fraction
