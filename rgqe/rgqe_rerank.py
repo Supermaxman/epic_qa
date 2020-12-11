@@ -132,7 +132,7 @@ if __name__ == '__main__':
 			for entailed_set_id in entailed_sets:
 				qa_entailed_set_counts[entailed_set_id] += 1
 				# qa_entailed_set_scores[entailed_set_id] = ratio ** (2.0 * qa_entailed_set_counts[entailed_set_id])
-				qa_entailed_set_scores[entailed_set_id] = np.exp(qa_entailed_set_counts[entailed_set_id])
+				qa_entailed_set_scores[entailed_set_id] = np.exp(-qa_entailed_set_counts[entailed_set_id])
 			seen_entailed_sets = seen_entailed_sets.union(entailed_sets)
 
 		print(f'{question_id}: #top_100_avg_set_counts={np.mean(top_100_set_counts):.2f}')
