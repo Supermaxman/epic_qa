@@ -256,14 +256,17 @@ def get_ideal_ranking(question: JudgedQuestion,
 	return max(rankings, key=operator.attrgetter('score'))
 
 
-def get_ranking(question_id, question_answers, entailed_sets_text):
+def get_ranking(question_id, question_answers, entailed_sets_text, top_seen_answers):
 	question = JudgedQuestion(question_id)
 	question.nuggets = {
 		nugget_id: nugget_text for (nugget_id, nugget_text) in entailed_sets_text.items()
 	}
 	answer_list = []
 	for answer in question_answers:
-		a = Answer.from_string(answer['answer_id'])
+		answer_id = answer['answer_id']
+		if answer_id not in top_seen_answers:
+			continue
+		a = Answer.from_string(answer_id)
 		sentence_id = a.start_sent_id
 		answer_list.append(a)
 		context_id = JudgedSentence.get_context_id(sentence_id)
