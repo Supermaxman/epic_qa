@@ -28,6 +28,8 @@ export EXP_ANSWER_BATCH_SIZE=16
 export RQE_BATCH_SIZE=128
 
 export GPUS=0
+export TPU_IP_ADDRESS=10.155.6.34
+export XRT_TPU_CONFIG="tpu_worker;0;$TPU_IP_ADDRESS:8470"
 
 # flags to avoid re-running certain components
 # index & search flags
