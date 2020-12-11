@@ -105,8 +105,9 @@ def create_components(question_entail_set_pairs, answer_sets, threshold):
 			for entailed_set_id in a_sets:
 				if entailed_set_id in unconnected_sets:
 					num_unconnected += 1
-				new_entailed_set_id = merged_mapping[entailed_set_id]
-				new_entailed_sets.add(new_entailed_set_id)
+				else:
+					new_entailed_set_id = merged_mapping[entailed_set_id]
+					new_entailed_sets.add(new_entailed_set_id)
 			if num_unconnected != len(a_sets):
 				connected_answers += 1
 			merged_entailed_set_answer_lookup[answer_id] = sorted(list(new_entailed_sets))
