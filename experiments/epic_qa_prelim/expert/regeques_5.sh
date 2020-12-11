@@ -18,9 +18,9 @@ export DATASET=expert
 export SEARCH_TOP_K=500
 export NEGATIVE_SAMPLES=800
 export RGQE_TOP_K=100
-export RGQE_SELF_THRESHOLD=0.8
-export RGQE_TOP_C_THRESHOLD=0.8
-export RGQE_ALL_THRESHOLD=0.8
+export RGQE_SELF_THRESHOLD=0.9
+export RGQE_TOP_C_THRESHOLD=0.9
+export RGQE_ALL_THRESHOLD=0.9
 export RQE_TOP_THRESHOLD=0.01
 export RQE_ALL_THRESHOLD=0.1
 export RGQE_RATIO=0.8
@@ -47,9 +47,9 @@ export EVAL_RERANK=false
 export RUN_EXPAND_ANSWERS=false
 
 # RGQE pairwise self-entailment to find entailed sets for each answer
-export RUN_RGQE_SELF=false
+export RUN_RGQE_SELF=true
 # RGQE query-generated question entailment to filter poor generated questions
-export RUN_RGQE_QUESTION=false
+export RUN_RGQE_QUESTION=true
 # RGQE full set-pairwise entailment for top_k answers for each query
 export RUN_RGQE_TOP=true
 # RGQE top_k set entailment to all set entailment to find entailed sets for all answers
