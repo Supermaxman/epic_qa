@@ -107,7 +107,7 @@ if __name__ == '__main__':
 				# answer['ndns_score'] = 0.0
 				answer['ndns_score'] = answer['score']
 			else:
-				answer['score'] = answer['score'] + answer['ndns_score']
+				answer['score'] = answer['score'] * (1.0 + answer['ndns_score'])
 		query = queries[question_id]
 		results[question_id] = {
 			'query': query,
