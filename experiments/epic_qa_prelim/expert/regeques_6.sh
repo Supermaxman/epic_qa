@@ -358,7 +358,7 @@ if [[ ${RUN_RGQE_RERANK} = true ]]; then
       --queries_path ${QUERY_PATH} \
       --output_path ${RGQE_ALL_RERANK_FILE_PATH} \
       --threshold ${RGQE_ALL_THRESHOLD} \
-      --ratio ${RGQE_RATIO} \
+      --ratio 0.9 \
     ; \
     python rgqe/format_eval.py \
       --results_path ${RGQE_ALL_RERANK_FILE_PATH} \

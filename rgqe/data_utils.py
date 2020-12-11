@@ -156,9 +156,11 @@ class RGQETopPredictionDataset(Dataset):
 		self.top_k = top_k
 
 		with open(input_path) as f:
+			# [answer_id] -> entailed sets
 			self.answers = json.load(f)
 
 		with open(qe_path) as f:
+			# [question_id][answer_id] -> (entailed set, entailed_prob)
 			self.qa_set_entailments = json.load(f)
 
 		question_answer_count = defaultdict(int)
