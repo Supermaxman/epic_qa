@@ -26,7 +26,7 @@ export EXP_ANSWER_TOP_K=20
 export EXP_ANSWER_NUM_SAMPLES=20
 export EXP_ANSWER_BATCH_SIZE=16
 
-export GPUS=0
+export GPUS=4,5,6,7
 
 # flags to avoid re-running certain components
 # index & search flags
@@ -42,11 +42,11 @@ export RUN_RERANK=false
 export RUN_EXPAND_ANSWERS=false
 
 # RGQE pairwise self-entailment to find entailed sets for each answer
-export RUN_RGQE_SELF=false
+export RUN_RGQE_SELF=true
 # RGQE query-generated question entailment to filter poor generated questions
-export RUN_RGQE_QUESTION=false
+export RUN_RGQE_QUESTION=true
 # RGQE full set-pairwise entailment for top_k answers for each query
-export RUN_RGQE_TOP=false
+export RUN_RGQE_TOP=true
 # RGQE top_k set entailment to all set entailment to find entailed sets for all answers
 export RUN_RGQE_ALL=true
 # RGQE rerank answers based on generated question entailment sets
