@@ -116,7 +116,7 @@ if __name__ == '__main__':
 			novel_count = len(novel_sets)
 			new_score = 0.0
 			# set_score = rerank_score / max(num_entailed, 1)
-			set_score = rerank_score / num_entailed
+			set_score = rerank_score / max(num_entailed, 1)
 			for entailed_set_id in entailed_sets:
 				novelty_score = qa_entailed_set_scores[entailed_set_id]
 				if rerank_score > 0:
