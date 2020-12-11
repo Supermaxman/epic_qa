@@ -257,10 +257,10 @@ def get_ideal_ranking(question: JudgedQuestion,
 	return max(rankings, key=operator.attrgetter('score'))
 
 
-def get_ranking(question_id, question_answers, top_answer_sets):
+def get_ranking(question_id, question_answers, entailed_sets_text):
 	question = JudgedQuestion(question_id)
 	question.nuggets = {
-		nugget['entailed_set_id']: nugget['entailed_set'][0]['entailed_set_text'] for nugget in top_answer_sets
+		nugget_id: nugget_text for (nugget_id, nugget_text) in entailed_sets_text.items()
 	}
 	answer_list = []
 	for answer in question_answers:
