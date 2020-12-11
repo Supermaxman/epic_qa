@@ -25,12 +25,13 @@ export RGQE_ALL_THRESHOLD=0.8
 export RQE_TOP_THRESHOLD=0.01
 export RQE_ALL_THRESHOLD=0.1
 export RGQE_RATIO=0.9
-export MAX_RQE_SEQ_LEN=64
-export RGQE_BATCH_SIZE=128
-export EXP_ANSWER_TOP_K=10
+export RGQE_SEQ_LEN=128
+export RGQE_BATCH_SIZE=64
+export EXP_ANSWER_TOP_K=50
 export EXP_ANSWER_NUM_SAMPLES=20
 export EXP_ANSWER_BATCH_SIZE=16
 export EXP_ANSWER_SEQ_LEN=96
+export EXP_ANSWER_OUT_SEQ_LEN=64
 
 export RERANK_SEQ_LEN=96
 export RERANK_BATCH_SIZE=32
@@ -278,6 +279,7 @@ if [[ ${RUN_EXPAND_ANSWERS} = true ]]; then
      --num_samples ${EXP_ANSWER_NUM_SAMPLES} \
      --batch_size ${EXP_ANSWER_BATCH_SIZE} \
      --max_seq_len ${EXP_ANSWER_SEQ_LEN} \
+     --max_output_length ${EXP_ANSWER_OUT_SEQ_LEN} \
      --run_top_k ${RGQE_TOP_K} \
     ; \
     python expand_query/format_expand.py \
@@ -292,7 +294,7 @@ if [[ ${RUN_RGQE_SELF} = true ]]; then
       --input_path ${EXP_ANSWER_FILE_PATH} \
       --output_path ${RGQE_SELF_PATH} \
       --model_name ${RQE_MODEL_NAME} \
-      --max_seq_len ${MAX_RQE_SEQ_LEN} \
+      --max_seq_len ${RGQE_SEQ_LEN} \
       --batch_size ${RGQE_BATCH_SIZE} \
       --mode self \
     ; \
@@ -317,7 +319,7 @@ if [[ ${RUN_RGQE_QUESTION} = true ]]; then
       --query_path ${QUERY_PATH} \
       --label_path ${LABEL_PATH} \
       --model_name ${RQE_MODEL_NAME} \
-      --max_seq_len ${MAX_RQE_SEQ_LEN} \
+      --max_seq_len ${RGQE_SEQ_LEN} \
       --batch_size ${RGQE_BATCH_SIZE} \
       --top_k ${RGQE_TOP_K} \
       --mode question \
@@ -336,7 +338,7 @@ if [[ ${RUN_RGQE_TOP} = true ]]; then
       --qe_path ${RGQE_QUESTION_FILE_PATH} \
       --search_path ${RERANK_RUN_PATH} \
       --model_name ${RQE_MODEL_NAME} \
-      --max_seq_len ${MAX_RQE_SEQ_LEN} \
+      --max_seq_len ${RGQE_SEQ_LEN} \
       --batch_size ${RGQE_BATCH_SIZE} \
       --mode top \
       --top_k ${RGQE_TOP_K} \
