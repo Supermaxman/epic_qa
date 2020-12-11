@@ -19,8 +19,8 @@ export DATASET=expert
 export SEARCH_TOP_K=500
 export NEGATIVE_SAMPLES=800
 export RGQE_TOP_K=100
-export RGQE_SELF_THRESHOLD=0.5
-export RGQE_TOP_C_THRESHOLD=0.5
+export RGQE_SELF_THRESHOLD=0.6
+export RGQE_TOP_C_THRESHOLD=0.6
 export RQE_TOP_THRESHOLD=0.01
 export RGQE_RATIO=0.9
 export RGQE_SEQ_LEN=96
@@ -281,18 +281,18 @@ fi
 if [[ ${RUN_RGQE_SELF} = true ]]; then
     echo "Running self RGQE..."
     # self entailment
-    python rgqe/rgqe.py \
-      --input_path ${EXP_ANSWER_FILE_PATH} \
-      --output_path ${RGQE_SELF_PATH} \
-      --model_name ${RQE_MODEL_NAME} \
-      --max_seq_len ${RGQE_SEQ_LEN} \
-      --batch_size ${RGQE_BATCH_SIZE} \
-      --mode self \
-    ; \
-    python rgqe/format_rgqe_self.py \
-      --input_path ${RGQE_SELF_PATH} \
-      --output_path ${RGQE_SELF_FILE_PATH} \
-    ; \
+#    python rgqe/rgqe.py \
+#      --input_path ${EXP_ANSWER_FILE_PATH} \
+#      --output_path ${RGQE_SELF_PATH} \
+#      --model_name ${RQE_MODEL_NAME} \
+#      --max_seq_len ${RGQE_SEQ_LEN} \
+#      --batch_size ${RGQE_BATCH_SIZE} \
+#      --mode self \
+#    ; \
+#    python rgqe/format_rgqe_self.py \
+#      --input_path ${RGQE_SELF_PATH} \
+#      --output_path ${RGQE_SELF_FILE_PATH} \
+#    ; \
     python rgqe/rgqe_self_components.py \
       --input_path ${RGQE_SELF_FILE_PATH} \
       --expand_path ${EXP_ANSWER_FILE_PATH} \
