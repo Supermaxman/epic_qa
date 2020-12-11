@@ -130,7 +130,7 @@ if __name__ == '__main__':
 				new_score = rerank_score
 				for novel_set_id in novel_sets:
 					novel_score = qa_entailed_set_scores[novel_set_id]
-					new_score = new_score + novel_score
+					# new_score = new_score + novel_score
 
 			if answer['rank'] <= 100:
 				top_100_set_counts.append(num_entailed)
