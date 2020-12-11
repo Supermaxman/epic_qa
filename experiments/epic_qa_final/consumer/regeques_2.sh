@@ -44,9 +44,9 @@ export RUN_EXPAND_ANSWERS=false
 # RGQE pairwise self-entailment to find entailed sets for each answer
 export RUN_RGQE_SELF=false
 # RGQE query-generated question entailment to filter poor generated questions
-export RUN_RGQE_QUESTION=true
+export RUN_RGQE_QUESTION=false
 # RGQE full set-pairwise entailment for top_k answers for each query
-export RUN_RGQE_TOP=true
+export RUN_RGQE_TOP=false
 # RGQE top_k set entailment to all set entailment to find entailed sets for all answers
 export RUN_RGQE_ALL=true
 # RGQE rerank answers based on generated question entailment sets
@@ -294,6 +294,7 @@ if [[ ${RUN_RGQE_ALL} = true ]]; then
       --qe_path ${RGQE_QUESTION_FILE_PATH} \
       --model_name ${RQE_MODEL_NAME} \
       --max_seq_len ${MAX_RQE_SEQ_LEN} \
+      --threshold ${RQE_THRESHOLD} \
       --gpus ${GPUS} \
       --mode all \
     ; \

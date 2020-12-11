@@ -46,7 +46,11 @@ if __name__ == '__main__':
 	rerank_scores = answers['rerank_scores']
 	answer_text_lookup = answers['answer_text_lookup']
 	for question_id, question_answers in rerank_scores.items():
-		answer_sets = question_answer_sets[question_id]
+		if question_id not in question_answer_sets:
+			answer_sets = []
+			print(f'WARNING: {question_id} has no sets outside top 100')
+		else:
+			answer_sets = question_answer_sets[question_id]
 		rgqe_top_cc = rgqe_top_q_cc[question_id]
 		top_answer_sets = rgqe_top_cc['answer_sets']
 		entailed_sets_text = {
