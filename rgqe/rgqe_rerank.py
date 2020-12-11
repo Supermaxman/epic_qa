@@ -100,9 +100,10 @@ if __name__ == '__main__':
 			# TODO two ideas:
 			# TODO 1. use bert score if gain is 0, not arbitrary ranking
 			#
-			if ndns_gain == 1:
-				max_non_top_score = max(max_non_top_score, answer['score'])
-				num_top_zero += 1
+			print(ndns_gain)
+			# if ndns_gain == 1:
+			# 	max_non_top_score = max(max_non_top_score, answer['score'])
+			# 	num_top_zero += 1
 			# goes from 1.0 to 0.0
 			# add max non top answer score to make sure ndns is ranked higher
 			answer['ndns_score'] = (1.0 - (ndns_rank / len(ranking.answers))) + max_non_top_score
