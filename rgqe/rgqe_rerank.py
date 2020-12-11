@@ -119,9 +119,9 @@ if __name__ == '__main__':
 			for entailed_set_id in entailed_sets:
 				novelty_score = qa_entailed_set_scores[entailed_set_id]
 				if rerank_score > 0:
-					new_score += (2.0 * novelty_score) * set_score
+					new_score += novelty_score * set_score
 				else:
-					new_score += (2.0 - (1.0 - novelty_score)) * set_score
+					new_score += (1.0 - (1.0 - novelty_score)) * set_score
 
 			if answer['rank'] <= 100:
 				top_100_set_counts.append(num_entailed)
@@ -131,7 +131,7 @@ if __name__ == '__main__':
 			answer['score'] = new_score
 			for entailed_set_id in entailed_sets:
 				qa_entailed_set_counts[entailed_set_id] += 1
-				qa_entailed_set_scores[entailed_set_id] = ratio ** qa_entailed_set_counts[entailed_set_id]
+				qa_entailed_set_scores[entailed_set_id] = ratio ** (qa_entailed_set_counts[entailed_set_id]/q_set_counts[entailed_set_id])
 			seen_entailed_sets = seen_entailed_sets.union(entailed_sets)
 
 		print(f'{question_id}: #top_100_avg_set_counts={np.mean(top_100_set_counts):.2f}')
