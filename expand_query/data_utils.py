@@ -18,17 +18,22 @@ def parse_id(doc_pass_sent_id):
 
 
 class AnswerDataset(Dataset):
-	def __init__(self, collection_path, input_path):
+	def __init__(self, collection_path, input_path, run_top_k):
 		self.collection_path = collection_path
 		self.input_path = input_path
+		self.run_top_k = run_top_k
 		if self.input_path is not None:
 			self.doc_ids = defaultdict(lambda: defaultdict(list))
 			self.seen_answers = set()
+			self.question_counts = defaultdict(int)
 			with open(self.input_path, 'r') as f:
 				for line in f:
 					line = line.strip()
 					if line:
-						q_id, _, answer_id, rank, score, run_name = line.split()
+						question_id, _, answer_id, rank, score, run_name = line.split()
+						if self.question_counts[question_id] > self.run_top_k:
+							continue
+						self.question_counts[question_id] += 1
 						if answer_id in self.seen_answers:
 							continue
 						doc_id, pass_id, sent_start_id, sent_end_id = parse_id(answer_id)

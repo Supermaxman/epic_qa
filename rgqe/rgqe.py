@@ -24,7 +24,7 @@ if __name__ == '__main__':
 	parser.add_argument('-cd', '--torch_cache_dir', default=None)
 	parser.add_argument('-tpu', '--use_tpus', default=False, action='store_true')
 	parser.add_argument('-m', '--mode', required=True, help='all/self/top')
-	parser.add_argument('-k', '--top_k', default=100, type=int)
+	parser.add_argument('-k', '--top_k', default=10000, type=int)
 	parser.add_argument('-sd', '--save_directory', default='models')
 	parser.add_argument('-sp', '--search_path', default=None)
 	parser.add_argument('-qp', '--query_path', default=None)
@@ -130,7 +130,6 @@ if __name__ == '__main__':
 					queries.append(query)
 		eval_dataset = RGQEQuestionPredictionDataset(
 			input_path,
-			search_path,
 			queries
 		)
 	else:

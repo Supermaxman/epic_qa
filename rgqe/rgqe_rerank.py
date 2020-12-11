@@ -9,7 +9,7 @@ import numpy as np
 if __name__ == '__main__':
 
 	parser = argparse.ArgumentParser()
-	parser.add_argument('-i', '--input_path', required=True)
+	parser.add_argument('-l', '--all_path', default=None)
 	parser.add_argument('-c', '--cc_path', required=True)
 	parser.add_argument('-a', '--answers_path', required=True)
 	parser.add_argument('-q', '--queries_path', required=True)
@@ -19,17 +19,19 @@ if __name__ == '__main__':
 
 	args = parser.parse_args()
 
-	input_path = args.input_path
+	all_path = args.all_path
 	cc_path = args.cc_path
 	answers_path = args.answers_path
 	queries_path = args.queries_path
 	output_path = args.output_path
 	threshold = args.threshold
 	ratio = args.ratio
-
-	with open(input_path, 'r') as f:
-		# [question_id][answer_id] -> entailed sets
-		question_answer_sets = json.load(f)
+	if all_path is not None:
+		with open(all_path, 'r') as f:
+			# [question_id][answer_id] -> entailed sets
+			question_answer_sets = json.load(f)
+	else:
+		question_answer_sets = {}
 
 	with open(queries_path, 'r') as f:
 		queries = json.load(f)
@@ -46,11 +48,12 @@ if __name__ == '__main__':
 	rerank_scores = answers['rerank_scores']
 	answer_text_lookup = answers['answer_text_lookup']
 	for question_id, question_answers in rerank_scores.items():
-		if question_id not in question_answer_sets:
-			answer_sets = []
-			print(f'WARNING: {question_id} has no sets outside top 100')
-		else:
-			answer_sets = question_answer_sets[question_id]
+		if all_path is not None:
+			if question_id not in question_answer_sets:
+				answer_sets = {}
+				print(f'WARNING: {question_id} has no sets outside top 100')
+			else:
+				answer_sets = question_answer_sets[question_id]
 		rgqe_top_cc = rgqe_top_q_cc[question_id]
 		top_answer_sets = rgqe_top_cc['answer_sets']
 		entailed_sets_text = {
@@ -64,11 +67,12 @@ if __name__ == '__main__':
 				qa_sets = top_answer_sets[answer_id]
 			else:
 				qa_sets = set()
-				# if answer_id in answer_sets:
-				# 	for entailed_set_a_id, entailed_set_b_id, entail_prob in answer_sets[answer_id]:
-				# 		if entail_prob < threshold:
-				# 			continue
-				# 		qa_sets.add(entailed_set_b_id)
+				if all_path is not None:
+					if answer_id in answer_sets:
+						for entailed_set_a_id, entailed_set_b_id, entail_prob in answer_sets[answer_id]:
+							if entail_prob < threshold:
+								continue
+							qa_sets.add(entailed_set_b_id)
 			qa_sets = list(qa_sets)
 			if len(qa_sets) > 0:
 				num_answers_with_set += 1

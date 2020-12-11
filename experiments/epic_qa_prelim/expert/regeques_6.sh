@@ -49,16 +49,16 @@ export RUN_RERANK=false
 export EVAL_RERANK=false
 
 # rerank answer query expansion flags
-export RUN_EXPAND_ANSWERS=false
+export RUN_EXPAND_ANSWERS=true
 
 # RGQE pairwise self-entailment to find entailed sets for each answer
-export RUN_RGQE_SELF=false
+export RUN_RGQE_SELF=true
 # RGQE query-generated question entailment to filter poor generated questions
-export RUN_RGQE_QUESTION=false
+export RUN_RGQE_QUESTION=true
 # RGQE full set-pairwise entailment for top_k answers for each query
-export RUN_RGQE_TOP=false
+export RUN_RGQE_TOP=true
 # RGQE top_k set entailment to all set entailment to find entailed sets for all answers
-export RUN_RGQE_ALL=false
+export RUN_RGQE_ALL=true
 # RGQE rerank answers based on generated question entailment sets
 export RUN_RGQE_RERANK=true
 # RGQE run evaluation script on validation set
@@ -277,6 +277,7 @@ if [[ ${RUN_EXPAND_ANSWERS} = true ]]; then
      --num_samples ${EXP_ANSWER_NUM_SAMPLES} \
      --batch_size ${EXP_ANSWER_BATCH_SIZE} \
      --max_seq_len ${EXP_ANSWER_SEQ_LEN} \
+     --run_top_k ${RGQE_TOP_K} \
     ; \
     python expand_query/format_expand.py \
       --input_path ${EXP_ANSWER_PATH} \
@@ -315,6 +316,7 @@ if [[ ${RUN_RGQE_QUESTION} = true ]]; then
       --label_path ${LABEL_PATH} \
       --model_name ${RQE_MODEL_NAME} \
       --max_seq_len ${MAX_RQE_SEQ_LEN} \
+      --top_k ${RGQE_TOP_K} \
       --mode question \
     ; \
     python rgqe/format_rgqe_question.py \
@@ -347,28 +349,10 @@ if [[ ${RUN_RGQE_TOP} = true ]]; then
       --threshold ${RGQE_TOP_C_THRESHOLD}
 fi
 
-if [[ ${RUN_RGQE_ALL} = true ]]; then
-    echo "Running all RGQE..."
-    # all entailment against sets
-    python rgqe/rgqe.py \
-      --input_path ${RGQE_TOP_CC_FILE_PATH} \
-      --output_path ${RGQE_ALL_PATH} \
-      --cc_path ${RGQE_CC_FILE_PATH} \
-      --qe_path ${RGQE_QUESTION_FILE_PATH} \
-      --model_name ${RQE_MODEL_NAME} \
-      --max_seq_len ${MAX_RQE_SEQ_LEN} \
-      --mode all \
-      --threshold ${RQE_ALL_THRESHOLD} \
-    ; \
-    python rgqe/format_rgqe_all.py \
-      --input_path ${RGQE_ALL_PATH} \
-      --output_path ${RGQE_ALL_FILE_PATH}
-fi
 
 if [[ ${RUN_RGQE_RERANK} = true ]]; then
     echo "Running RGQE rerank..."
     python rgqe/rgqe_rerank.py \
-      --input_path ${RGQE_ALL_FILE_PATH} \
       --cc_path ${RGQE_TOP_CC_FILE_PATH} \
       --answers_path ${ANSWERS_PATH} \
       --queries_path ${QUERY_PATH} \

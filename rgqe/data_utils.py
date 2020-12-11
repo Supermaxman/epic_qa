@@ -61,77 +61,11 @@ def make_id(sample):
 	return f'{sample["question_id"]}|{sample["id"]}|{sample["sample_id"]}'
 
 
-class RGQEAllPredictionDataset(Dataset):
-	def __init__(self, input_path, qe_path, cc_path, threshold):
-		self.input_path = input_path
-		self.qe_path = qe_path
-		self.cc_path = cc_path
-		self.threshold = threshold
-
-		with open(self.input_path, 'r') as f:
-			self.top_cc = json.load(f)
-
-		with open(self.cc_path, 'r') as f:
-			# [answer_id] -> list of entailed sets
-			self.answer_sets = json.load(f)
-
-		self.q_entailed_sets = defaultdict(lambda: defaultdict(set))
-		with open(self.qe_path, 'r') as f:
-			# [answer_id] -> list of entailed sets
-			qa_set_entailments = json.load(f)
-			for question_id, q_set_entailments in qa_set_entailments.items():
-				for answer_id, a_set_entailments in q_set_entailments.items():
-					for entailed_set_id, entail_prob in a_set_entailments:
-						if entail_prob < threshold:
-							continue
-						self.q_entailed_sets[question_id][answer_id].add(entailed_set_id)
-		self.examples = []
-		for question_id, q_top_cc in self.top_cc.items():
-			# list of entailed_set_id, entailed_set with entailed_set containing samples,
-			# where entailed_set[0]['entailed_set_text'] is representative question
-			entailed_sets = q_top_cc['entailed_sets']
-			# [answer_id] -> merged_entailed_sets for top_k answers
-			top_answer_sets = q_top_cc['answer_sets']
-			num_sets = 0
-			num_possible_sets = 0
-			for answer_id, a_sets in self.answer_sets.items():
-				if answer_id in top_answer_sets:
-					continue
-				for entailed_set_a in a_sets:
-					entailed_set_a_id = entailed_set_a['entailed_set_id']
-					num_possible_sets += 1
-					if entailed_set_a_id not in self.q_entailed_sets[question_id][answer_id]:
-						continue
-					entailed_set_a_text = entailed_set_a['entailed_set'][0]['sample_text']
-					num_sets += 1
-					for entailed_set_b in entailed_sets:
-						entailed_set_b_id = entailed_set_b['entailed_set_id']
-						entailed_set_b_text = entailed_set_b['entailed_set'][0]['entailed_set_text']
-						example = {
-							'question_a_id': f'{question_id}|{answer_id}|{entailed_set_a_id}',
-							'question_b_id': entailed_set_b_id,
-							'question_a_text': entailed_set_a_text,
-							'question_b_text': entailed_set_b_text,
-						}
-						self.examples.append(example)
-			print(f'{question_id}: {len(entailed_sets)} entailed sets with {num_sets} total sets (possible {num_possible_sets})')
-
-	def __len__(self):
-		return len(self.examples)
-
-	def __getitem__(self, idx):
-		if torch.is_tensor(idx):
-			idx = idx.tolist()
-
-		example = self.examples[idx]
-
-		return example
-
-
 class RGQESelfPredictionDataset(Dataset):
 	def __init__(self, input_path):
 		self.input_path = input_path
 		with open(input_path) as f:
+			# [
 			self.answers = json.load(f)
 
 		self.examples = []
@@ -152,6 +86,55 @@ class RGQESelfPredictionDataset(Dataset):
 					'question_b_text': sample_b['sample_text'],
 				}
 				self.examples.append(example)
+
+	def __len__(self):
+		return len(self.examples)
+
+	def __getitem__(self, idx):
+		if torch.is_tensor(idx):
+			idx = idx.tolist()
+
+		example = self.examples[idx]
+
+		return example
+
+
+class RGQEQuestionPredictionDataset(Dataset):
+	def __init__(self, input_path, search_path, queries, top_k):
+		self.input_path = input_path
+		self.search_path = search_path
+		self.top_k = top_k
+		self.queries = {q['question_id']: q for q in queries}
+
+		with open(input_path) as f:
+			self.answers = json.load(f)
+
+		question_answer_count = defaultdict(int)
+		answer_questions = defaultdict(list)
+		with open(self.search_path, 'r') as f:
+			for line in f:
+				line = line.strip()
+				if line:
+					question_id, _, answer_id, rank, score, run_name = line.split()
+					if question_answer_count[question_id] > top_k:
+						continue
+					question_answer_count[question_id] += 1
+					answer_questions[answer_id].append(question_id)
+
+		self.examples = []
+		for answer_id, a_sets in self.answers.items():
+			for question_id in answer_questions[answer_id]:
+				question_text = self.queries[question_id]['question']
+				for entailed_set in a_sets:
+					entailed_set_id = entailed_set['entailed_set_id']
+					entailed_set_sample_text = entailed_set['entailed_set'][0]['sample_text']
+					example = {
+						'question_a_id': f'{answer_id}|{entailed_set_id}',
+						'question_b_id': question_id,
+						'question_a_text': entailed_set_sample_text,
+						'question_b_text': question_text,
+					}
+					self.examples.append(example)
 
 	def __len__(self):
 		return len(self.examples)
@@ -229,39 +212,60 @@ class RGQETopPredictionDataset(Dataset):
 		return example
 
 
-class RGQEQuestionPredictionDataset(Dataset):
-	def __init__(self, input_path, search_path, queries):
+class RGQEAllPredictionDataset(Dataset):
+	def __init__(self, input_path, qe_path, cc_path, threshold):
 		self.input_path = input_path
-		self.search_path = search_path
-		self.queries = {q['question_id']: q for q in queries}
+		self.qe_path = qe_path
+		self.cc_path = cc_path
+		self.threshold = threshold
 
-		with open(input_path) as f:
-			self.answers = json.load(f)
+		with open(self.input_path, 'r') as f:
+			self.top_cc = json.load(f)
 
-		seen_answers = set()
-		with open(self.search_path, 'r') as f:
-			for line in f:
-				line = line.strip()
-				if line:
-					question_id, _, answer_id, rank, score, run_name = line.split()
-					seen_answers.add(answer_id)
+		with open(self.cc_path, 'r') as f:
+			# [answer_id] -> list of entailed sets
+			self.answer_sets = json.load(f)
 
+		self.q_entailed_sets = defaultdict(lambda: defaultdict(set))
+		with open(self.qe_path, 'r') as f:
+			# [answer_id] -> list of entailed sets
+			qa_set_entailments = json.load(f)
+			for question_id, q_set_entailments in qa_set_entailments.items():
+				for answer_id, a_set_entailments in q_set_entailments.items():
+					for entailed_set_id, entail_prob in a_set_entailments:
+						if entail_prob < threshold:
+							continue
+						self.q_entailed_sets[question_id][answer_id].add(entailed_set_id)
 		self.examples = []
-		for answer_id, a_sets in self.answers.items():
-			if answer_id not in seen_answers:
-				continue
-			for entailed_set in a_sets:
-				# TODO filter by which answers for which query
-				entailed_set_id = entailed_set['entailed_set_id']
-				entailed_set_sample_text = entailed_set['entailed_set'][0]['sample_text']
-				for question_id, query in self.queries.items():
-					example = {
-						'question_a_id': f'{answer_id}|{entailed_set_id}',
-						'question_b_id': question_id,
-						'question_a_text': entailed_set_sample_text,
-						'question_b_text': query['question'],
-					}
-					self.examples.append(example)
+		for question_id, q_top_cc in self.top_cc.items():
+			# list of entailed_set_id, entailed_set with entailed_set containing samples,
+			# where entailed_set[0]['entailed_set_text'] is representative question
+			entailed_sets = q_top_cc['entailed_sets']
+			# [answer_id] -> merged_entailed_sets for top_k answers
+			top_answer_sets = q_top_cc['answer_sets']
+			num_sets = 0
+			num_possible_sets = 0
+			for answer_id, a_sets in self.answer_sets.items():
+				if answer_id in top_answer_sets:
+					continue
+				for entailed_set_a in a_sets:
+					entailed_set_a_id = entailed_set_a['entailed_set_id']
+					num_possible_sets += 1
+					if entailed_set_a_id not in self.q_entailed_sets[question_id][answer_id]:
+						continue
+					entailed_set_a_text = entailed_set_a['entailed_set'][0]['sample_text']
+					num_sets += 1
+					for entailed_set_b in entailed_sets:
+						entailed_set_b_id = entailed_set_b['entailed_set_id']
+						entailed_set_b_text = entailed_set_b['entailed_set'][0]['entailed_set_text']
+						example = {
+							'question_a_id': f'{question_id}|{answer_id}|{entailed_set_a_id}',
+							'question_b_id': entailed_set_b_id,
+							'question_a_text': entailed_set_a_text,
+							'question_b_text': entailed_set_b_text,
+						}
+						self.examples.append(example)
+			print(f'{question_id}: {len(entailed_sets)} entailed sets with {num_sets} total sets (possible {num_possible_sets})')
 
 	def __len__(self):
 		return len(self.examples)

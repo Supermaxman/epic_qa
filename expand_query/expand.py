@@ -25,6 +25,7 @@ if __name__ == '__main__':
   parser.add_argument('-cd', '--torch_cache_dir', default=None)
   parser.add_argument('-mo', '--max_output_length', default=32, type=int)
   parser.add_argument('-k', '--top_k', default=10, type=int)
+  parser.add_argument('-rk', '--run_top_k', default=10000, type=int)
   parser.add_argument('-s', '--num_samples', default=10, type=int)
   parser.add_argument('-tpu', '--use_tpus', default=False, action='store_true')
   parser.add_argument('-gpu', '--gpus', default='0')
@@ -35,6 +36,7 @@ if __name__ == '__main__':
   save_directory = args.save_directory
   model_name = args.model_name
   output_path = args.output_path
+  run_top_k = args.run_top_k
   save_directory = os.path.join(save_directory, model_name)
 
   if not os.path.exists(save_directory):
@@ -85,7 +87,8 @@ if __name__ == '__main__':
   logging.info(f'Loading dataset: {collection_path}')
   eval_dataset = AnswerDataset(
     collection_path,
-    input_path
+    input_path,
+    run_top_k
   )
   eval_data_loader = DataLoader(
     eval_dataset,
