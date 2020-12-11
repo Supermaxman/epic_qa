@@ -52,13 +52,13 @@ export EVAL_RERANK=false
 export RUN_EXPAND_ANSWERS=false
 
 # RGQE pairwise self-entailment to find entailed sets for each answer
-export RUN_RGQE_SELF=true
+export RUN_RGQE_SELF=false
 # RGQE query-generated question entailment to filter poor generated questions
-export RUN_RGQE_QUESTION=true
+export RUN_RGQE_QUESTION=false
 # RGQE full set-pairwise entailment for top_k answers for each query
-export RUN_RGQE_TOP=true
+export RUN_RGQE_TOP=false
 # RGQE top_k set entailment to all set entailment to find entailed sets for all answers
-export RUN_RGQE_ALL=true
+export RUN_RGQE_ALL=false
 # RGQE rerank answers based on generated question entailment sets
 export RUN_RGQE_RERANK=true
 # RGQE run evaluation script on validation set
