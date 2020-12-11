@@ -65,7 +65,7 @@ class RGQESelfPredictionDataset(Dataset):
 	def __init__(self, input_path):
 		self.input_path = input_path
 		with open(input_path) as f:
-			# [
+			# [answer_id] -> samples
 			self.answers = json.load(f)
 
 		self.examples = []
