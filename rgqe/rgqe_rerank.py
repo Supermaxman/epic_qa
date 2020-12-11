@@ -98,12 +98,13 @@ if __name__ == '__main__':
 			answer['ndns_gain'] = ndns_scored_answer.gain
 			# goes from 1.0 to 0.0
 			# add max non top answer score to make sure ndns is ranked higher
-			answer['ndns_score'] = (1.0 - ((ndns_rank + 1) / len(ranking.answers))) + max_non_top_score
+			answer['ndns_score'] = (1.0 - (ndns_rank / len(ranking.answers))) #+ max_non_top_score
 			ndns_rank += 1
 		ndns_score_offset = 1.0 - ((ndns_rank + 1) / len(ranking.answers))
 		for answer in question_answers:
 			if 'ndns_score' not in answer:
-				answer['ndns_score'] = answer['score']
+				answer['ndns_score'] = 0.0
+				# answer['ndns_score'] = answer['score']
 			answer['score'] = answer['ndns_score']
 
 	results = {}
