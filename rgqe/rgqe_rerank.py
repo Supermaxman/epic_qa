@@ -132,7 +132,7 @@ if __name__ == '__main__':
 				if 'ndns_score' in answer:
 					ndns_score = answer['ndns_score']
 
-				new_score = rerank_score + ndns_score
+				new_score = rerank_score #+ ndns_score
 			if answer['rank'] <= 100:
 				top_100_set_counts.append(num_entailed)
 			else:
