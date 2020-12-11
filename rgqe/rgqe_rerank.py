@@ -103,7 +103,6 @@ if __name__ == '__main__':
 		}
 
 		score_factor = 0.1
-
 		for answer in question_answers:
 			answer_id = answer['answer_id']
 			text = answer['text']
@@ -117,18 +116,8 @@ if __name__ == '__main__':
 			novelty_ratio = 1.0 - (num_overlap / max(num_entailed, 1))
 			novel_sets = entailed_sets.difference(overlap_sets)
 			novel_count = len(novel_sets)
-			# TODO calculate rarity of sets
-			# if novel_count == 0:
-			# 	# if positive score make less positive by %ratio ^ (num_entailed + 1)
-			# 	if rerank_score > 0:
-			# 		new_score = (ratio**(num_overlap + 1)) * rerank_score
-			# 	# if negative score make more negative by %(1.0 + (1.0 - ratio) ^ (num_entailed + 1)
-			# 	else:
-			# 		new_score = ((1.0+(1.0 - ratio))**(num_overlap + 1)) * rerank_score
-			# 	num_modified += 1
-			# else:
 			new_score = 0.0
-			set_fraction = rerank_score / max(num_entailed, 1)
+			set_fraction = rerank_score / max(float(num_entailed), (1.0/ratio))
 			for novel_set_id in novel_sets:
 				novel_score = qa_entailed_set_scores[novel_set_id]
 				new_score += novel_score * set_fraction
