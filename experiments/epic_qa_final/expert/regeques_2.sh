@@ -27,9 +27,9 @@ export EXP_ANSWER_NUM_SAMPLES=20
 export EXP_ANSWER_BATCH_SIZE=16
 export RQE_BATCH_SIZE=64
 
-export GPUS=0
-export TPU_IP_ADDRESS=10.155.6.34
-export XRT_TPU_CONFIG="tpu_worker;0;$TPU_IP_ADDRESS:8470"
+export GPUS=4,5,6,7
+#export TPU_IP_ADDRESS=10.155.6.34
+#export XRT_TPU_CONFIG="tpu_worker;0;$TPU_IP_ADDRESS:8470"
 
 # flags to avoid re-running certain components
 # index & search flags
@@ -231,7 +231,6 @@ if [[ ${RUN_RGQE_SELF} = true ]]; then
       --max_seq_len ${MAX_RQE_SEQ_LEN} \
       --batch_size ${RQE_BATCH_SIZE} \
       --gpus ${GPUS} \
-      --use_tpus \
       --mode self \
     ; \
     python rgqe/format_rgqe_self.py \
@@ -257,7 +256,6 @@ if [[ ${RUN_RGQE_QUESTION} = true ]]; then
       --max_seq_len ${MAX_RQE_SEQ_LEN} \
       --batch_size ${RQE_BATCH_SIZE} \
       --gpus ${GPUS} \
-      --use_tpus \
       --mode question \
     ; \
     python rgqe/format_rgqe_question.py \
@@ -279,7 +277,6 @@ if [[ ${RUN_RGQE_TOP} = true ]]; then
       --mode top \
       --top_k ${RGQE_TOP_K} \
       --gpus ${GPUS} \
-      --use_tpus \
       --threshold ${RQE_THRESHOLD} \
     ; \
     python rgqe/format_rgqe_top.py \
@@ -306,7 +303,6 @@ if [[ ${RUN_RGQE_ALL} = true ]]; then
       --batch_size ${RQE_BATCH_SIZE} \
       --threshold ${RQE_THRESHOLD} \
       --gpus ${GPUS} \
-      --use_tpus \
       --mode all \
     ; \
     python rgqe/format_rgqe_all.py \
