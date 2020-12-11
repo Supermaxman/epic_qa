@@ -128,11 +128,10 @@ if __name__ == '__main__':
 					new_score = ((1.0 + (1.0 - ratio)) ** (num_overlapped + 1)) * rerank_score
 				num_modified += 1
 			else:
-				ndns_score = 0.0
+				ndns_score = 1.0
 				if 'ndns_score' in answer:
 					ndns_score = answer['ndns_score']
-					print(ndns_score)
-				new_score = rerank_score + ndns_score
+				new_score = ndns_score * rerank_score
 			if answer['rank'] <= 100:
 				top_100_set_counts.append(num_entailed)
 			else:
