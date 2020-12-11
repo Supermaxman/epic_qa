@@ -97,7 +97,7 @@ if __name__ == '__main__':
 			for idx, ndns_scored_answer in enumerate(ranking.answers):
 				a_answer = ndns_scored_answer.answer
 				answer_id = f'{a_answer.start_sent_id}:{a_answer.end_sent_id}'
-				top_seen_answers.remove(answer_id)
+				top_seen_set_answers.remove(answer_id)
 				answer = answer_lookup[answer_id]
 				ndns_gain = ndns_scored_answer.gain
 				answer['ndns_gain'] = ndns_gain
@@ -110,7 +110,7 @@ if __name__ == '__main__':
 				# 	num_top_zero += 1
 				# goes from 1.0 to 0.0
 				# add max non top answer score to make sure ndns is ranked higher
-				answer['ndns_score'] = (1.0 - (ndns_rank / len(top_seen_answers))) + max_non_top_score
+				answer['ndns_score'] = (1.0 - (ndns_rank / len(top_seen_set_answers))) + max_non_top_score
 				ndns_rank += 1
 
 		print(f'{question_id}: {num_answers_with_set / len(question_answers):.2f}% '
