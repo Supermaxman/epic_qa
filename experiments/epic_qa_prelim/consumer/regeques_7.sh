@@ -2,9 +2,7 @@
 
 # run names
 export EXP_DATA_RUN_NAME=HLTRI_REGEQUES_EXP_DATA_1
-# 1 is expanded, 2 is not expanded
-#export INDEX_NAME=HLTRI_REGEQUES_EXP_INDEX_1
-export INDEX_NAME=HLTRI_REGEQUES_EXP_INDEX_2
+export INDEX_NAME=HLTRI_REGEQUES_EXP_INDEX_1
 export SEARCH_RUN_NAME=HLTRI_REGEQUES_SEARCH_1
 export RERANK_RUN_NAME=HLTRI_REGEQUES_RERANK_1
 export RERANK_RUN_MODEL_NAME=HLTRI_REGEQUES_RERANK_1
@@ -13,7 +11,7 @@ export RQE_RUN_NAME=HLTRI_REGEQUES_SEP_TOP_K_2
 
 # collection and task names
 export COLLECTION=epic_qa_prelim
-export DATASET=expert
+export DATASET=consumer
 
 # major hyper-parameters for system
 export SEARCH_TOP_K=500
@@ -51,7 +49,7 @@ export EVAL_RERANK=false
 export RUN_EXPAND_ANSWERS=false
 
 # RGQE pairwise self-entailment to find entailed sets for each answer
-export RUN_RGQE_SELF=false
+export RUN_RGQE_SELF=true
 # RGQE query-generated question entailment to filter poor generated questions
 export RUN_RGQE_QUESTION=true
 # RGQE full set-pairwise entailment for top_k answers for each query
