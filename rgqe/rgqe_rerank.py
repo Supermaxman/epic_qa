@@ -98,9 +98,11 @@ if __name__ == '__main__':
 		}
 		qa_entailed_set_counts = defaultdict(int)
 		qa_entailed_set_scores = {
-			entailed_set_id: np.log(answer_count / 1.0)
-			for (entailed_set_id, _) in q_set_counts.items()
+			entailed_set_id: 1.0
+			for (entailed_set_id, entailed_set_df) in q_set_counts.items()
 		}
+
+		score_factor = 0.1
 
 		for answer in question_answers:
 			answer_id = answer['answer_id']
@@ -127,7 +129,7 @@ if __name__ == '__main__':
 			else:
 				new_score = rerank_score
 				for novel_set_id in novel_sets:
-					novel_score = q_set_score[novel_set_id]
+					novel_score = qa_entailed_set_scores[novel_set_id]
 					new_score = new_score + novel_score
 
 			if answer['rank'] <= 100:
@@ -138,7 +140,7 @@ if __name__ == '__main__':
 			answer['score'] = new_score
 			for entailed_set_id in entailed_sets:
 				qa_entailed_set_counts[entailed_set_id] += 1
-				qa_entailed_set_scores[entailed_set_id] = np.log(answer_count / (1.0 + qa_entailed_set_counts[entailed_set_id]))
+				qa_entailed_set_scores[entailed_set_id] = score_factor ** qa_entailed_set_counts[entailed_set_id]
 			seen_entailed_sets = seen_entailed_sets.union(entailed_sets)
 
 		print(f'{question_id}: #modified={num_modified}')
