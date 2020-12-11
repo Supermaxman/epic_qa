@@ -119,7 +119,7 @@ if __name__ == '__main__':
 			for entailed_set_id in entailed_sets:
 				novelty_score = qa_entailed_set_scores[entailed_set_id]
 				if rerank_score > 0:
-					new_score += novelty_score * set_score
+					new_score += (2.0 * novelty_score) * set_score
 				else:
 					new_score += (2.0 - (1.0 - novelty_score)) * set_score
 
