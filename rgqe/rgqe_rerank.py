@@ -133,7 +133,8 @@ if __name__ == '__main__':
 					novel_score = qa_entailed_set_scores[novel_set_id]
 					new_score += novel_score * set_fraction
 				for overlap_set_id in overlap_sets:
-					new_score += set_fraction
+					novel_score = qa_entailed_set_scores[overlap_set_id]
+					new_score += novel_score * set_fraction
 
 			if answer['rank'] <= 100:
 				top_100_set_counts.append(num_entailed)
