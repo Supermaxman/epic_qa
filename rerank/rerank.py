@@ -69,10 +69,6 @@ if __name__ == '__main__':
 
 	is_distributed = len(gpus) > 1
 	use_tpus = args.use_tpus
-	if not use_tpus:
-		os.environ['CUDA_DEVICE_ORDER'] = 'PCI_BUS_ID'
-		os.environ['CUDA_VISIBLE_DEVICES'] = args.gpus
-
 	precision = 16 if use_tpus else 32
 	# precision = 32
 	tpu_cores = 8
