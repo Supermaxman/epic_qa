@@ -101,10 +101,10 @@ if __name__ == '__main__':
 			if novel_count == 0:
 				# if positive score make less positive by %ratio ^ (num_entailed + 1)
 				if rerank_score > 0:
-					new_score = (ratio**(num_overlap + 1)) * rerank_score
+					new_score = (ratio**(num_entailed + 1)) * rerank_score
 				# if negative score make more negative by %(1.0 + (1.0 - ratio) ^ (num_entailed + 1)
 				else:
-					new_score = ((1.0+(1.0 - ratio))**(num_overlap + 1)) * rerank_score
+					new_score = ((1.0+(1.0 - ratio))**(num_entailed + 1)) * rerank_score
 				num_modified += 1
 			else:
 				new_score = rerank_score
