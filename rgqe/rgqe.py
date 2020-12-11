@@ -130,7 +130,9 @@ if __name__ == '__main__':
 					queries.append(query)
 		eval_dataset = RGQEQuestionPredictionDataset(
 			input_path,
-			queries
+			search_path,
+			queries,
+			top_k,
 		)
 	else:
 		raise ValueError(f'Unknown mode: {mode}')
