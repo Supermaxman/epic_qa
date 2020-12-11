@@ -117,7 +117,7 @@ if __name__ == '__main__':
 			novel_sets = entailed_sets.difference(overlap_sets)
 			novel_count = len(novel_sets)
 			new_score = 0.0
-			set_fraction = rerank_score / max(float(num_entailed), (1.0/ratio))
+			set_fraction = rerank_score / max(float(num_entailed), (1.0/0.5))
 			for novel_set_id in novel_sets:
 				novel_score = qa_entailed_set_scores[novel_set_id]
 				new_score += novel_score * set_fraction
