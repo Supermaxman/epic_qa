@@ -104,8 +104,8 @@ if __name__ == '__main__':
 		ndns_score_offset = 1.0 - ((ndns_rank + 1) / len(ranking.answers))
 		for answer in question_answers:
 			if 'ndns_score' not in answer:
-				# answer['ndns_score'] = 0.0
-				answer['ndns_score'] = answer['score']
+				answer['ndns_score'] = 0.0
+				# answer['ndns_score'] = answer['score']
 			answer['score'] = answer['ndns_score']
 		query = queries[question_id]
 		results[question_id] = {
