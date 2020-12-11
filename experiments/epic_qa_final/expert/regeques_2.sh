@@ -25,6 +25,7 @@ export MAX_RQE_SEQ_LEN=64
 export EXP_ANSWER_TOP_K=20
 export EXP_ANSWER_NUM_SAMPLES=20
 export EXP_ANSWER_BATCH_SIZE=16
+export RQE_BATCH_SIZE=32
 
 export GPUS=4,5,6,7
 
@@ -226,6 +227,7 @@ if [[ ${RUN_RGQE_SELF} = true ]]; then
       --output_path ${RGQE_SELF_PATH} \
       --model_name ${RQE_MODEL_NAME} \
       --max_seq_len ${MAX_RQE_SEQ_LEN} \
+      --batch_size ${RQE_BATCH_SIZE} \
       --gpus ${GPUS} \
       --mode self \
     ; \
@@ -250,6 +252,7 @@ if [[ ${RUN_RGQE_QUESTION} = true ]]; then
       --query_path ${QUERY_PATH} \
       --model_name ${RQE_MODEL_NAME} \
       --max_seq_len ${MAX_RQE_SEQ_LEN} \
+      --batch_size ${RQE_BATCH_SIZE} \
       --gpus ${GPUS} \
       --mode question \
     ; \
@@ -268,6 +271,7 @@ if [[ ${RUN_RGQE_TOP} = true ]]; then
       --search_path ${RERANK_RUN_PATH} \
       --model_name ${RQE_MODEL_NAME} \
       --max_seq_len ${MAX_RQE_SEQ_LEN} \
+      --batch_size ${RQE_BATCH_SIZE} \
       --mode top \
       --top_k ${RGQE_TOP_K} \
       --gpus ${GPUS} \
@@ -294,6 +298,7 @@ if [[ ${RUN_RGQE_ALL} = true ]]; then
       --qe_path ${RGQE_QUESTION_FILE_PATH} \
       --model_name ${RQE_MODEL_NAME} \
       --max_seq_len ${MAX_RQE_SEQ_LEN} \
+      --batch_size ${RQE_BATCH_SIZE} \
       --threshold ${RQE_THRESHOLD} \
       --gpus ${GPUS} \
       --mode all \
