@@ -66,7 +66,7 @@ if __name__ == '__main__':
 		top_answers = []
 		for answer in question_answers:
 			answer_id = answer['answer_id']
-			answer_lookup = answer
+			answer_lookup[answer_id] = answer
 			if answer_id in top_answer_sets:
 				qa_sets = top_answer_sets[answer_id]
 				top_answers.append(answer)
