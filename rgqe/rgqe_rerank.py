@@ -63,11 +63,13 @@ if __name__ == '__main__':
 		}
 		num_answers_with_set = 0
 		answer_lookup = {}
+		top_answers = []
 		for answer in question_answers:
 			answer_id = answer['answer_id']
 			answer_lookup = answer
 			if answer_id in top_answer_sets:
 				qa_sets = top_answer_sets[answer_id]
+				top_answers.append(answer)
 			else:
 				qa_sets = set()
 				if all_path is not None:
@@ -86,7 +88,7 @@ if __name__ == '__main__':
 					f'percent answers with at least one entailed set')
 
 		print(f'{question_id}: running NDNS...')
-		ranking = get_ranking(question_answers, top_answer_sets)
+		ranking = get_ranking(top_answers, top_answer_sets)
 		print(f'{question_id}: NDNS SCORE: {ranking.score:.4f}')
 		for idx, ndns_scored_answer in enumerate(ranking.answers):
 			a_answer = ndns_scored_answer.answer
@@ -117,19 +119,24 @@ if __name__ == '__main__':
 			novelty_ratio = 1.0 - (num_overlapped / max(num_entailed, 1))
 			novel_sets = entailed_sets.difference(overlap_set)
 			novel_count = len(novel_sets)
-			if novel_count == 0:
-				num_seen = 0
-				for entailed_set in entailed_sets:
-					pass
-				# if positive score make less positive by %ratio ^ (num_entailed + 1)
-				if rerank_score > 0:
-					new_score = (ratio ** (num_overlapped + 1)) * rerank_score
-				# if negative score make more negative by %(1.0 + (1.0 - ratio) ^ (num_entailed + 1)
-				else:
-					new_score = ((1.0 + (1.0 - ratio)) ** (num_overlapped + 1)) * rerank_score
-				num_modified += 1
+			if 'ndns_score' in answer:
+				new_score = answer['ndns_score']
 			else:
-				new_score = rerank_score
+				new_score = 0.0
+
+			# if novel_count == 0:
+			# 	num_seen = 0
+			# 	for entailed_set in entailed_sets:
+			# 		pass
+			# 	# if positive score make less positive by %ratio ^ (num_entailed + 1)
+			# 	if rerank_score > 0:
+			# 		new_score = (ratio ** (num_overlapped + 1)) * rerank_score
+			# 	# if negative score make more negative by %(1.0 + (1.0 - ratio) ^ (num_entailed + 1)
+			# 	else:
+			# 		new_score = ((1.0 + (1.0 - ratio)) ** (num_overlapped + 1)) * rerank_score
+			# 	num_modified += 1
+			# else:
+			# 	new_score = rerank_score
 			if answer['rank'] <= 100:
 				top_100_set_counts.append(num_entailed)
 			else:
