@@ -22,7 +22,7 @@ export RGQE_TOP_K=100
 export RGQE_SELF_THRESHOLD=0.8
 export RGQE_TOP_C_THRESHOLD=0.8
 export RGQE_ALL_THRESHOLD=0.8
-export RQE_TOP_THRESHOLD=0.5
+export RQE_TOP_THRESHOLD=0.1
 export RQE_ALL_THRESHOLD=0.1
 export RGQE_RATIO=0.9
 export RGQE_SEQ_LEN=128
@@ -51,12 +51,12 @@ export RUN_RERANK=false
 export EVAL_RERANK=false
 
 # rerank answer query expansion flags
-export RUN_EXPAND_ANSWERS=true
+export RUN_EXPAND_ANSWERS=false
 
 # RGQE pairwise self-entailment to find entailed sets for each answer
-export RUN_RGQE_SELF=true
+export RUN_RGQE_SELF=false
 # RGQE query-generated question entailment to filter poor generated questions
-export RUN_RGQE_QUESTION=true
+export RUN_RGQE_QUESTION=false
 # RGQE full set-pairwise entailment for top_k answers for each query
 export RUN_RGQE_TOP=true
 # RGQE top_k set entailment to all set entailment to find entailed sets for all answers
