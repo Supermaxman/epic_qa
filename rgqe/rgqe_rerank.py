@@ -65,18 +65,13 @@ if __name__ == '__main__':
 		num_answers_with_set = 0
 		answer_lookup = {}
 		top_answers = []
-		top_seen_set_answers = set()
-		max_non_top_score = 0.0
 		for answer in question_answers:
 			answer_id = answer['answer_id']
 			answer_lookup[answer_id] = answer
 			if answer_id in top_answer_sets:
 				qa_sets = top_answer_sets[answer_id]
 				top_answers.append(answer)
-				if len(qa_sets) > 0:
-					top_seen_set_answers.add(answer_id)
 			else:
-				max_non_top_score = max(max_non_top_score, answer['score'])
 				qa_sets = set()
 				if all_path is not None:
 					if answer_id in answer_sets:
@@ -91,36 +86,31 @@ if __name__ == '__main__':
 			answer['text'] = answer_text_lookup[answer_id]
 			answer['entailed_sets_text'] = [entailed_sets_text[x] for x in qa_sets]
 
-		total_top_set_answers = len(top_seen_set_answers)
 		ndns_rank = 0
-		while len(top_seen_set_answers) > 0:
-			ranking = get_ranking(question_id, top_answers, entailed_sets_text, top_seen_set_answers)
-			for idx, ndns_scored_answer in enumerate(ranking.answers):
-				a_answer = ndns_scored_answer.answer
-				answer_id = f'{a_answer.start_sent_id}:{a_answer.end_sent_id}'
-				top_seen_set_answers.remove(answer_id)
-				answer = answer_lookup[answer_id]
-				ndns_gain = ndns_scored_answer.gain
-				answer['ndns_gain'] = ndns_gain
-				# TODO two ideas:
-				# TODO 1. use bert score if gain is 0, not arbitrary ranking
-				#
-				# print(ndns_gain)
-				# if ndns_gain == 1:
-				# 	max_non_top_score = max(max_non_top_score, answer['score'])
-				# 	num_top_zero += 1
-				# goes from 1.0 to 0.0
-				# add max non top answer score to make sure ndns is ranked higher
-				answer['ndns_score'] = (1.0 - (ndns_rank / total_top_set_answers)) + max_non_top_score
-				ndns_rank += 1
+		ranking = get_ranking(question_id, top_answers, entailed_sets_text)
+		for idx, ndns_scored_answer in enumerate(ranking.answers):
+			a_answer = ndns_scored_answer.answer
+			answer_id = f'{a_answer.start_sent_id}:{a_answer.end_sent_id}'
+			answer = answer_lookup[answer_id]
+			ndns_gain = ndns_scored_answer.gain
+			answer['ndns_gain'] = ndns_gain
+			# goes from 1.0 to 0.0
+			# add max non top answer score to make sure ndns is ranked higher
+			answer['ndns_score'] = (1.0 - (ndns_rank / len(ranking.answers)))
+			ndns_rank += 1
 
 		print(f'{question_id}: {num_answers_with_set / len(question_answers):.2f}% '
 					f'percent answers with at least one entailed set)')
+		max_non_top_score = 0.0
+		for answer in question_answers:
+			if 'ndns_score' not in answer:
+				max_non_top_score = max(max_non_top_score, answer['score'])
+
 		for answer in question_answers:
 			if 'ndns_score' not in answer:
 				answer['ndns_score'] = answer['score']
 			else:
-				answer['score'] = answer['ndns_score']
+				answer['score'] = answer['ndns_score'] + max_non_top_score
 		query = queries[question_id]
 		results[question_id] = {
 			'query': query,
