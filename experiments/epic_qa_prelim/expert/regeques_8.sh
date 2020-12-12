@@ -18,7 +18,7 @@ export DATASET=expert
 # major hyper-parameters for system
 export SEARCH_TOP_K=500
 export NEGATIVE_SAMPLES=800
-export RGQE_TOP_K=100
+export RGQE_TOP_K=50
 export RGQE_SELF_THRESHOLD=0.6
 export RGQE_TOP_C_THRESHOLD=0.6
 export RQE_TOP_THRESHOLD=0.01
@@ -53,7 +53,7 @@ export RUN_EXPAND_ANSWERS=false
 # RGQE pairwise self-entailment to find entailed sets for each answer
 export RUN_RGQE_SELF=false
 # RGQE query-generated question entailment to filter poor generated questions
-export RUN_RGQE_QUESTION=false
+export RUN_RGQE_QUESTION=true
 # RGQE full set-pairwise entailment for top_k answers for each query
 export RUN_RGQE_TOP=true
 # RGQE rerank answers based on generated question entailment sets
