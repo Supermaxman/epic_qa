@@ -107,7 +107,8 @@ if __name__ == '__main__':
 		for answer in question_answers:
 			if 'ndns_score' not in answer:
 				if answer['top']:
-					answer['ndns_score'] = 0.8 * answer['score']
+					answer['ndns_score'] = answer['score']
+					answer['score'] = 0.8 * answer['score']
 				else:
 					answer['ndns_score'] = answer['score']
 			else:
