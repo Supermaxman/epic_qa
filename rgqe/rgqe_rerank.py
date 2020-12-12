@@ -72,7 +72,9 @@ if __name__ == '__main__':
 			if answer_id in top_answer_sets:
 				qa_sets = top_answer_sets[answer_id]
 				top_answers.append(answer)
+				answer['top'] = True
 			else:
+				answer['top'] = False
 				max_non_top_score = max(max_non_top_score, answer['score'])
 				qa_sets = set()
 				if all_path is not None:
@@ -104,7 +106,10 @@ if __name__ == '__main__':
 
 		for answer in question_answers:
 			if 'ndns_score' not in answer:
-				answer['ndns_score'] = answer['score']
+				if answer['top']:
+					answer['ndns_score'] = 0.8 * answer['score']
+				else:
+					answer['ndns_score'] = answer['score']
 			else:
 				answer['score'] = answer['ndns_score']
 		query = queries[question_id]
