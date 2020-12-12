@@ -78,7 +78,8 @@ def create_components(question_entail_set_pairs, answer_sets, threshold):
 			set_samples = list(sorted(set_samples, key=lambda x: x['num_connected'], reverse=True))
 			merged_set = {
 				'entailed_set_id': new_entailed_set_id,
-				'entailed_set': set_samples
+				'entailed_set': set_samples,
+				'num_connected': len(set_samples)
 			}
 
 			merged_entailed_sets.append(
@@ -88,8 +89,9 @@ def create_components(question_entail_set_pairs, answer_sets, threshold):
 
 		unconnected_sets = set()
 		for merged_entailed_set in merged_entailed_sets:
-			if len(merged_entailed_set["entailed_set"]) < 2:
-				unconnected_sets.add(merged_entailed_set["entailed_set"][0]['entailed_set_id'])
+			if merged_entailed_set['num_connected'] < 2:
+				old_set_id = merged_entailed_set["entailed_set"][0]['entailed_set_id']
+				unconnected_sets.add(old_set_id)
 			else:
 				print(f'({len(merged_entailed_set["entailed_set"])}): '
 							f'{merged_entailed_set["entailed_set"][0]["entailed_set_text"]}')
@@ -103,6 +105,7 @@ def create_components(question_entail_set_pairs, answer_sets, threshold):
 			new_entailed_sets = set()
 			num_unconnected = 0
 			for entailed_set_id in a_sets:
+				# do not keep unconnected entailed sets for scoring
 				if entailed_set_id in unconnected_sets:
 					num_unconnected += 1
 				else:
