@@ -101,16 +101,15 @@ if __name__ == '__main__':
 
 		print(f'{question_id}: {num_answers_with_set / len(question_answers):.2f}% '
 					f'percent answers with at least one entailed set)')
-		max_non_top_score = 0.0
+		max_score = 0.0
 		for answer in question_answers:
-			if 'ndns_score' not in answer:
-				max_non_top_score = max(max_non_top_score, answer['score'])
+			max_score = max(max_score, answer['score'])
 
 		for answer in question_answers:
 			if 'ndns_score' not in answer:
 				answer['ndns_score'] = answer['score']
 			else:
-				answer['score'] = answer['ndns_score'] + max_non_top_score
+				answer['score'] = answer['ndns_score'] + max_score
 		query = queries[question_id]
 		results[question_id] = {
 			'query': query,
