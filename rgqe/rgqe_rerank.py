@@ -108,7 +108,6 @@ if __name__ == '__main__':
 			if 'ndns_score' not in answer:
 				if answer['top']:
 					answer['ndns_score'] = answer['score']
-					answer['score'] = 0.8 * answer['score']
 				else:
 					answer['ndns_score'] = answer['score']
 			else:
