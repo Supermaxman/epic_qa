@@ -65,6 +65,7 @@ if __name__ == '__main__':
 		num_answers_with_set = 0
 		answer_lookup = {}
 		top_answers = []
+		max_non_top_score = 0.0
 		for answer in question_answers:
 			answer_id = answer['answer_id']
 			answer_lookup[answer_id] = answer
@@ -72,6 +73,7 @@ if __name__ == '__main__':
 				qa_sets = top_answer_sets[answer_id]
 				top_answers.append(answer)
 			else:
+				max_non_top_score = max(max_non_top_score, answer['score'])
 				qa_sets = set()
 				if all_path is not None:
 					if answer_id in answer_sets:
@@ -97,18 +99,14 @@ if __name__ == '__main__':
 			answer['ndns_gain'] = ndns_scored_answer.gain
 			# goes from 1.0 to 0.0
 			# add max non top answer score to make sure ndns is ranked higher
-			answer['ndns_score'] = (1.0 - (ndns_rank / len(ranking.answers)))
+			answer['ndns_score'] = (1.0 - (ndns_rank / len(ranking.answers))) + max_non_top_score
 			ndns_rank += 1
 
-		max_non_top_score = 0.0
-		for answer in question_answers:
-			if 'ndns_score' not in answer:
-				max_non_top_score = max(max_non_top_score, answer['score'])
 		for answer in question_answers:
 			if 'ndns_score' not in answer:
 				answer['ndns_score'] = answer['score']
 			else:
-				answer['score'] = answer['ndns_score'] + max_non_top_score
+				answer['score'] = answer['ndns_score']
 		query = queries[question_id]
 		results[question_id] = {
 			'query': query,
