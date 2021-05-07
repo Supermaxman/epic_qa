@@ -95,7 +95,7 @@ if __name__ == "__main__":
 	# export TPU_IP_ADDRESS=10.155.6.34
 	# export XRT_TPU_CONFIG="tpu_worker;0;$TPU_IP_ADDRESS:8470"
 	# TODO move to args
-	use_tpus = True
+	use_tpus = False
 	train_model = True
 	load_model = False
 	calc_seq_len = False

@@ -59,3 +59,13 @@ python -m rqe.rqe_eval \
 # # # # # # # # # # # # # # # #
 # bert-base                         0.8894
 # bert-base-msmarco                 0.8955
+
+python -m rqe.rqe_train \
+  --dataset=quora \
+  --pre_model_name=models/mt-dnn-base-uncased \
+  --model_type=lm
+
+python -m rqe.rqe_eval \
+  --dataset=quora \
+  --pre_model_name=models/mt-dnn-base-uncased \
+  --model_type=lm
