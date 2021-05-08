@@ -35,8 +35,8 @@ export RERANK_BATCH_SIZE=32
 
 # flags to avoid re-running certain components
 # index & search flags
-export CREATE_INDEX=false
-export EXPAND_INDEX=false
+export CREATE_INDEX=true
+export EXPAND_INDEX=true
 export SEARCH_INDEX=false
 
 # rerank flags
@@ -114,10 +114,10 @@ export EVAL_PATH=${RGQE_TOP_PATH}/${RQE_RUN_NAME}.eval
 if [[ ${CREATE_INDEX} = true ]]; then
     echo "Creating index..."
     # create dataset split
-    python rerank/split_data.py \
-      --label_path data/${COLLECTION}/prelim_judgments_corrected.json \
-      --output_path ${DATASET_PATH}/split \
-      --dataset ${DATASET}
+#    python rerank/split_data.py \
+#      --label_path data/${COLLECTION}/prelim_judgments_corrected.json \
+#      --output_path ${DATASET_PATH}/split \
+#      --dataset ${DATASET}
 
     if [[ ${EXPAND_INDEX} = true ]]; then
         mkdir ${COLLECTION_JSONL_PATH}
