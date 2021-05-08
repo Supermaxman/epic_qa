@@ -120,11 +120,11 @@ if [[ ${CREATE_INDEX} = true ]]; then
 #      --dataset ${DATASET}
 
     if [[ ${EXPAND_INDEX} = true ]]; then
-        mkdir ${COLLECTION_JSONL_PATH}
+#        mkdir ${COLLECTION_JSONL_PATH}
         # setup dataset
-        python search/extract_collection.py \
-         --collection_path ${COLLECTION_PATH} \
-         --output_path ${COLLECTION_JSONL_FILE_PATH}
+#        python search/extract_collection.py \
+#         --collection_path ${COLLECTION_PATH} \
+#         --output_path ${COLLECTION_JSONL_FILE_PATH}
 
 
         # expand dataset for indexing
@@ -138,7 +138,6 @@ if [[ ${CREATE_INDEX} = true ]]; then
          --batch_size 32 \
          --max_seq_len 256 \
          --gpus 4,5,6,7 \
-         --is_distributed \
         ; \
 #        python expand_query/expand.py \
 #         --collection_path ${COLLECTION_JSONL_FILE_PATH} \
