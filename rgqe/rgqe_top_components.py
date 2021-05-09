@@ -120,7 +120,7 @@ def create_components(question_entail_set_pairs, answer_sets, threshold):
 			'entailed_sets': merged_entailed_sets,
 			'answer_sets': merged_entailed_set_answer_lookup,
 		}
-		print(f'{connected_answers/seen_answers:.2f}% answers part of at least one connected set '
+		print(f'{100*connected_answers/seen_answers:.0f}% answers part of at least one connected set '
 					f'({connected_answers}/{seen_answers})')
 	return results
 

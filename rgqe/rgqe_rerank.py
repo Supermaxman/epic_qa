@@ -89,7 +89,7 @@ if __name__ == '__main__':
 			answer['entailed_sets'] = qa_sets
 			answer['text'] = answer_text_lookup[answer_id]
 			answer['entailed_sets_text'] = [entailed_sets_text[x] for x in qa_sets]
-		print(f'{question_id}: {num_answers_with_set / len(question_answers):.2f}% '
+		print(f'{question_id}: {100*num_answers_with_set / len(question_answers):.0f}% '
 					f'percent answers with at least one entailed set')
 
 		ranking = get_ranking(question_id, top_answers, entailed_sets_text)
