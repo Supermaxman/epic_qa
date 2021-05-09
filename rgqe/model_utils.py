@@ -46,7 +46,7 @@ class RGQEPredictionBert(pl.LightningModule):
 	# 	)[0]
 	# 	return logits
 
-	def forward(self, input_ids, attention_mask, token_type_ids, batch):
+	def forward(self, input_ids, attention_mask, token_type_ids):
 		cls_embeddings = self.bert(
 			input_ids,
 			attention_mask=attention_mask,
