@@ -19,7 +19,7 @@ export DATASET=expert
 export SEARCH_TOP_K=500
 export NEGATIVE_SAMPLES=800
 # 100 for run_3
-export RGQE_TOP_K=20
+export RGQE_TOP_K=10
 # 0.6 for run_3
 export RGQE_SELF_THRESHOLD=0.6
 # 0.6 for run_3
