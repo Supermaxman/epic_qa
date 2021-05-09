@@ -1,5 +1,5 @@
 
-from transformers import AutoModelForSequenceClassification
+from transformers import AutoModelForSequenceClassification, BertModel
 from transformers import AdamW, get_linear_schedule_with_warmup
 import torch
 import pytorch_lightning as pl
@@ -21,22 +21,41 @@ class RGQEPredictionBert(pl.LightningModule):
 		self.updates_total = updates_total
 		self.predict_mode = predict_mode
 		self.predict_path = predict_path
-		self.bert = AutoModelForSequenceClassification.from_pretrained(
+		# self.bert = AutoModelForSequenceClassification.from_pretrained(
+		# 	pre_model_name,
+		# 	cache_dir=torch_cache_dir
+		# )
+		self.bert = BertModel.from_pretrained(
 			pre_model_name,
 			cache_dir=torch_cache_dir
+		)
+		self.classifier = torch.nn.Linear(
+			self.bert.config.hidden_size,
+			2
 		)
 		self.score_func = torch.nn.Softmax(dim=-1)
 		self.config = self.bert.config
 		self.save_hyperparameters()
+	#
+	# def forward(self, input_ids, attention_mask, token_type_ids):
+	# 	# [batch_size, 2]
+	# 	logits = self.bert(
+	# 		input_ids,
+	# 		attention_mask=attention_mask,
+	# 		token_type_ids=token_type_ids
+	# 	)[0]
+	# 	return logits
 
-	def forward(self, input_ids, attention_mask, token_type_ids):
-		# [batch_size, 2]
-		logits = self.bert(
+	def forward(self, input_ids, attention_mask, token_type_ids, batch):
+		cls_embeddings = self.bert(
 			input_ids,
 			attention_mask=attention_mask,
 			token_type_ids=token_type_ids
-		)[0]
-		return logits
+		)[0][:, 0]
+		# [batch_size, 2]
+		logits = self.classifier(cls_embeddings)
+		scores = self.score_func(logits)
+		return logits, scores
 
 	def training_step(self, batch, batch_nb):
 		loss, logits, prediction, correct_count, total_count, accuracy = self._forward_step(batch, batch_nb)
@@ -56,7 +75,7 @@ class RGQEPredictionBert(pl.LightningModule):
 		return self._eval_step(batch, batch_nb, 'val')
 
 	def _forward_step(self, batch, batch_nb):
-		logits = self(
+		logits, scores = self(
 			input_ids=batch['input_ids'],
 			attention_mask=batch['attention_mask'],
 			token_type_ids=batch['token_type_ids'],
