@@ -40,3 +40,9 @@ Answer:
     1, 2, 5, 8, 11, 21
 2 - what province in china is covid from?
     1, 43 33 4, 6
+
+python rerank/epic_eval.py \
+      data/epic_qa_final/primary_judgements.json \
+      ${RUN_PATH} \
+      rerank/.${DATASET}_ideal_ranking_scores.tsv \
+      --task ${DATASET}
