@@ -20,9 +20,9 @@ export SEARCH_TOP_K=500
 export NEGATIVE_SAMPLES=800
 export RGQE_TOP_K=100
 # 0.6 for run_3
-export RGQE_SELF_THRESHOLD=0.8
+export RGQE_SELF_THRESHOLD=0.6
 # 0.6 for run_3
-export RGQE_TOP_C_THRESHOLD=0.8
+export RGQE_TOP_C_THRESHOLD=0.6
 # 0.01 for run_3
 export RQE_TOP_THRESHOLD=0.01
 export RGQE_RATIO=0.9
@@ -68,6 +68,7 @@ export RERANK_MODEL_NAME=rerank-${DATASET}-${RERANK_RUN_MODEL_NAME}
 #export RERANK_MODEL_NAME=rerank-expert-passage-large-HLTRI_RERANK_15
 export EXP_MODEL_NAME=docT5query-base
 export RQE_MODEL_NAME=quora-lm-models-mt-dnn-base-uncased
+export RQE_PRE_MODEL_NAME=models/mt-dnn-base-uncased
 
 export RERANK_PRE_MODEL_NAME=nboost/pt-biobert-base-msmarco
 export EXP_PRE_MODEL_NAME=models/docT5query-base/model.ckpt-1004000
@@ -284,19 +285,19 @@ fi
 if [[ ${RUN_RGQE_SELF} = true ]]; then
     echo "Running self RGQE..."
     # self entailment
-#    python rgqe/rgqe.py \
-#      --input_path ${EXP_ANSWER_FILE_PATH} \
-#      --output_path ${RGQE_SELF_PATH} \
-#      --model_name ${RQE_MODEL_NAME} \
-#      --pre_model_name models/${RQE_MODEL_NAME} \
-#      --max_seq_len ${RGQE_SEQ_LEN} \
-#      --batch_size ${RGQE_BATCH_SIZE} \
-#      --mode self \
-#    ; \
-#    python rgqe/format_rgqe_self.py \
-#      --input_path ${RGQE_SELF_PATH} \
-#      --output_path ${RGQE_SELF_FILE_PATH} \
-#    ; \
+    python rgqe/rgqe.py \
+      --input_path ${EXP_ANSWER_FILE_PATH} \
+      --output_path ${RGQE_SELF_PATH} \
+      --model_name ${RQE_MODEL_NAME} \
+      --pre_model_name models/${RQE_PRE_MODEL_NAME} \
+      --max_seq_len ${RGQE_SEQ_LEN} \
+      --batch_size ${RGQE_BATCH_SIZE} \
+      --mode self \
+    ; \
+    python rgqe/format_rgqe_self.py \
+      --input_path ${RGQE_SELF_PATH} \
+      --output_path ${RGQE_SELF_FILE_PATH} \
+    ; \
     python rgqe/rgqe_self_components.py \
       --input_path ${RGQE_SELF_FILE_PATH} \
       --expand_path ${EXP_ANSWER_FILE_PATH} \
@@ -314,7 +315,7 @@ if [[ ${RUN_RGQE_QUESTION} = true ]]; then
       --query_path ${QUERY_PATH} \
       --label_path ${LABEL_PATH} \
       --model_name ${RQE_MODEL_NAME} \
-      --pre_model_name models/${RQE_MODEL_NAME} \
+      --pre_model_name models/${RQE_PRE_MODEL_NAME} \
       --max_seq_len ${RGQE_SEQ_LEN} \
       --batch_size ${RGQE_BATCH_SIZE} \
       --top_k ${RGQE_TOP_K} \
@@ -334,7 +335,7 @@ if [[ ${RUN_RGQE_TOP} = true ]]; then
       --qe_path ${RGQE_QUESTION_FILE_PATH} \
       --search_path ${RERANK_RUN_PATH} \
       --model_name ${RQE_MODEL_NAME} \
-      --pre_model_name models/${RQE_MODEL_NAME} \
+      --pre_model_name models/${RQE_PRE_MODEL_NAME} \
       --max_seq_len ${RGQE_SEQ_LEN} \
       --batch_size ${RGQE_BATCH_SIZE} \
       --mode top \
