@@ -289,7 +289,7 @@ if [[ ${RUN_RGQE_SELF} = true ]]; then
       --input_path ${EXP_ANSWER_FILE_PATH} \
       --output_path ${RGQE_SELF_PATH} \
       --model_name ${RQE_MODEL_NAME} \
-      --pre_model_name models/${RQE_PRE_MODEL_NAME} \
+      --pre_model_name ${RQE_PRE_MODEL_NAME} \
       --max_seq_len ${RGQE_SEQ_LEN} \
       --batch_size ${RGQE_BATCH_SIZE} \
       --mode self \
@@ -315,7 +315,7 @@ if [[ ${RUN_RGQE_QUESTION} = true ]]; then
       --query_path ${QUERY_PATH} \
       --label_path ${LABEL_PATH} \
       --model_name ${RQE_MODEL_NAME} \
-      --pre_model_name models/${RQE_PRE_MODEL_NAME} \
+      --pre_model_name ${RQE_PRE_MODEL_NAME} \
       --max_seq_len ${RGQE_SEQ_LEN} \
       --batch_size ${RGQE_BATCH_SIZE} \
       --top_k ${RGQE_TOP_K} \
@@ -335,7 +335,7 @@ if [[ ${RUN_RGQE_TOP} = true ]]; then
       --qe_path ${RGQE_QUESTION_FILE_PATH} \
       --search_path ${RERANK_RUN_PATH} \
       --model_name ${RQE_MODEL_NAME} \
-      --pre_model_name models/${RQE_PRE_MODEL_NAME} \
+      --pre_model_name ${RQE_PRE_MODEL_NAME} \
       --max_seq_len ${RGQE_SEQ_LEN} \
       --batch_size ${RGQE_BATCH_SIZE} \
       --mode top \
