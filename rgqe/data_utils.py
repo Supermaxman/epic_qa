@@ -23,14 +23,7 @@ class PredictionBatchCollator(object):
 		for ex in examples:
 			question_a_ids.append(ex['question_a_id'])
 			question_b_ids.append(ex['question_b_id'])
-			a_text = ex['question_a_text'].strip()
-			b_text = ex['question_b_text'].strip()
-			if not a_text.endswith('?'):
-				a_text += '?'
-			if not b_text.endswith('?'):
-				b_text += '?'
-
-			sequences.append((a_text, b_text))
+			sequences.append((ex['question_a_text'], ex['question_b_text']))
 		# "input_ids": batch["input_ids"].to(device),
 		# "attention_mask": batch["attention_mask"].to(device),
 		tokenizer_batch = self.tokenizer.batch_encode_plus(
