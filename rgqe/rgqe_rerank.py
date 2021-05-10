@@ -101,6 +101,7 @@ if __name__ == '__main__':
 			answer['ndns_gain'] = ndns_scored_answer.gain
 			# goes from 1.0 to 0.0
 			# add max non top answer score to make sure ndns is ranked higher
+			# TODO if ndns gain is 0.0 then switch to other ranking?
 			answer['ndns_score'] = (1.0 - (ndns_rank / len(ranking.answers))) + max_non_top_score
 			ndns_rank += 1
 
