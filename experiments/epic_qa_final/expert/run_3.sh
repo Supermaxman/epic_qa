@@ -312,7 +312,6 @@ if [[ ${EVAL_RGQE} = true ]]; then
     python rerank/epic_eval.py \
       ${LABEL_PATH} \
       ${RUN_PATH} \
-#      rerank/.${DATASET}_ideal_ranking_scores.tsv \
       --task ${DATASET} \
       > ${EVAL_PATH} \
       ; \
