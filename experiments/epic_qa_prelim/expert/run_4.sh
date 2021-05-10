@@ -21,9 +21,9 @@ export NEGATIVE_SAMPLES=800
 # 100 for run_3, 20
 export RGQE_TOP_K=20
 # 0.6 for run_3, 0.6
-export RGQE_SELF_THRESHOLD=0.5
+export RGQE_SELF_THRESHOLD=0.6
 # 0.6 for run_3, 0.6
-export RGQE_TOP_C_THRESHOLD=0.5
+export RGQE_TOP_C_THRESHOLD=0.6
 # 0.01 for run_3, 0.0
 export RQE_TOP_THRESHOLD=0.0
 export RGQE_RATIO=0.9
