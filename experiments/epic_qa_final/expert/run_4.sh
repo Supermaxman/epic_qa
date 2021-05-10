@@ -44,13 +44,13 @@ export RUN_RERANK=false
 export RUN_EXPAND_ANSWERS=false
 
 # RGQE pairwise self-entailment to find entailed sets for each answer
-export RUN_RGQE_SELF=false
+export RUN_RGQE_SELF=true
 # RGQE query-generated question entailment to filter poor generated questions
-export RUN_RGQE_QUESTION=false
+export RUN_RGQE_QUESTION=true
 # RGQE full set-pairwise entailment for top_k answers for each query
-export RUN_RGQE_TOP=false
+export RUN_RGQE_TOP=true
 # RGQE rerank answers based on generated question entailment sets
-export RUN_RGQE_RERANK=false
+export RUN_RGQE_RERANK=true
 # RGQE run evaluation script on test set
 export EVAL_RGQE=true
 
@@ -320,10 +320,6 @@ if [[ ${EVAL_RGQE} = true ]]; then
       --task ${DATASET} \
       > ${EVAL_PATH} \
       ; \
-      tail -n 3 ${EVAL_PATH} \
-      | awk \
-        '{ for (i=1; i<=NF; i++) RtoC[i]= (RtoC[i]? RtoC[i] FS $i: $i) }
-        END{ for (i in RtoC) print RtoC[i] }' \
-      | tail -n 2
+      tail -n 3 ${EVAL_PATH}
 fi
 
