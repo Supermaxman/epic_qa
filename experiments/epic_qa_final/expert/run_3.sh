@@ -68,7 +68,7 @@ export COLLECTION_JSONL_PATH=${DATASET_PATH}/data_jsonl
 export COLLECTION_JSONL_FILE_PATH=${COLLECTION_JSONL_PATH}/data.jsonl
 
 export ARTIFACTS_PATH=artifacts/${COLLECTION}/${DATASET}
-export LABEL_PATH=data/${COLLECTION}/primary_judgements.json
+export LABEL_PATH=data/${COLLECTION}/primary_judgments.json
 
 export EXP_DATA_PATH=${ARTIFACTS_PATH}/${EXP_DATA_RUN_NAME}
 export EXP_DATA_FILE_PATH=${EXP_DATA_PATH}/data.expl
