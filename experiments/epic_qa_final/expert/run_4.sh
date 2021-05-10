@@ -7,7 +7,7 @@ export SEARCH_RUN_NAME=HLTRI_REGEQUES_SEARCH_1
 export RERANK_RUN_NAME=HLTRI_REGEQUES_RERANK_1
 export RERANK_RUN_MODEL_NAME=HLTRI_REGEQUES_RERANK_1
 export EXP_ANSWER_RUN_NAME=HLTRI_REGEQUES_EXP_ANSWER_1
-export RQE_RUN_NAME=HLTRI_REGEQUES_FINAL_3
+export RQE_RUN_NAME=HLTRI_REGEQUES_FINAL_4
 
 # collection and task names
 export COLLECTION=epic_qa_final
@@ -15,10 +15,10 @@ export DATASET=expert
 
 # major hyper-parameters for system
 export SEARCH_TOP_K=500
-export RGQE_TOP_K=100
+export RGQE_TOP_K=20
 export RGQE_SELF_THRESHOLD=0.6
 export RGQE_TOP_C_THRESHOLD=0.6
-export RQE_TOP_THRESHOLD=0.01
+export RQE_TOP_THRESHOLD=0.0
 export RGQE_RATIO=0.9
 export RGQE_SEQ_LEN=96
 export RGQE_BATCH_SIZE=64
@@ -44,19 +44,20 @@ export RUN_RERANK=false
 export RUN_EXPAND_ANSWERS=false
 
 # RGQE pairwise self-entailment to find entailed sets for each answer
-export RUN_RGQE_SELF=false
+export RUN_RGQE_SELF=true
 # RGQE query-generated question entailment to filter poor generated questions
-export RUN_RGQE_QUESTION=false
+export RUN_RGQE_QUESTION=true
 # RGQE full set-pairwise entailment for top_k answers for each query
-export RUN_RGQE_TOP=false
+export RUN_RGQE_TOP=true
 # RGQE rerank answers based on generated question entailment sets
-export RUN_RGQE_RERANK=false
+export RUN_RGQE_RERANK=true
 # RGQE run evaluation script on test set
 export EVAL_RGQE=true
 
 export RERANK_MODEL_NAME=rerank-${DATASET}-${RERANK_RUN_MODEL_NAME}
 export EXP_MODEL_NAME=docT5query-base
-export RQE_MODEL_NAME=quora-seq-nboost-pt-bert-base-uncased-msmarco
+export RQE_MODEL_NAME=quora-lm-models-mt-dnn-base-uncased
+export RQE_PRE_MODEL_NAME=models/mt-dnn-base-uncased
 
 export RERANK_PRE_MODEL_NAME=nboost/pt-biobert-base-msmarco
 export EXP_PRE_MODEL_NAME=models/docT5query-base/model.ckpt-1004000
@@ -225,6 +226,7 @@ if [[ ${RUN_RGQE_SELF} = true ]]; then
       --input_path ${EXP_ANSWER_FILE_PATH} \
       --output_path ${RGQE_SELF_PATH} \
       --model_name ${RQE_MODEL_NAME} \
+      --pre_model_name ${RQE_PRE_MODEL_NAME} \
       --max_seq_len ${RGQE_SEQ_LEN} \
       --batch_size ${RGQE_BATCH_SIZE} \
       --gpus ${GPUS} \
@@ -250,6 +252,7 @@ if [[ ${RUN_RGQE_QUESTION} = true ]]; then
       --search_path ${RERANK_RUN_PATH} \
       --query_path ${QUERY_PATH} \
       --model_name ${RQE_MODEL_NAME} \
+      --pre_model_name ${RQE_PRE_MODEL_NAME} \
       --max_seq_len ${RGQE_SEQ_LEN} \
       --batch_size ${RGQE_BATCH_SIZE} \
       --gpus ${GPUS} \
@@ -269,6 +272,7 @@ if [[ ${RUN_RGQE_TOP} = true ]]; then
       --qe_path ${RGQE_QUESTION_FILE_PATH} \
       --search_path ${RERANK_RUN_PATH} \
       --model_name ${RQE_MODEL_NAME} \
+      --pre_model_name ${RQE_PRE_MODEL_NAME} \
       --max_seq_len ${RGQE_SEQ_LEN} \
       --batch_size ${RGQE_BATCH_SIZE} \
       --mode top \
