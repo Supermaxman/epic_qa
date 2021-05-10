@@ -62,29 +62,14 @@ def make_id(sample):
 
 
 class RGQESelfPredictionDataset(Dataset):
-	def __init__(self, input_path, search_path, top_k):
+	def __init__(self, input_path):
 		self.input_path = input_path
-		self.search_path = search_path
 		with open(input_path) as f:
 			# [answer_id] -> samples
 			self.answers = json.load(f)
 
-		question_answer_count = defaultdict(int)
-		answer_questions = defaultdict(list)
-		with open(self.search_path, 'r') as f:
-			for line in f:
-				line = line.strip()
-				if line:
-					question_id, _, answer_id, rank, score, run_name = line.split()
-					if question_answer_count[question_id] > top_k:
-						continue
-					question_answer_count[question_id] += 1
-					answer_questions[answer_id].append(question_id)
-
 		self.examples = []
 		for answer_id, a_samples in self.answers.items():
-			if answer_id not in answer_questions:
-				continue
 			question_samples = []
 			for sample_id, a_sample_text in enumerate(a_samples):
 				example = {
