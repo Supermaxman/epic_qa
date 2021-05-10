@@ -15,10 +15,10 @@ export DATASET=expert
 
 # major hyper-parameters for system
 export SEARCH_TOP_K=500
-export RGQE_TOP_K=20
+export RGQE_TOP_K=100
 export RGQE_SELF_THRESHOLD=0.6
 export RGQE_TOP_C_THRESHOLD=0.6
-export RQE_TOP_THRESHOLD=0.0
+export RQE_TOP_THRESHOLD=0.01
 export RGQE_RATIO=0.9
 export RGQE_SEQ_LEN=96
 export RGQE_BATCH_SIZE=64
@@ -225,12 +225,14 @@ if [[ ${RUN_RGQE_SELF} = true ]]; then
     python rgqe/rgqe.py \
       --input_path ${EXP_ANSWER_FILE_PATH} \
       --output_path ${RGQE_SELF_PATH} \
+      --search_path ${RERANK_RUN_PATH} \
       --model_name ${RQE_MODEL_NAME} \
       --pre_model_name ${RQE_PRE_MODEL_NAME} \
       --max_seq_len ${RGQE_SEQ_LEN} \
       --batch_size ${RGQE_BATCH_SIZE} \
       --gpus ${GPUS} \
       --mode self \
+      --top_k ${RGQE_TOP_K} \
     ; \
     python rgqe/format_rgqe_self.py \
       --input_path ${RGQE_SELF_PATH} \
@@ -257,6 +259,7 @@ if [[ ${RUN_RGQE_QUESTION} = true ]]; then
       --batch_size ${RGQE_BATCH_SIZE} \
       --gpus ${GPUS} \
       --mode question \
+      --top_k ${RGQE_TOP_K} \
     ; \
     python rgqe/format_rgqe_question.py \
       --input_path ${RGQE_QUESTION_PATH} \
