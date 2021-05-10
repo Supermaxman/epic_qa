@@ -99,7 +99,9 @@ if __name__ == '__main__':
 		)
 	elif mode == 'self':
 		eval_dataset = RGQESelfPredictionDataset(
-			input_path
+			input_path,
+			search_path,
+			top_k
 		)
 	elif mode == 'top':
 		eval_dataset = RGQETopPredictionDataset(
