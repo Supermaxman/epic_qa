@@ -235,7 +235,8 @@ if __name__ == "__main__":
 			default_root_dir=save_directory,
 			max_epochs=epochs,
 			precision=precision,
-			deterministic=deterministic
+			deterministic=deterministic,
+			checkpoint_callback=False
 		)
 	else:
 		if len(gpus) > 1:
@@ -249,7 +250,8 @@ if __name__ == "__main__":
 			max_epochs=epochs,
 			precision=precision,
 			distributed_backend=backend,
-			deterministic=deterministic
+			deterministic=deterministic,
+			checkpoint_callback=False
 		)
 
 	if train_model:
