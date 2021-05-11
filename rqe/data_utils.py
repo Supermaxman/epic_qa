@@ -72,6 +72,8 @@ def load_q_hier_data(data_path):
 
 	pos_examples = data['pos_examples']
 	neg_examples = data['neg_examples']
+	random.shuffle(neg_examples)
+	neg_examples = neg_examples[:1000]
 	examples = []
 	for p_example in pos_examples + neg_examples:
 		example = {
@@ -81,6 +83,7 @@ def load_q_hier_data(data_path):
 			'label': p_example['label']
 		}
 		examples.append(example)
+
 	return examples
 
 
