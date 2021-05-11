@@ -88,7 +88,7 @@ class RQEBert(pl.LightningModule, ABC):
 	def _eval_epoch_end(self, outputs, name):
 		loss = torch.cat([x[f'{name}_batch_loss'] for x in outputs], dim=0).mean()
 		scores = torch.cat([x[f'{name}_batch_score'] for x in outputs], dim=0)
-		labels = torch.cat([x[f'{name}_batch_score'] for x in outputs], dim=0)
+		labels = torch.cat([x[f'{name}_batch_labels'] for x in outputs], dim=0)
 
 		f1, p, r, t, preds = compute_best_f1(scores, labels)
 		self.log(f'{name}_loss', loss)
@@ -399,7 +399,7 @@ class RQEPredictionBert(pl.LightningModule):
 
 			loss = torch.cat([x[f'{name}_batch_loss'] for x in outputs], dim=0).mean()
 			scores = torch.cat([x[f'{name}_batch_score'] for x in outputs], dim=0)
-			labels = torch.cat([x[f'{name}_batch_score'] for x in outputs], dim=0)
+			labels = torch.cat([x[f'{name}_batch_labels'] for x in outputs], dim=0)
 
 			f1, p, r, t, preds = compute_best_f1(scores, labels)
 			self.log(f'{name}_loss', loss)
