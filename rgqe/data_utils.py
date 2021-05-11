@@ -188,8 +188,12 @@ class RGQETopPredictionDataset(Dataset):
 					if question_answer_count[question_id] > top_k:
 						continue
 					question_answer_count[question_id] += 1
+					if answer_id not in self.answers:
+						continue
 					answer_sets = self.answers[answer_id]
 					answer_sets = {e['entailed_set_id']: e for e in answer_sets}
+					if answer_id not in self.qa_set_entailments[question_id]:
+						continue
 					for entailed_set_id, entail_prob in self.qa_set_entailments[question_id][answer_id]:
 						if entail_prob < threshold:
 							continue
