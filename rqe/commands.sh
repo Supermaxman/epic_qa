@@ -97,4 +97,6 @@ python -m rqe.rqe_train \
   --pre_model_name=models/quora-lm-models-mt-dnn-base-uncased \
   --model_type=lm \
   --load_model \
-  --batch_size=8
+  --learning_rate 5e-6 \
+  --batch_size=4 \
+  --epochs 10

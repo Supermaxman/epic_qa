@@ -8,6 +8,7 @@ from abc import ABC, abstractmethod
 import math
 import torch.distributed as dist
 import os
+import numpy as np
 
 
 class RQEBert(pl.LightningModule, ABC):
@@ -36,11 +37,10 @@ class RQEBert(pl.LightningModule, ABC):
 		return loss
 
 	def training_step(self, batch, batch_nb):
-		loss, logits, prediction, correct_count, total_count, accuracy = self._forward_step(batch, batch_nb)
+		loss, score, labels = self._forward_step(batch, batch_nb)
 
 		loss = loss.mean()
 		self.log('train_loss', loss)
-		self.log('train_accuracy', accuracy)
 		result = {
 			'loss': loss
 		}
@@ -66,31 +66,36 @@ class RQEBert(pl.LightningModule, ABC):
 		)
 		batch_size = logits.shape[0]
 		prediction = logits.max(dim=1)[1]
+		# positive probability
+		score = self.score_func(logits)[:, 1]
 		correct_count = (prediction.eq(labels)).float().sum()
 		total_count = float(batch_size)
 		accuracy = correct_count / batch_size
-		return loss, logits, prediction, correct_count, total_count, accuracy
+		return loss, score, labels
 
 	def _eval_step(self, batch, batch_nb, name):
-		loss, logits, prediction, correct_count, total_count, accuracy = self._forward_step(batch, batch_nb)
+		loss, score, labels = self._forward_step(batch, batch_nb)
 
 		result = {
 			f'{name}_loss': loss.mean(),
 			f'{name}_batch_loss': loss,
-			f'{name}_batch_accuracy': accuracy,
-			f'{name}_correct_count': correct_count,
-			f'{name}_total_count': total_count,
+			f'{name}_batch_score': score,
+			f'{name}_batch_labels': labels,
 		}
 
 		return result
 
 	def _eval_epoch_end(self, outputs, name):
 		loss = torch.cat([x[f'{name}_batch_loss'] for x in outputs], dim=0).mean()
-		correct_count = torch.stack([x[f'{name}_correct_count'] for x in outputs], dim=0).sum()
-		total_count = sum([x[f'{name}_total_count'] for x in outputs])
-		accuracy = correct_count / total_count
+		scores = torch.cat([x[f'{name}_batch_score'] for x in outputs], dim=0)
+		labels = torch.cat([x[f'{name}_batch_score'] for x in outputs], dim=0)
+
+		f1, p, r, t, preds = compute_best_f1(scores, labels)
 		self.log(f'{name}_loss', loss)
-		self.log(f'{name}_accuracy', accuracy)
+		self.log(f'{name}_f1', f1)
+		self.log(f'{name}_p', p)
+		self.log(f'{name}_r', r)
+		self.log(f'{name}_threshold', t)
 
 	def validation_epoch_end(self, outputs):
 		self._eval_epoch_end(outputs, 'val')
@@ -319,11 +324,10 @@ class RQEPredictionBert(pl.LightningModule):
 		return logits
 
 	def training_step(self, batch, batch_nb):
-		loss, logits, prediction, correct_count, total_count, accuracy = self._forward_step(batch, batch_nb)
+		loss, score, labels = self._forward_step(batch, batch_nb)
 
 		loss = loss.mean()
 		self.log('train_loss', loss)
-		self.log('train_accuracy', accuracy)
 		result = {
 			'loss': loss
 		}
@@ -341,6 +345,7 @@ class RQEPredictionBert(pl.LightningModule):
 			attention_mask=batch['attention_mask'],
 			token_type_ids=batch['token_type_ids'],
 		)
+		score = self.score_func(logits)[:, -1]
 		if not self.predict_mode:
 			labels = batch['labels']
 			loss = self._loss(
@@ -352,30 +357,26 @@ class RQEPredictionBert(pl.LightningModule):
 			correct_count = (prediction.eq(logits)).float().sum()
 			total_count = float(batch_size)
 			accuracy = correct_count / batch_size
-			return loss, labels, prediction, correct_count, total_count, accuracy
+			return loss, score, labels
 		else:
-			return logits
+			return score
 
 	def _eval_step(self, batch, batch_nb, name):
 		if not self.predict_mode:
-			loss, logits, prediction, correct_count, total_count, accuracy = self._forward_step(batch, batch_nb)
+			loss, score, labels = self._forward_step(batch, batch_nb)
 
 			result = {
 				f'{name}_loss': loss.mean(),
 				f'{name}_batch_loss': loss,
-				f'{name}_batch_accuracy': accuracy,
-				f'{name}_correct_count': correct_count,
-				f'{name}_total_count': total_count,
+				f'{name}_batch_score': score,
+				f'{name}_batch_labels': labels,
 			}
 
 			return result
 		else:
 			# [bsize, 2]
-			logits = self._forward_step(batch, batch_nb)
-			# [bsize, 2]
-			probs = self.score_func(logits)
-			# positive prob [bsize]
-			probs = probs[:, 1].detach()
+			score = self._forward_step(batch, batch_nb)
+			probs = score.detach()
 			device_id = get_device_id()
 			self.write_prediction_dict(
 				{
@@ -395,12 +396,18 @@ class RQEPredictionBert(pl.LightningModule):
 
 	def _eval_epoch_end(self, outputs, name):
 		if not self.predict_mode:
+
 			loss = torch.cat([x[f'{name}_batch_loss'] for x in outputs], dim=0).mean()
-			correct_count = torch.stack([x[f'{name}_correct_count'] for x in outputs], dim=0).sum()
-			total_count = sum([x[f'{name}_total_count'] for x in outputs])
-			accuracy = correct_count / total_count
+			scores = torch.cat([x[f'{name}_batch_score'] for x in outputs], dim=0)
+			labels = torch.cat([x[f'{name}_batch_score'] for x in outputs], dim=0)
+
+			f1, p, r, t, preds = compute_best_f1(scores, labels)
 			self.log(f'{name}_loss', loss)
-			self.log(f'{name}_accuracy', accuracy)
+			self.log(f'{name}_f1', f1)
+			self.log(f'{name}_p', p)
+			self.log(f'{name}_r', r)
+			self.log(f'{name}_threshold', t)
+
 		else:
 			pass
 
@@ -445,3 +452,39 @@ def get_device_id():
 		else:
 			device_id = 0
 	return device_id
+
+
+def compute_f1(scores, labels, threshold):
+	# [num_examples, num_misinfo]
+	predictions = (scores.gt(threshold)).long()
+	# label is positive and predicted positive
+	i_tp = (predictions.eq(1).float() * labels.eq(1).float()).sum()
+	# label is not positive and predicted positive
+	i_fp = (predictions.eq(1).float() * labels.ne(1).float()).sum()
+	# label is positive and predicted negative
+	i_fn = (predictions.ne(1).float() * labels.eq(1).float()).sum()
+	i_precision = i_tp / (torch.clamp(i_tp + i_fp, 1.0))
+	i_recall = i_tp / torch.clamp(i_tp + i_fn, 1.0)
+
+	i_f1 = 2.0 * (i_precision * i_recall) / (torch.clamp(i_precision + i_recall, 1e-6))
+	return i_f1, i_precision, i_recall, predictions
+
+
+def compute_best_f1(scores, labels, threshold_range=None):
+	if threshold_range is None:
+		threshold_range = np.arange(0.0, 1.0, step=0.01)
+	best_f1 = float('-inf')
+	best_p = None
+	best_r = None
+	best_preds = None
+	best_t = None
+	for threshold in threshold_range:
+		i_f1, i_p, i_r, i_preds = compute_f1(scores, labels, threshold)
+		if i_f1 > best_f1:
+			best_f1 = i_f1
+			best_p = i_p
+			best_r = i_r
+			best_preds = i_preds
+			best_t = threshold
+
+	return best_f1, best_p, best_r, best_t, best_preds
