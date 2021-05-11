@@ -90,7 +90,7 @@ if __name__ == "__main__":
 		val_examples, _ = split_data(other_examples, ratio=0.5)
 
 	elif dataset == 'q_hier':
-		train_path = 'data/q_hier/q_hier/train.json'
+		train_path = 'data/q_hier/q_hier_train.json'
 		test_path = 'data/q_hier/q_hier_val.json'
 		max_seq_len = 64
 		# do 80% train 10% dev 10% test
