@@ -88,15 +88,15 @@ python -m rqe.rqe_eval \
   --model_type=lm \
   --batch_size=128
 
-# q_hier val results:
-# quora-seq-nboost-pt-bert-base-uncased-msmarco 0.7339
-# quora-lm-models-mt-dnn-base-uncased           0.7581
+# q_hier val results (F1):
+# quora-seq-nboost-pt-bert-base-uncased-msmarco 0.2368
+# quora-lm-models-mt-dnn-base-uncased           0.2105
 
 python -m rqe.rqe_train \
   --dataset=q_hier \
   --pre_model_name=models/quora-lm-models-mt-dnn-base-uncased \
   --model_type=lm \
   --load_model \
-  --learning_rate 5e-6 \
+  --learning_rate 5e-5 \
   --batch_size=4 \
   --epochs 10
