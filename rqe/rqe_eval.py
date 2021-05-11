@@ -13,7 +13,7 @@ import torch
 from rqe.model_utils import RQEBertFromSequenceClassification, RQEBertFromLanguageModel, \
 	RQEATBertFromSequenceClassification
 from rqe.data_utils import BatchCollator, RQEDataset, load_clinical_data, load_quora_data, split_data, \
-	load_smart_maps, load_at_predictions
+	load_smart_maps, load_at_predictions, load_q_hier_data
 
 
 if __name__ == "__main__":
@@ -88,6 +88,12 @@ if __name__ == "__main__":
 		# 10/10
 		_, eval_examples = split_data(other_examples, ratio=0.5)
 
+	elif dataset == 'q_hier':
+		test_path = 'data/q_hier/q_hier_val.json'
+		max_seq_len = 64
+		# do 80% train 10% dev 10% test
+		logging.info('Loading q_hier dataset...')
+		eval_examples = load_q_hier_data(test_path)
 	else:
 		raise ValueError(f'Unknown dataset: {dataset}')
 
@@ -140,9 +146,7 @@ if __name__ == "__main__":
 		collate_fn=BatchCollator(
 			tokenizer,
 			max_seq_len,
-			force_max_seq_len=use_tpus,
-			category_map=category_map,
-			types_map=types_map
+			force_max_seq_len=use_tpus
 		)
 	)
 	logging.info('Loading model...')
