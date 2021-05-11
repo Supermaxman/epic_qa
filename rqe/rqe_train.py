@@ -42,7 +42,7 @@ if __name__ == "__main__":
 	pl.seed_everything(seed)
 	dataset = args.dataset.lower()
 	model_type = args.model_type.lower()
-	pre_model_name = args.pre_model_name.lower()
+	pre_model_name = args.pre_model_name
 	at_model = args.at_model.lower()
 
 	torch_cache_dir = args.torch_cache_dir

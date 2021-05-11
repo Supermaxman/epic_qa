@@ -41,7 +41,7 @@ if __name__ == "__main__":
 	pl.seed_everything(seed)
 	dataset = args.dataset.lower()
 	model_type = args.model_type.lower()
-	pre_model_name = args.pre_model_name.lower()
+	pre_model_name = args.pre_model_name
 	at_model = args.at_model.lower()
 
 	torch_cache_dir = args.torch_cache_dir
@@ -99,7 +99,7 @@ if __name__ == "__main__":
 		raise ValueError(f'Unknown dataset: {dataset}')
 
 	# model_name = f'{dataset}-{model_type}-{pre_model_name.replace("/", "-")}'
-	model_name = args.model_name.lower()
+	model_name = args.model_name
 	# export TPU_IP_ADDRESS=10.155.6.34
 	# export XRT_TPU_CONFIG="tpu_worker;0;$TPU_IP_ADDRESS:8470"
 	# TODO move to args

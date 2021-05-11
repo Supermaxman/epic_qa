@@ -90,7 +90,9 @@ python -m rqe.rqe_eval \
 
 # q_hier val results (F1):
 # quora-seq-nboost-pt-bert-base-uncased-msmarco 0.2368
+#                                               0.2957
 # quora-lm-models-mt-dnn-base-uncased           0.2105
+#                                               0.2991
 
 python -m rqe.rqe_train \
   --dataset=q_hier \
@@ -104,6 +106,15 @@ python -m rqe.rqe_train \
 python -m rqe.rqe_train \
   --dataset=q_hier \
   --pre_model_name=models/quora-seq-nboost-pt-bert-base-uncased-msmarco \
+  --model_type=seq \
+  --load_model \
+  --learning_rate 5e-5 \
+  --batch_size=4 \
+  --epochs 10
+
+python -m rqe.rqe_train \
+  --dataset=q_hier \
+  --pre_model_name=models/rerank-expert-HLTRI_REGEQUES_RERANK_1 \
   --model_type=seq \
   --load_model \
   --learning_rate 5e-5 \
