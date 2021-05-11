@@ -19,13 +19,13 @@ export DATASET=expert
 export SEARCH_TOP_K=500
 export NEGATIVE_SAMPLES=800
 # 100 for run_3, 20
-export RGQE_TOP_K=20
+export RGQE_TOP_K=100
 # 0.6 for run_3, 0.6
 export RGQE_SELF_THRESHOLD=0.6
 # 0.6 for run_3, 0.6
 export RGQE_TOP_C_THRESHOLD=0.6
 # 0.01 for run_3, 0.0
-export RQE_TOP_THRESHOLD=0.0
+export RQE_TOP_THRESHOLD=0.01
 export RGQE_RATIO=0.9
 export RGQE_SEQ_LEN=96
 export RGQE_BATCH_SIZE=64
@@ -68,7 +68,7 @@ export EVAL_RGQE=true
 export RERANK_MODEL_NAME=rerank-${DATASET}-${RERANK_RUN_MODEL_NAME}
 #export RERANK_MODEL_NAME=rerank-expert-passage-large-HLTRI_RERANK_15
 export EXP_MODEL_NAME=docT5query-base
-export RQE_MODEL_NAME=quora-lm-models-mt-dnn-base-uncased
+export RQE_MODEL_NAME=q_hier-lm-models-quora-lm-models-mt-dnn-base-uncased
 export RQE_PRE_MODEL_NAME=models/mt-dnn-base-uncased
 
 export RERANK_PRE_MODEL_NAME=nboost/pt-biobert-base-msmarco
