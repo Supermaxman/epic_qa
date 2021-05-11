@@ -21,11 +21,11 @@ def load_predictions(input_path):
 	sample_entail_pairs = defaultdict(lambda: defaultdict(list))
 	probs = []
 	for prediction in tqdm(pred_list):
-		answer_a_id, entailed_set_id = get_id(prediction['question_a_id'])
-		question_id = prediction['question_b_id']
+		answer_id, entailed_set_id = get_id(prediction['question_b_id'])
+		question_id = prediction['question_a_id']
 		entail_prob = prediction['entail_prob']
 		probs.append(entail_prob)
-		sample_entail_pairs[question_id][answer_a_id].append((entailed_set_id, entail_prob))
+		sample_entail_pairs[question_id][answer_id].append((entailed_set_id, entail_prob))
 	print(f'min={min(probs)}')
 	print(f'max={max(probs)}')
 	return sample_entail_pairs
