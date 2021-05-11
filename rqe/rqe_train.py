@@ -9,6 +9,7 @@ from torch.utils.data import DataLoader
 from pytorch_lightning import loggers as pl_loggers
 # note: do NOT import torch before pytorch_lightning, really breaks TPUs
 import torch
+import random
 
 from rqe.model_utils import RQEBertFromSequenceClassification, RQEBertFromLanguageModel, \
 	RQEATBertFromSequenceClassification
@@ -96,6 +97,7 @@ if __name__ == "__main__":
 		# do 80% train 10% dev 10% test
 		logging.info('Loading q_hier dataset...')
 		train_examples = load_q_hier_data(train_path)
+		random.shuffle(train_examples)
 		val_examples = load_q_hier_data(test_path)
 
 	else:
