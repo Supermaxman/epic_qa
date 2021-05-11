@@ -19,6 +19,7 @@ from rqe.data_utils import BatchCollator, RQEDataset, load_clinical_data, load_q
 if __name__ == "__main__":
 	parser = argparse.ArgumentParser()
 	parser.add_argument('--dataset', help='clinical-qe/quora', type=str, default='quora')
+	parser.add_argument('--model_name', type=str, default='nboost/pt-bert-base-uncased-msmarco')
 	parser.add_argument('--pre_model_name', type=str, default='nboost/pt-bert-base-uncased-msmarco')
 	parser.add_argument('--at_model', type=str, default='models/smart-dbpedia-at-v3')
 	parser.add_argument('--model_type', help='seq/lm/seq-at', type=str, default='seq')
@@ -97,7 +98,8 @@ if __name__ == "__main__":
 	else:
 		raise ValueError(f'Unknown dataset: {dataset}')
 
-	model_name = f'{dataset}-{model_type}-{pre_model_name.replace("/", "-")}'
+	# model_name = f'{dataset}-{model_type}-{pre_model_name.replace("/", "-")}'
+	model_name = args.model_name.lower()
 	# export TPU_IP_ADDRESS=10.155.6.34
 	# export XRT_TPU_CONFIG="tpu_worker;0;$TPU_IP_ADDRESS:8470"
 	# TODO move to args

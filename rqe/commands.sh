@@ -76,12 +76,14 @@ python -m rqe.rqe_eval \
 
 python -m rqe.rqe_eval \
   --dataset=q_hier \
+  --model_name=quora-seq-nboost-pt-bert-base-uncased-msmarco \
   --pre_model_name=nboost/pt-bert-base-uncased-msmarco \
   --model_type=seq \
   --batch_size=128
 
 python -m rqe.rqe_eval \
   --dataset=q_hier \
+  --model_name=quora-lm-models-mt-dnn-base-uncased \
   --pre_model_name=models/mt-dnn-base-uncased \
   --model_type=lm \
   --batch_size=128
