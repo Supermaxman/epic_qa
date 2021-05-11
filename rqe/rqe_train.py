@@ -13,7 +13,7 @@ import torch
 from rqe.model_utils import RQEBertFromSequenceClassification, RQEBertFromLanguageModel, \
 	RQEATBertFromSequenceClassification
 from rqe.data_utils import BatchCollator, RQEDataset, load_clinical_data, load_quora_data, split_data, \
-	load_smart_maps, load_at_predictions
+	load_smart_maps, load_at_predictions, load_q_hier_data
 
 
 if __name__ == "__main__":
@@ -33,6 +33,7 @@ if __name__ == "__main__":
 	parser.add_argument('--lr_warmup', type=float, default=0.1)
 	parser.add_argument('--weight_decay', type=float, default=0.01)
 	parser.add_argument('--save_directory', type=str, default='models')
+	parser.add_argument('--load_model', action='store_true', default=False)
 
 	args = parser.parse_args()
 	# TODO parameterize below into config file for reproducibility
@@ -88,6 +89,15 @@ if __name__ == "__main__":
 		# 10/10
 		val_examples, _ = split_data(other_examples, ratio=0.5)
 
+	elif dataset == 'q_hier':
+		train_path = 'data/q_hier/q_hier/train.json'
+		test_path = 'data/q_hier/q_hier_val.json'
+		max_seq_len = 64
+		# do 80% train 10% dev 10% test
+		logging.info('Loading q_hier dataset...')
+		train_examples = load_q_hier_data(train_path)
+		val_examples = load_q_hier_data(test_path)
+
 	else:
 		raise ValueError(f'Unknown dataset: {dataset}')
 
@@ -97,7 +107,7 @@ if __name__ == "__main__":
 	# TODO move to args
 	use_tpus = False
 	train_model = True
-	load_model = False
+	load_model = args.load_model
 	calc_seq_len = False
 	is_distributed = False
 
@@ -110,7 +120,7 @@ if __name__ == "__main__":
 	save_directory = os.path.join(root_save_directory, model_name)
 
 	checkpoint_path = os.path.join(save_directory, 'pytorch_model.bin')
-
+	pre_checkpoint_path = os.path.join(args.pre_model_name, 'pytorch_model.bin')
 	if not os.path.exists(save_directory):
 		os.mkdir(save_directory)
 
@@ -145,9 +155,7 @@ if __name__ == "__main__":
 		collate_fn=BatchCollator(
 			tokenizer,
 			max_seq_len,
-			force_max_seq_len=use_tpus,
-			category_map=category_map,
-			types_map=types_map
+			force_max_seq_len=use_tpus
 		)
 	)
 
@@ -160,9 +168,7 @@ if __name__ == "__main__":
 			collate_fn=BatchCollator(
 				tokenizer,
 				max_seq_len,
-				force_max_seq_len=False,
-				category_map=category_map,
-				types_map=types_map
+				force_max_seq_len=False
 			)
 		)
 		import numpy as np
@@ -183,9 +189,7 @@ if __name__ == "__main__":
 		collate_fn=BatchCollator(
 			tokenizer,
 			max_seq_len,
-			force_max_seq_len=use_tpus,
-			category_map=category_map,
-			types_map=types_map
+			force_max_seq_len=use_tpus
 		)
 	)
 	logging.info('Loading model...')
@@ -210,7 +214,8 @@ if __name__ == "__main__":
 			torch_cache_dir=torch_cache_dir
 		)
 	if load_model:
-		model.load_state_dict(torch.load(checkpoint_path))
+		logging.info(f'Loading from checkpoint: {pre_checkpoint_path}')
+		model.load_state_dict(torch.load(pre_checkpoint_path))
 	else:
 		tokenizer.save_pretrained(save_directory)
 		model.config.save_pretrained(save_directory)
