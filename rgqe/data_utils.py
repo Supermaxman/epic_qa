@@ -144,10 +144,10 @@ class RGQEQuestionPredictionDataset(Dataset):
 					entailed_set_id = entailed_set['entailed_set_id']
 					entailed_set_sample_text = entailed_set['entailed_set'][0]['sample_text']
 					example = {
-						'question_a_id': f'{answer_id}|{entailed_set_id}',
-						'question_b_id': question_id,
-						'question_a_text': entailed_set_sample_text,
-						'question_b_text': question_text,
+						'question_a_id': question_id,
+						'question_b_id': f'{answer_id}|{entailed_set_id}',
+						'question_a_text': question_text,
+						'question_b_text': entailed_set_sample_text,
 					}
 					self.examples.append(example)
 
