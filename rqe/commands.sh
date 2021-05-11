@@ -100,3 +100,12 @@ python -m rqe.rqe_train \
   --learning_rate 5e-5 \
   --batch_size=4 \
   --epochs 10
+
+python -m rqe.rqe_train \
+  --dataset=q_hier \
+  --pre_model_name=models/quora-seq-nboost-pt-bert-base-uncased-msmarco \
+  --model_type=seq \
+  --load_model \
+  --learning_rate 5e-5 \
+  --batch_size=4 \
+  --epochs 10
