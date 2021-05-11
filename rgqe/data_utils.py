@@ -5,6 +5,7 @@ from torch.utils.data import Dataset
 from collections import defaultdict
 import itertools
 import os
+import string
 
 
 class PredictionBatchCollator(object):
@@ -94,13 +95,22 @@ class RGQESelfPredictionDataset(Dataset):
 				question_samples.append(example)
 
 			for sample_a, sample_b in itertools.combinations(question_samples, r=2):
-				example = {
+				example_a = {
 					'question_a_id': sample_a['id'],
 					'question_b_id': sample_b['id'],
 					'question_a_text': sample_a['sample_text'],
 					'question_b_text': sample_b['sample_text'],
 				}
-				self.examples.append(example)
+				example_b = {
+					'question_a_id': sample_b['id'],
+					'question_b_id': sample_a['id'],
+					'question_a_text': sample_b['sample_text'],
+					'question_b_text': sample_a['sample_text'],
+				}
+				self.examples.append(example_a)
+				self.examples.append(example_b)
+
+		self.examples, self.labeled_examples = find_near_exact_questions(self.examples)
 
 	def __len__(self):
 		return len(self.examples)
@@ -150,6 +160,7 @@ class RGQEQuestionPredictionDataset(Dataset):
 						'question_b_text': entailed_set_sample_text,
 					}
 					self.examples.append(example)
+		self.examples, self.labeled_examples = find_near_exact_questions(self.examples)
 
 	def __len__(self):
 		return len(self.examples)
@@ -234,13 +245,22 @@ class RGQETopPredictionDataset(Dataset):
 				# TODO allow for inversion b-> a
 				for sample_a in qa_samples:
 					for sample_b in qb_samples:
-						example = {
+						example_a = {
 							'question_a_id': sample_a['id'],
 							'question_b_id': sample_b['id'],
 							'question_a_text': sample_a['entailed_set_text'],
 							'question_b_text': sample_b['entailed_set_text'],
 						}
-						self.examples.append(example)
+						self.examples.append(example_a)
+						example_b = {
+							'question_a_id': sample_b['id'],
+							'question_b_id': sample_a['id'],
+							'question_a_text': sample_b['entailed_set_text'],
+							'question_b_text': sample_a['entailed_set_text'],
+						}
+						self.examples.append(example_b)
+
+		self.examples, self.labeled_examples = find_near_exact_questions(self.examples)
 
 	def __len__(self):
 		return len(self.examples)
@@ -319,3 +339,40 @@ class RGQEAllPredictionDataset(Dataset):
 		example = self.examples[idx]
 
 		return example
+
+
+def find_near_exact_questions(examples):
+	final_examples = []
+	key_labels = []
+	for example in examples:
+		a_key = near_exact_key(example['question_a_text'])
+		b_key = near_exact_key(example['question_b_text'])
+		if a_key == b_key:
+			key_labels.append(
+				{
+					'question_a_id': example['question_a_id'],
+					'question_b_id': example['question_b_id'],
+					'entail_prob': 1.0
+				}
+			)
+		else:
+			final_examples.append(example)
+	return final_examples, key_labels
+
+
+trans_dict = {}
+for c in string.punctuation:
+	trans_dict[c] = ''
+for c in string.digits:
+	trans_dict[c] = ''
+for c in string.whitespace:
+	trans_dict[c] = ''
+
+trans_dict = str.maketrans(trans_dict)
+
+
+def near_exact_key(ex_txt):
+	ex_txt = ex_txt.lower()
+	txt_key = ex_txt.translate(trans_dict)
+	return txt_key
+

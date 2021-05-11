@@ -139,6 +139,13 @@ if __name__ == '__main__':
 	else:
 		raise ValueError(f'Unknown mode: {mode}')
 	logging.info(f'num_examples={len(eval_dataset)}')
+	labeled_examples = eval_dataset.labeled_examples
+	logging.info(f'num_labeled_examples={len(labeled_examples)}')
+	# TODO save these & then merge with other
+	labeled_output_path = os.path.join(output_path, f'labels.{mode}')
+	with open(labeled_output_path, 'w') as f:
+		json.dump(labeled_examples, f)
+
 	eval_data_loader = DataLoader(
 		eval_dataset,
 		batch_size=batch_size,

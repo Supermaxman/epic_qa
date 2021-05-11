@@ -16,8 +16,13 @@ def load_predictions(input_path):
 	pred_list = []
 	for file_name in os.listdir(input_path):
 		if file_name.endswith('.top'):
-			preds = torch.load(os.path.join(input_path, file_name))
-			pred_list.extend(preds)
+			if file_name.startswith('labels'):
+				with open(os.path.join(input_path, file_name)) as f:
+					preds = json.load(f)
+				pred_list.extend(preds)
+			else:
+				preds = torch.load(os.path.join(input_path, file_name))
+				pred_list.extend(preds)
 	sample_entail_pairs = defaultdict(list)
 	probs = []
 	for prediction in tqdm(pred_list):
