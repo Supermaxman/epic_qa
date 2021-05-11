@@ -179,7 +179,7 @@ class RGQETopPredictionDataset(Dataset):
 			self.qa_set_entailments = json.load(f)
 
 		question_answer_count = defaultdict(int)
-		question_samples = defaultdict(list)
+		question_samples = defaultdict(lambda: defaultdict(list))
 		with open(self.search_path, 'r') as f:
 			for line in f:
 				line = line.strip()
@@ -200,22 +200,43 @@ class RGQETopPredictionDataset(Dataset):
 							'answer_id': answer_id,
 							'entailed_set_text': entailed_set_sample_text
 						}
-						question_samples[question_id].append(example)
+						question_samples[question_id][answer_id].append(example)
 
 		self.examples = []
+		# for question_id, q_samples in question_samples.items():
+		# 	print(f'{question_id}: {len(q_samples)}')
+		# 	for sample_a, sample_b in itertools.combinations(q_samples, r=2):
+		# 		# ignore self entailment since that was already computed
+		# 		if sample_a['answer_id'] == sample_b['answer_id']:
+		# 			continue
+		# 		example = {
+		# 			'question_a_id': sample_a['id'],
+		# 			'question_b_id': sample_b['id'],
+		# 			'question_a_text': sample_a['entailed_set_text'],
+		# 			'question_b_text': sample_b['entailed_set_text'],
+		# 		}
+		# 		self.examples.append(example)
+
+		# # TODO do a binary tree on questions for better efficiency,
+		# # TODO but would require iterative approach
 		for question_id, q_samples in question_samples.items():
-			print(f'{question_id}: {len(q_samples)}')
-			for sample_a, sample_b in itertools.combinations(q_samples, r=2):
+			# print(f'{question_id}: {len(q_samples)}')
+			for answer_a_id, answer_b_id in itertools.combinations(q_samples.keys(), r=2):
 				# ignore self entailment since that was already computed
-				if sample_a['answer_id'] == sample_b['answer_id']:
+				if answer_a_id == answer_b_id:
 					continue
-				example = {
-					'question_a_id': sample_a['id'],
-					'question_b_id': sample_b['id'],
-					'question_a_text': sample_a['entailed_set_text'],
-					'question_b_text': sample_b['entailed_set_text'],
-				}
-				self.examples.append(example)
+				qa_samples = q_samples[answer_a_id]
+				qb_samples = q_samples[answer_b_id]
+				# TODO allow for inversion b-> a
+				for sample_a in qa_samples:
+					for sample_b in qb_samples:
+						example = {
+							'question_a_id': sample_a['id'],
+							'question_b_id': sample_b['id'],
+							'question_a_text': sample_a['entailed_set_text'],
+							'question_b_text': sample_b['entailed_set_text'],
+						}
+						self.examples.append(example)
 
 	def __len__(self):
 		return len(self.examples)
