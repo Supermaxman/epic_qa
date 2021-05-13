@@ -21,6 +21,7 @@ class RGQEPredictionBert(pl.LightningModule):
 		self.updates_total = updates_total
 		self.predict_mode = predict_mode
 		self.predict_path = predict_path
+		self.model_type = model_type
 		if model_type == 'seq':
 			self.bert = AutoModelForSequenceClassification.from_pretrained(
 				pre_model_name,
@@ -42,7 +43,7 @@ class RGQEPredictionBert(pl.LightningModule):
 		self.save_hyperparameters()
 
 	def forward(self, input_ids, attention_mask, token_type_ids):
-		if self.mode_type == 'seq':
+		if self.model_type == 'seq':
 			logits = self.bert(
 				input_ids,
 				attention_mask=attention_mask,
