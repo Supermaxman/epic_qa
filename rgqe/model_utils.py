@@ -10,7 +10,7 @@ import os
 class RGQEPredictionBert(pl.LightningModule):
 	def __init__(
 			self, pre_model_name, learning_rate, weight_decay, lr_warmup, updates_total, mode,
-			torch_cache_dir, predict_mode=False, predict_path=None):
+			torch_cache_dir=None, model_type='seq', predict_mode=False, predict_path=None):
 		super().__init__()
 		self.mode = mode
 		self.pre_model_name = pre_model_name
@@ -21,40 +21,48 @@ class RGQEPredictionBert(pl.LightningModule):
 		self.updates_total = updates_total
 		self.predict_mode = predict_mode
 		self.predict_path = predict_path
-		# self.bert = AutoModelForSequenceClassification.from_pretrained(
-		# 	pre_model_name,
-		# 	cache_dir=torch_cache_dir
-		# )
-		self.bert = BertModel.from_pretrained(
-			pre_model_name,
-			cache_dir=torch_cache_dir
-		)
-		self.classifier = torch.nn.Linear(
-			self.bert.config.hidden_size,
-			2
-		)
+		if model_type == 'seq':
+			self.bert = AutoModelForSequenceClassification.from_pretrained(
+				pre_model_name,
+				cache_dir=torch_cache_dir
+			)
+		elif model_type == 'lm':
+			self.bert = BertModel.from_pretrained(
+				pre_model_name,
+				cache_dir=torch_cache_dir
+			)
+			self.classifier = torch.nn.Linear(
+				self.bert.config.hidden_size,
+				2
+			)
+		else:
+			raise ValueError(f'Unknown model type: {model_type}')
 		self.score_func = torch.nn.Softmax(dim=-1)
 		self.config = self.bert.config
 		self.save_hyperparameters()
-	#
-	# def forward(self, input_ids, attention_mask, token_type_ids):
-	# 	# [batch_size, 2]
-	# 	logits = self.bert(
-	# 		input_ids,
-	# 		attention_mask=attention_mask,
-	# 		token_type_ids=token_type_ids
-	# 	)[0]
-	# 	return logits
 
 	def forward(self, input_ids, attention_mask, token_type_ids):
-		cls_embeddings = self.bert(
-			input_ids,
-			attention_mask=attention_mask,
-			token_type_ids=token_type_ids
-		)[0][:, 0]
-		# [batch_size, 2]
-		logits = self.classifier(cls_embeddings)
-		scores = self.score_func(logits)
+		if self.mode_type == 'seq':
+			logits = self.bert(
+				input_ids,
+				attention_mask=attention_mask,
+				token_type_ids=token_type_ids
+			)[0]
+			scores = self.score_func(logits)
+			return logits, scores
+
+		elif self.model_type == 'lm':
+			cls_embeddings = self.bert(
+				input_ids,
+				attention_mask=attention_mask,
+				token_type_ids=token_type_ids
+			)[0][:, 0]
+			# [batch_size, 2]
+			logits = self.classifier(cls_embeddings)
+			scores = self.score_func(logits)
+		else:
+			raise ValueError(f'Unknown model type: {self.model_type}')
+
 		return logits, scores
 
 	def training_step(self, batch, batch_nb):
@@ -93,7 +101,7 @@ class RGQEPredictionBert(pl.LightningModule):
 			accuracy = correct_count / batch_size
 			return loss, labels, prediction, correct_count, total_count, accuracy
 		else:
-			return logits
+			return logits, scores
 
 	def _eval_step(self, batch, batch_nb, name):
 		if not self.predict_mode:
@@ -110,9 +118,9 @@ class RGQEPredictionBert(pl.LightningModule):
 			return result
 		else:
 			# [bsize, 2]
-			logits = self._forward_step(batch, batch_nb)
+			logits, scores = self._forward_step(batch, batch_nb)
 			# [bsize, 2]
-			probs = self.score_func(logits)
+			probs = scores
 			# positive prob [bsize]
 			probs = probs[:, 1].detach()
 			device_id = get_device_id()

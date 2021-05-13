@@ -1,12 +1,12 @@
 import json
 import argparse
 import os
+from collections import defaultdict
 import pytorch_lightning as pl
 from transformers import AutoTokenizer
 from torch.utils.data import DataLoader
-from model_utils import RGQEPredictionBert
-from data_utils import RGQEAllPredictionDataset, RGQESelfPredictionDataset, RGQETopPredictionDataset, \
-	RGQEQuestionPredictionDataset, PredictionBatchCollator
+from model_utils import RerankBert
+from data_utils import QueryPassageDataset, PredictionBatchCollator, GeneratedQueryPassageDataset
 import logging
 from pytorch_lightning import loggers as pl_loggers
 import torch
@@ -16,48 +16,39 @@ if __name__ == '__main__':
 	parser = argparse.ArgumentParser()
 	parser.add_argument('-i', '--input_path', required=True)
 	parser.add_argument('-o', '--output_path', required=True)
-	parser.add_argument('-mn', '--model_name', default='quora-seq-at-nboost-pt-bert-base-uncased-msmarco')
-	parser.add_argument('-pm', '--pre_model_name', default='nboost/pt-bert-base-uncased-msmarco')
-	parser.add_argument('-bs', '--batch_size', default=64, type=int)
+	parser.add_argument('-c', '--collection_path', required=True)
+	parser.add_argument('-pm', '--pre_model_name', default='nboost/pt-biobert-base-msmarco')
+	parser.add_argument('-mn', '--model_name', default='pt-biobert-base-msmarco')
+	parser.add_argument('-sd', '--save_directory', default='models')
+	parser.add_argument('-bs', '--batch_size', default=16, type=int)
 	parser.add_argument('-ml', '--max_seq_len', default=128, type=int)
 	parser.add_argument('-se', '--seed', default=0, type=int)
 	parser.add_argument('-cd', '--torch_cache_dir', default=None)
 	parser.add_argument('-tpu', '--use_tpus', default=False, action='store_true')
-	parser.add_argument('-m', '--mode', required=True, help='all/self/top')
-	parser.add_argument('-k', '--top_k', default=10000, type=int)
-	parser.add_argument('-sd', '--save_directory', default='models')
-	parser.add_argument('-sp', '--search_path', default=None)
-	parser.add_argument('-qp', '--query_path', default=None)
-	parser.add_argument('-lp', '--label_path', default=None)
-	parser.add_argument('-qe', '--qe_path', default=None)
-	parser.add_argument('-cc', '--cc_path', default=None)
-	parser.add_argument('-te', '--threshold', default=0.5, type=float)
+	parser.add_argument('-lt', '--load_trained_model', default=False, action='store_true')
 	parser.add_argument('-gpu', '--gpus', default='0')
-	parser.add_argument('-mt', '--model_type', default='seq')
 
 	args = parser.parse_args()
 	seed = args.seed
 	pl.seed_everything(seed)
 
+	save_directory = args.save_directory
 	model_name = args.model_name
-	save_directory = os.path.join(args.save_directory, model_name)
-	checkpoint_path = os.path.join(save_directory, 'pytorch_model.bin')
-	pre_model_name = args.pre_model_name
+	save_directory = os.path.join(save_directory, model_name)
 
+	if not os.path.exists(save_directory):
+		os.mkdir(save_directory)
+
+	collection_path = args.collection_path
 	input_path = args.input_path
 	output_path = args.output_path
+
+	pre_model_name = args.pre_model_name
 	tokenizer_name = pre_model_name
 	batch_size = args.batch_size
 	max_seq_len = args.max_seq_len
 	torch_cache_dir = args.torch_cache_dir
-	mode = args.mode.lower()
-	top_k = args.top_k
-	search_path = args.search_path
-	query_path = args.query_path
-	label_path = args.label_path
-	qe_path = args.qe_path
-	cc_path = args.cc_path
-	threshold = args.threshold
+	load_trained_model = args.load_trained_model
 
 	# export TPU_IP_ADDRESS=10.155.6.34
 	# export XRT_TPU_CONFIG="tpu_worker;0;$TPU_IP_ADDRESS:8470"
@@ -68,8 +59,10 @@ if __name__ == '__main__':
 	precision = 16 if use_tpus else 32
 	# precision = 32
 	tpu_cores = 8
-	num_workers = 4
+	num_workers = 1
 	deterministic = True
+
+	checkpoint_path = os.path.join(save_directory, 'pytorch_model.bin')
 
 	if not os.path.exists(output_path):
 		os.mkdir(output_path)
@@ -90,63 +83,12 @@ if __name__ == '__main__':
 
 	logging.info(f'Loading tokenizer: {tokenizer_name}')
 	tokenizer = AutoTokenizer.from_pretrained(tokenizer_name)
-	logging.info(f'Loading {mode} dataset...')
-	if mode == 'all':
-		eval_dataset = RGQEAllPredictionDataset(
-			input_path,
-			qe_path,
-			cc_path,
-			threshold=threshold
-		)
-	elif mode == 'self':
-		eval_dataset = RGQESelfPredictionDataset(
-			input_path,
-			search_path,
-			top_k
-		)
-	elif mode == 'top':
-		eval_dataset = RGQETopPredictionDataset(
-			input_path,
-			qe_path,
-			search_path,
-			top_k,
-			threshold=threshold
-		)
-	elif mode == 'question':
-		logging.info('Loading queries...')
-		keep_ids = None
-		if label_path:
-			keep_ids = set()
-			with open(label_path) as f:
-				questions = json.load(f)
-				for question in questions:
-					question_id = question['question_id']
-					keep_ids.add(question_id)
-
-		queries = []
-		with open(query_path) as f:
-			all_queries = json.load(f)
-			for query in all_queries:
-				if keep_ids is not None and query['question_id'] not in keep_ids:
-					continue
-				else:
-					queries.append(query)
-		eval_dataset = RGQEQuestionPredictionDataset(
-			input_path,
-			search_path,
-			queries,
-			top_k,
-		)
-	else:
-		raise ValueError(f'Unknown mode: {mode}')
-	logging.info(f'num_examples={len(eval_dataset)}')
-	labeled_examples = eval_dataset.labeled_examples
-	logging.info(f'num_labeled_examples={len(labeled_examples)}')
-	# TODO save these & then merge with other
-	labeled_output_path = os.path.join(output_path, f'labels.{mode}')
-	with open(labeled_output_path, 'w') as f:
-		json.dump(labeled_examples, f)
-
+	logging.info(f'Loading dataset: {collection_path}')
+	eval_dataset = GeneratedQueryPassageDataset(
+		input_path,
+		collection_path
+	)
+	logging.info(f'Loaded dataset, #examples={len(eval_dataset)}')
 	eval_data_loader = DataLoader(
 		eval_dataset,
 		batch_size=batch_size,
@@ -160,19 +102,20 @@ if __name__ == '__main__':
 	)
 
 	logging.info('Loading model...')
-	model = RGQEPredictionBert(
+	model = RerankBert(
 		pre_model_name=pre_model_name,
 		learning_rate=5e-5,
 		lr_warmup=0.1,
 		updates_total=0,
 		weight_decay=0.01,
-		mode=mode,
 		torch_cache_dir=torch_cache_dir,
 		predict_mode=True,
-		predict_path=output_path,
-		model_type=args.model_type
+		predict_path=output_path
 	)
-	model.load_state_dict(torch.load(checkpoint_path))
+
+	if load_trained_model:
+		logging.warning(f'Loading weights from trained checkpoint: {checkpoint_path}...')
+		model.load_state_dict(torch.load(checkpoint_path))
 
 	logger = pl_loggers.TensorBoardLogger(
 		save_dir=save_directory,

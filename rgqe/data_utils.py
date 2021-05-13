@@ -101,14 +101,15 @@ class RGQESelfPredictionDataset(Dataset):
 					'question_a_text': sample_a['sample_text'],
 					'question_b_text': sample_b['sample_text'],
 				}
-				example_b = {
-					'question_a_id': sample_b['id'],
-					'question_b_id': sample_a['id'],
-					'question_a_text': sample_b['sample_text'],
-					'question_b_text': sample_a['sample_text'],
-				}
 				self.examples.append(example_a)
-				self.examples.append(example_b)
+				# TODO inversions b->a
+				# example_b = {
+				# 	'question_a_id': sample_b['id'],
+				# 	'question_b_id': sample_a['id'],
+				# 	'question_a_text': sample_b['sample_text'],
+				# 	'question_b_text': sample_a['sample_text'],
+				# }
+				# self.examples.append(example_b)
 
 		self.examples, self.labeled_examples = find_near_exact_questions(self.examples)
 
@@ -252,13 +253,13 @@ class RGQETopPredictionDataset(Dataset):
 							'question_b_text': sample_b['entailed_set_text'],
 						}
 						self.examples.append(example_a)
-						example_b = {
-							'question_a_id': sample_b['id'],
-							'question_b_id': sample_a['id'],
-							'question_a_text': sample_b['entailed_set_text'],
-							'question_b_text': sample_a['entailed_set_text'],
-						}
-						self.examples.append(example_b)
+						# example_b = {
+						# 	'question_a_id': sample_b['id'],
+						# 	'question_b_id': sample_a['id'],
+						# 	'question_a_text': sample_b['entailed_set_text'],
+						# 	'question_b_text': sample_a['entailed_set_text'],
+						# }
+						# self.examples.append(example_b)
 
 		self.examples, self.labeled_examples = find_near_exact_questions(self.examples)
 

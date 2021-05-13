@@ -17,8 +17,11 @@ export DATASET=expert
 export SEARCH_TOP_K=500
 export RGQE_TOP_K=100
 export RGQE_SELF_THRESHOLD=0.6
+# TODO use this
+export RGQE_RANK_THRESHOLD=0.0
+
 export RGQE_TOP_C_THRESHOLD=0.6
-export RQE_TOP_THRESHOLD=0.01
+export RQE_TOP_THRESHOLD=0.001
 export RGQE_RATIO=0.9
 export RGQE_SEQ_LEN=96
 export RGQE_BATCH_SIZE=64
@@ -26,7 +29,7 @@ export EXP_ANSWER_TOP_K=20
 export EXP_ANSWER_NUM_SAMPLES=20
 export EXP_ANSWER_BATCH_SIZE=16
 
-export GPUS=4,5,6,7
+export GPUS=0
 #export TPU_IP_ADDRESS=10.155.6.34
 #export XRT_TPU_CONFIG="tpu_worker;0;$TPU_IP_ADDRESS:8470"
 
@@ -45,22 +48,25 @@ export RUN_EXPAND_ANSWERS=false
 
 # RGQE pairwise self-entailment to find entailed sets for each answer
 export RUN_RGQE_SELF=true
+
+export RUN_RGQE_RANK=true
+
 # RGQE query-generated question entailment to filter poor generated questions
-export RUN_RGQE_QUESTION=true
+export RUN_RGQE_QUESTION=false
 # RGQE full set-pairwise entailment for top_k answers for each query
-export RUN_RGQE_TOP=true
+export RUN_RGQE_TOP=false
 # RGQE rerank answers based on generated question entailment sets
-export RUN_RGQE_RERANK=true
+export RUN_RGQE_RERANK=false
 # RGQE run evaluation script on test set
-export EVAL_RGQE=true
+export EVAL_RGQE=false
 
 export RERANK_MODEL_NAME=rerank-${DATASET}-${RERANK_RUN_MODEL_NAME}
 export EXP_MODEL_NAME=docT5query-base
-export RQE_MODEL_NAME=quora-lm-models-mt-dnn-base-uncased
-export RQE_PRE_MODEL_NAME=models/mt-dnn-base-uncased
+export RQE_MODEL_NAME=quora-seq-nboost-pt-bert-base-uncased-msmarco
 
 export RERANK_PRE_MODEL_NAME=nboost/pt-biobert-base-msmarco
 export EXP_PRE_MODEL_NAME=models/docT5query-base/model.ckpt-1004000
+export RQE_PRE_MODEL_NAME=nboost/pt-bert-base-uncased-msmarco
 
 export DATASET_PATH=data/${COLLECTION}/${DATASET}
 export QUERY_PATH=${DATASET_PATH}/questions.json
@@ -85,6 +91,9 @@ export EXP_ANSWER_FILE_PATH=${EXP_ANSWER_PATH}/${EXP_ANSWER_RUN_NAME}.exp
 export RGQE_SELF_PATH=${ARTIFACTS_PATH}/${RQE_RUN_NAME}_SELF
 export RGQE_SELF_FILE_PATH=${RGQE_SELF_PATH}/${RQE_RUN_NAME}.rgqe_self
 export RGQE_CC_FILE_PATH=${RGQE_SELF_PATH}/${RQE_RUN_NAME}.rgqe_cc
+
+export RGQE_RANK_PATH=${ARTIFACTS_PATH}/${RQE_RUN_NAME}_RQE_RANK
+export RGQE_RANK_FILE_PATH=${RGQE_RANK_PATH}/${RQE_RUN_NAME}.rgqe_rank
 
 export RGQE_QUESTION_PATH=${ARTIFACTS_PATH}/${RQE_RUN_NAME}_QUESTION
 export RGQE_QUESTION_FILE_PATH=${RGQE_QUESTION_PATH}/${RQE_RUN_NAME}.rgqe_question
@@ -222,6 +231,7 @@ fi
 if [[ ${RUN_RGQE_SELF} = true ]]; then
     echo "Running self RGQE..."
     # self entailment
+#      --top_k ${RGQE_TOP_K} \
     python rgqe/rgqe.py \
       --input_path ${EXP_ANSWER_FILE_PATH} \
       --output_path ${RGQE_SELF_PATH} \
@@ -232,7 +242,6 @@ if [[ ${RUN_RGQE_SELF} = true ]]; then
       --batch_size ${RGQE_BATCH_SIZE} \
       --gpus ${GPUS} \
       --mode self \
-      --top_k ${RGQE_TOP_K} \
     ; \
     python rgqe/format_rgqe_self.py \
       --input_path ${RGQE_SELF_PATH} \
@@ -243,6 +252,25 @@ if [[ ${RUN_RGQE_SELF} = true ]]; then
       --expand_path ${EXP_ANSWER_FILE_PATH} \
       --output_path ${RGQE_CC_FILE_PATH} \
       --threshold ${RGQE_SELF_THRESHOLD}
+fi
+
+
+if [[ ${RUN_RGQE_RANK} = true ]]; then
+    # answer-question relevance to filter out not relevant generated questions
+    echo "Running rgqe rank model..."
+    python rerank/rgqe_rank.py \
+      --input_path ${RGQE_CC_FILE_PATH} \
+      --output_path ${RGQE_RANK_PATH} \
+      --collection_path ${COLLECTION_PATH} \
+      --pre_model_name ${RERANK_PRE_MODEL_NAME} \
+      --model_name ${RERANK_MODEL_NAME} \
+      --max_seq_len 96 \
+      --load_trained_model \
+      --gpus ${GPUS} \
+    ; \
+    python rerank/format_rgqe_rank.py \
+      --input_path ${RERANK_PATH} \
+      --output_path ${RGQE_RANK_FILE_PATH}
 fi
 
 if [[ ${RUN_RGQE_QUESTION} = true ]]; then
