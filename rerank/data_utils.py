@@ -535,3 +535,60 @@ class QueryPassageLabeledDataset(Dataset):
 
 		return example
 
+
+def parse_id(doc_pass_sent_id):
+	start_id, end_id = doc_pass_sent_id.split(':')
+	id_list = start_id.split('-')
+	doc_id = '-'.join(id_list[:-2])
+	pass_id = id_list[-2]
+	sent_start_id = id_list[-1]
+	sent_end_id = end_id.split('-')[-1]
+	return doc_id, pass_id, sent_start_id, sent_end_id
+
+
+def answer_lookup(collection_path, answer_id):
+	doc_id, pass_id, sent_start_id, sent_end_id = parse_id(answer_id)
+	doc_path = os.path.join(collection_path, f'{doc_id}.json')
+	with open(doc_path) as f:
+		doc = json.load(f)
+	passage_lookup = {c['context_id']: c for c in doc['contexts']}
+	passage = passage_lookup[f'{doc_id}-{pass_id}']
+	sent_start_idx = int(sent_start_id[1:])
+	sent_end_idx = int(sent_end_id[1:])
+	sentences = passage['sentences'][sent_start_idx:sent_end_idx+1]
+	text = passage['text'][sentences[0]['start']:sentences[-1]['end']]
+	return text
+
+
+class GeneratedQueryPassageDataset(Dataset):
+	def __init__(self, gq_path, collection_path):
+		self.gq_path = gq_path
+		self.collection_path = collection_path
+
+		with open(gq_path) as f:
+			cc = json.load(f)
+
+		self.examples = []
+		for answer_id, answer_qs in tqdm(cc.items(), total=len(cc)):
+			answer_txt = answer_lookup(self.collection_path, answer_id)
+			for answer_q in answer_qs:
+				es_id = answer_q['entailed_set_id']
+				es_txt = answer_q['entailed_set'][0]['sample_text']
+				example = {
+					'id': answer_id,
+					'question_id': es_id,
+					'text': answer_txt,
+					'query': es_txt
+				}
+				self.examples.append(example)
+
+	def __len__(self):
+		return len(self.examples)
+
+	def __getitem__(self, idx):
+		if torch.is_tensor(idx):
+			idx = idx.tolist()
+
+		example = self.examples[idx]
+
+		return example

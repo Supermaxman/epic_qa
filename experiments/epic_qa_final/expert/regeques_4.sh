@@ -18,6 +18,8 @@ export SEARCH_TOP_K=500
 export RGQE_TOP_K=100
 export RGQE_SELF_THRESHOLD=0.6
 export RGQE_TOP_C_THRESHOLD=0.6
+# TODO
+export RGQE_RANK_THRESHOLD=4.0
 export RQE_TOP_THRESHOLD=0.01
 export RGQE_RATIO=0.9
 export RGQE_SEQ_LEN=96
@@ -47,6 +49,9 @@ export RUN_EXPAND_ANSWERS=false
 export RUN_RGQE_SELF=false
 # RGQE query-generated question entailment to filter poor generated questions
 export RUN_RGQE_QUESTION=false
+
+export RUN_RGQE_RANK=true
+
 # RGQE full set-pairwise entailment for top_k answers for each query
 export RUN_RGQE_TOP=true
 # RGQE rerank answers based on generated question entailment sets
@@ -84,6 +89,9 @@ export EXP_ANSWER_FILE_PATH=${EXP_ANSWER_PATH}/${EXP_ANSWER_RUN_NAME}.exp
 export RGQE_SELF_PATH=${ARTIFACTS_PATH}/${RQE_RUN_NAME}_SELF
 export RGQE_SELF_FILE_PATH=${RGQE_SELF_PATH}/${RQE_RUN_NAME}.rgqe_self
 export RGQE_CC_FILE_PATH=${RGQE_SELF_PATH}/${RQE_RUN_NAME}.rgqe_cc
+
+export RGQE_RANK_PATH=${ARTIFACTS_PATH}/${RQE_RUN_NAME}_RQE_RANK
+export RGQE_RANK_FILE_PATH=${RGQE_RANK_PATH}/${RQE_RUN_NAME}.rgqe_rank
 
 export RGQE_QUESTION_PATH=${ARTIFACTS_PATH}/${RQE_RUN_NAME}_QUESTION
 export RGQE_QUESTION_FILE_PATH=${RGQE_QUESTION_PATH}/${RQE_RUN_NAME}.rgqe_question
@@ -260,6 +268,25 @@ if [[ ${RUN_RGQE_QUESTION} = true ]]; then
       --output_path ${RGQE_QUESTION_FILE_PATH}
 fi
 
+
+if [[ ${RUN_RGQE_RANK} = true ]]; then
+    # answer-question relevance to filter out not relevant generated questions
+    echo "Running rgqe rank model..."
+    python rerank/rgqe_rank.py \
+      --input_path ${RGQE_CC_FILE_PATH} \
+      --output_path ${RGQE_RANK_PATH} \
+      --collection_path ${COLLECTION_PATH} \
+      --pre_model_name ${RERANK_PRE_MODEL_NAME} \
+      --model_name ${RERANK_MODEL_NAME} \
+      --max_seq_len 96 \
+      --load_trained_model \
+      --gpus ${GPUS} \
+    ; \
+    python rerank/format_rgqe_rank.py \
+      --input_path ${RGQE_RANK_PATH} \
+      --output_path ${RGQE_RANK_FILE_PATH}
+fi
+
 if [[ ${RUN_RGQE_TOP} = true ]]; then
     echo "Running top RGQE..."
     # top_k set entailment
@@ -283,8 +310,10 @@ if [[ ${RUN_RGQE_TOP} = true ]]; then
     python rgqe/rgqe_top_components.py \
       --input_path ${RGQE_TOP_FILE_PATH} \
       --cc_path ${RGQE_CC_FILE_PATH} \
+      --rr_path ${RGQE_RANK_FILE_PATH} \
       --output_path ${RGQE_TOP_CC_FILE_PATH} \
-      --threshold ${RGQE_TOP_C_THRESHOLD}
+      --cc_threshold ${RGQE_TOP_C_THRESHOLD} \
+      --rr_threshold ${RGQE_RANK_THRESHOLD}
 fi
 
 
