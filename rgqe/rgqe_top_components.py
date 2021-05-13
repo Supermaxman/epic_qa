@@ -32,7 +32,7 @@ class DFS(object):
 		return c_list
 
 
-def create_components(question_entail_set_pairs, answer_sets, threshold):
+def create_components(question_entail_set_pairs, answer_sets, aq_ranks, cc_threshold, rr_threshold):
 	entailed_set_text_lookup = {}
 	for answer_id, a_sets in answer_sets.items():
 		for a_set in a_sets:
@@ -47,11 +47,19 @@ def create_components(question_entail_set_pairs, answer_sets, threshold):
 		edges = defaultdict(set)
 		entailed_set_answer_lookup = defaultdict(set)
 		for answer_a_id, answer_b_id, entail_set_a_id, entail_set_b_id, entail_prob in entail_set_pairs:
+
+			if aq_ranks[answer_a_id][str(entail_set_a_id)] < rr_threshold:
+				continue
+
+			if aq_ranks[answer_b_id][str(entail_set_b_id)] < rr_threshold:
+				continue
+
 			entailed_set_answer_lookup[answer_a_id].add(entail_set_a_id)
 			entailed_set_answer_lookup[answer_b_id].add(entail_set_b_id)
+
 			nodes.add(entail_set_a_id)
 			nodes.add(entail_set_b_id)
-			if entail_prob < threshold:
+			if entail_prob < cc_threshold:
 				continue
 			edges[entail_set_a_id].add(entail_set_b_id)
 			edges[entail_set_b_id].add(entail_set_a_id)
@@ -125,27 +133,35 @@ if __name__ == '__main__':
 	parser = argparse.ArgumentParser()
 	parser.add_argument('-i', '--input_path', required=True)
 	parser.add_argument('-c', '--cc_path', required=True)
+	parser.add_argument('-r', '--rr_path', required=True)
 	parser.add_argument('-o', '--output_path', required=True)
-	parser.add_argument('-t', '--threshold', default=0.5, type=float)
+	parser.add_argument('-tc', '--cc_threshold', default=0.01, type=float)
+	parser.add_argument('-tr', '--rr_threshold', default=0.0, type=float)
 
 	args = parser.parse_args()
 
 	sys.setrecursionlimit(10 ** 6)
 	input_path = args.input_path
 	cc_path = args.cc_path
+	rr_path = args.rr_path
 	output_path = args.output_path
-	threshold = args.threshold
+	cc_threshold = args.cc_threshold
+	rr_threshold = args.rr_threshold
 
 	with open(input_path) as f:
 		question_entail_set_pairs = json.load(f)
 
 	with open(cc_path) as f:
 		answer_sets = json.load(f)
+	with open(rr_path) as f:
+		aq_ranks = json.load(f)
 
 	component_results = create_components(
 		question_entail_set_pairs,
 		answer_sets,
-		threshold
+		aq_ranks,
+		cc_threshold,
+		rr_threshold
 	)
 
 	with open(output_path, 'w') as f:
