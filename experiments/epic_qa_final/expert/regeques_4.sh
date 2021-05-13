@@ -19,7 +19,7 @@ export RGQE_TOP_K=100
 export RGQE_SELF_THRESHOLD=0.6
 export RGQE_TOP_C_THRESHOLD=0.6
 # TODO
-export RGQE_RANK_THRESHOLD=4.0
+export RGQE_RANK_THRESHOLD=0.0
 export RQE_TOP_THRESHOLD=0.01
 export RGQE_RATIO=0.9
 export RGQE_SEQ_LEN=96
@@ -50,7 +50,7 @@ export RUN_RGQE_SELF=false
 # RGQE query-generated question entailment to filter poor generated questions
 export RUN_RGQE_QUESTION=false
 
-export RUN_RGQE_RANK=true
+export RUN_RGQE_RANK=false
 
 # RGQE full set-pairwise entailment for top_k answers for each query
 export RUN_RGQE_TOP=true
