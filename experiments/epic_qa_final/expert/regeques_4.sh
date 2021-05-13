@@ -289,10 +289,10 @@ fi
 
 
 if [[ ${RUN_RGQE_RERANK} = true ]]; then
-    python rerank/extract_answers.py \
-      --search_path ${RERANK_RUN_PATH} \
-      --collection_path ${COLLECTION_PATH} \
-      --output_path ${ANSWERS_PATH}
+#    python rerank/extract_answers.py \
+#      --search_path ${RERANK_RUN_PATH} \
+#      --collection_path ${COLLECTION_PATH} \
+#      --output_path ${ANSWERS_PATH}
     echo "Running RGQE rerank..."
     python rgqe/rgqe_rerank.py \
       --cc_path ${RGQE_TOP_CC_FILE_PATH} \
