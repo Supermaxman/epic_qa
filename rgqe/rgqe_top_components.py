@@ -47,22 +47,19 @@ def create_components(question_entail_set_pairs, answer_sets, aq_ranks, cc_thres
 		edges = defaultdict(set)
 		entailed_set_answer_lookup = defaultdict(set)
 		for answer_a_id, answer_b_id, entail_set_a_id, entail_set_b_id, entail_prob in entail_set_pairs:
-
-			if aq_ranks[answer_a_id][str(entail_set_a_id)] < rr_threshold:
-				continue
-
-			if aq_ranks[answer_b_id][str(entail_set_b_id)] < rr_threshold:
-				continue
-
 			entailed_set_answer_lookup[answer_a_id].add(entail_set_a_id)
 			entailed_set_answer_lookup[answer_b_id].add(entail_set_b_id)
 
 			nodes.add(entail_set_a_id)
 			nodes.add(entail_set_b_id)
-			if entail_prob < cc_threshold:
-				continue
-			edges[entail_set_a_id].add(entail_set_b_id)
-			edges[entail_set_b_id].add(entail_set_a_id)
+
+			entail_prob_above = entail_prob >= cc_threshold
+			a_rank_above = aq_ranks[answer_a_id][str(entail_set_a_id)] >= rr_threshold
+			b_rank_above = aq_ranks[answer_b_id][str(entail_set_b_id)] >= rr_threshold
+
+			if entail_prob_above or (a_rank_above and b_rank_above):
+				edges[entail_set_a_id].add(entail_set_b_id)
+				edges[entail_set_b_id].add(entail_set_a_id)
 
 		nodes = sorted(list(nodes))
 		dfs = DFS(
