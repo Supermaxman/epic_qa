@@ -7,7 +7,7 @@ export SEARCH_RUN_NAME=HLTRI_REGEQUES_SEARCH_1
 export RERANK_RUN_NAME=HLTRI_REGEQUES_RERANK_1
 export RERANK_RUN_MODEL_NAME=HLTRI_REGEQUES_RERANK_1
 export EXP_ANSWER_RUN_NAME=HLTRI_REGEQUES_EXP_ANSWER_1
-export RQE_RUN_NAME=HLTRI_REGEQUES_FINAL_3
+export RQE_RUN_NAME=HLTRI_REGEQUES_FINAL_4
 
 # collection and task names
 export COLLECTION=epic_qa_final
@@ -48,7 +48,7 @@ export RUN_RGQE_SELF=false
 # RGQE query-generated question entailment to filter poor generated questions
 export RUN_RGQE_QUESTION=false
 # RGQE full set-pairwise entailment for top_k answers for each query
-export RUN_RGQE_TOP=false
+export RUN_RGQE_TOP=true
 # RGQE rerank answers based on generated question entailment sets
 export RUN_RGQE_RERANK=true
 
@@ -263,23 +263,23 @@ fi
 if [[ ${RUN_RGQE_TOP} = true ]]; then
     echo "Running top RGQE..."
     # top_k set entailment
-    python rgqe/rgqe.py \
-      --input_path ${RGQE_CC_FILE_PATH} \
-      --output_path ${RGQE_TOP_PATH} \
-      --qe_path ${RGQE_QUESTION_FILE_PATH} \
-      --search_path ${RERANK_RUN_PATH} \
-      --model_name ${RQE_MODEL_NAME} \
-      --max_seq_len ${RGQE_SEQ_LEN} \
-      --batch_size ${RGQE_BATCH_SIZE} \
-      --mode top \
-      --top_k ${RGQE_TOP_K} \
-      --gpus ${GPUS} \
-      --threshold ${RQE_TOP_THRESHOLD} \
-    ; \
-    python rgqe/format_rgqe_top.py \
-      --input_path ${RGQE_TOP_PATH} \
-      --output_path ${RGQE_TOP_FILE_PATH} \
-    ; \
+#    python rgqe/rgqe.py \
+#      --input_path ${RGQE_CC_FILE_PATH} \
+#      --output_path ${RGQE_TOP_PATH} \
+#      --qe_path ${RGQE_QUESTION_FILE_PATH} \
+#      --search_path ${RERANK_RUN_PATH} \
+#      --model_name ${RQE_MODEL_NAME} \
+#      --max_seq_len ${RGQE_SEQ_LEN} \
+#      --batch_size ${RGQE_BATCH_SIZE} \
+#      --mode top \
+#      --top_k ${RGQE_TOP_K} \
+#      --gpus ${GPUS} \
+#      --threshold ${RQE_TOP_THRESHOLD} \
+#    ; \
+#    python rgqe/format_rgqe_top.py \
+#      --input_path ${RGQE_TOP_PATH} \
+#      --output_path ${RGQE_TOP_FILE_PATH} \
+#    ; \
     python rgqe/rgqe_top_components.py \
       --input_path ${RGQE_TOP_FILE_PATH} \
       --cc_path ${RGQE_CC_FILE_PATH} \
