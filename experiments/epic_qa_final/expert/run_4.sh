@@ -18,7 +18,7 @@ export SEARCH_TOP_K=500
 export RGQE_TOP_K=100
 export RGQE_SELF_THRESHOLD=0.6
 # TODO use this
-export RGQE_RANK_THRESHOLD=0.0
+export RGQE_RANK_THRESHOLD=3.0
 
 export RGQE_TOP_C_THRESHOLD=0.6
 export RQE_TOP_THRESHOLD=0.001
@@ -259,18 +259,18 @@ fi
 if [[ ${RUN_RGQE_RANK} = true ]]; then
     # answer-question relevance to filter out not relevant generated questions
     echo "Running rgqe rank model..."
-#    python rerank/rgqe_rank.py \
-#      --input_path ${RGQE_CC_FILE_PATH} \
-#      --output_path ${RGQE_RANK_PATH} \
-#      --collection_path ${COLLECTION_PATH} \
-#      --pre_model_name ${RERANK_PRE_MODEL_NAME} \
-#      --model_name ${RERANK_MODEL_NAME} \
-#      --max_seq_len 96 \
-#      --load_trained_model \
-#      --gpus ${GPUS} \
-#    ; \
+    python rerank/rgqe_rank.py \
+      --input_path ${RGQE_CC_FILE_PATH} \
+      --output_path ${RGQE_RANK_PATH} \
+      --collection_path ${COLLECTION_PATH} \
+      --pre_model_name ${RERANK_PRE_MODEL_NAME} \
+      --model_name ${RERANK_MODEL_NAME} \
+      --max_seq_len 96 \
+      --load_trained_model \
+      --gpus ${GPUS} \
+    ; \
     python rerank/format_rgqe_rank.py \
-      --input_path ${RERANK_PATH} \
+      --input_path ${RGQE_RANK_PATH} \
       --output_path ${RGQE_RANK_FILE_PATH}
 fi
 
@@ -302,6 +302,7 @@ if [[ ${RUN_RGQE_TOP} = true ]]; then
       --input_path ${RGQE_CC_FILE_PATH} \
       --output_path ${RGQE_TOP_PATH} \
       --qe_path ${RGQE_QUESTION_FILE_PATH} \
+      --rr_path ${RGQE_RANK_FILE_PATH} \
       --search_path ${RERANK_RUN_PATH} \
       --model_name ${RQE_MODEL_NAME} \
       --pre_model_name ${RQE_PRE_MODEL_NAME} \
@@ -310,7 +311,8 @@ if [[ ${RUN_RGQE_TOP} = true ]]; then
       --mode top \
       --top_k ${RGQE_TOP_K} \
       --gpus ${GPUS} \
-      --threshold ${RQE_TOP_THRESHOLD} \
+      --qe_threshold ${RQE_TOP_THRESHOLD} \
+      --rr_threshold ${RGQE_RANK_THRESHOLD} \
     ; \
     python rgqe/format_rgqe_top.py \
       --input_path ${RGQE_TOP_PATH} \
