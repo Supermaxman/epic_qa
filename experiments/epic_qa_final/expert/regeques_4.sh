@@ -48,9 +48,11 @@ export RUN_RGQE_SELF=false
 # RGQE query-generated question entailment to filter poor generated questions
 export RUN_RGQE_QUESTION=false
 # RGQE full set-pairwise entailment for top_k answers for each query
-export RUN_RGQE_TOP=true
+export RUN_RGQE_TOP=false
 # RGQE rerank answers based on generated question entailment sets
 export RUN_RGQE_RERANK=true
+
+export EVAL_RGQE=true
 
 export RERANK_MODEL_NAME=rerank-${DATASET}-${RERANK_RUN_MODEL_NAME}
 export EXP_MODEL_NAME=docT5query-base
@@ -66,6 +68,7 @@ export COLLECTION_JSONL_PATH=${DATASET_PATH}/data_jsonl
 export COLLECTION_JSONL_FILE_PATH=${COLLECTION_JSONL_PATH}/data.jsonl
 
 export ARTIFACTS_PATH=artifacts/${COLLECTION}/${DATASET}
+export LABEL_PATH=data/${COLLECTION}/primary_judgments.json
 
 export EXP_DATA_PATH=${ARTIFACTS_PATH}/${EXP_DATA_RUN_NAME}
 export EXP_DATA_FILE_PATH=${EXP_DATA_PATH}/data.expl
@@ -301,4 +304,16 @@ if [[ ${RUN_RGQE_RERANK} = true ]]; then
     python rgqe/format_eval.py \
       --results_path ${RGQE_TOP_RERANK_FILE_PATH} \
       --output_path ${RUN_PATH}
+fi
+
+
+if [[ ${EVAL_RGQE} = true ]]; then
+    echo "Evaluating RGQE model..."
+    python rerank/epic_eval.py \
+      ${LABEL_PATH} \
+      ${RUN_PATH} \
+      --task ${DATASET} \
+      > ${EVAL_PATH} \
+      ; \
+      tail -n 3 ${EVAL_PATH}
 fi
