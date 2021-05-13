@@ -27,7 +27,7 @@ export RGQE_TOP_THRESHOLD=0.6
 # TODO use this
 export RGQE_QE_THRESHOLD=0.01
 # TODO use this
-export RGQE_RANK_THRESHOLD=4.0
+export RGQE_RANK_THRESHOLD=0.0
 
 
 export RGQE_SEQ_LEN=96
