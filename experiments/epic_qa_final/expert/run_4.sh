@@ -15,20 +15,23 @@ export DATASET=expert
 
 # major hyper-parameters for system
 export SEARCH_TOP_K=500
+
+export EXP_ANSWER_NUM_SAMPLES=20
+export EXP_ANSWER_TOP_K=20
+export EXP_ANSWER_BATCH_SIZE=16
+
 export RGQE_TOP_K=100
 export RGQE_SELF_THRESHOLD=0.6
+export RGQE_TOP_THRESHOLD=0.6
+
 # TODO use this
-export RGQE_RANK_THRESHOLD=3.0
-export RQE_TOP_THRESHOLD=0.001
+export RGQE_QE_THRESHOLD=0.01
+# TODO use this
+export RGQE_RANK_THRESHOLD=4.0
 
-export RGQE_TOP_C_THRESHOLD=0.6
 
-export RGQE_RATIO=0.9
 export RGQE_SEQ_LEN=96
 export RGQE_BATCH_SIZE=64
-export EXP_ANSWER_TOP_K=20
-export EXP_ANSWER_NUM_SAMPLES=20
-export EXP_ANSWER_BATCH_SIZE=16
 
 export GPUS=0
 #export TPU_IP_ADDRESS=10.155.6.34
@@ -312,7 +315,7 @@ if [[ ${RUN_RGQE_TOP} = true ]]; then
       --mode top \
       --top_k ${RGQE_TOP_K} \
       --gpus ${GPUS} \
-      --qe_threshold ${RQE_TOP_THRESHOLD} \
+      --qe_threshold ${RGQE_QE_THRESHOLD} \
       --rr_threshold ${RGQE_RANK_THRESHOLD} \
     ; \
     python rgqe/format_rgqe_top.py \
@@ -323,7 +326,7 @@ if [[ ${RUN_RGQE_TOP} = true ]]; then
       --input_path ${RGQE_TOP_FILE_PATH} \
       --cc_path ${RGQE_CC_FILE_PATH} \
       --output_path ${RGQE_TOP_CC_FILE_PATH} \
-      --threshold ${RGQE_TOP_C_THRESHOLD}
+      --threshold ${RGQE_TOP_THRESHOLD}
 fi
 
 
@@ -338,7 +341,6 @@ if [[ ${RUN_RGQE_RERANK} = true ]]; then
       --answers_path ${ANSWERS_PATH} \
       --queries_path ${QUERY_PATH} \
       --output_path ${RGQE_TOP_RERANK_FILE_PATH} \
-      --ratio ${RGQE_RATIO} \
     ; \
     python rgqe/format_eval.py \
       --results_path ${RGQE_TOP_RERANK_FILE_PATH} \
