@@ -25,6 +25,7 @@ if __name__ == '__main__':
 	queries_path = args.queries_path
 	output_path = args.output_path
 	threshold = args.threshold
+
 	if all_path is not None:
 		with open(all_path, 'r') as f:
 			# [question_id][answer_id] -> entailed sets
@@ -70,9 +71,7 @@ if __name__ == '__main__':
 			if answer_id in top_answer_sets:
 				qa_sets = top_answer_sets[answer_id]
 				top_answers.append(answer)
-				answer['top'] = True
 			else:
-				answer['top'] = False
 				max_non_top_score = max(max_non_top_score, answer['score'])
 				qa_sets = set()
 				if all_path is not None:
@@ -87,7 +86,7 @@ if __name__ == '__main__':
 			answer['entailed_sets'] = qa_sets
 			answer['text'] = answer_text_lookup[answer_id]
 			answer['entailed_sets_text'] = [entailed_sets_text[x] for x in qa_sets]
-		print(f'{question_id}: {100*num_answers_with_set / len(question_answers):.0f}% '
+		print(f'{question_id}: {num_answers_with_set / len(question_answers):.2f}% '
 					f'percent answers with at least one entailed set')
 
 		ranking = get_ranking(question_id, top_answers, entailed_sets_text)
@@ -99,16 +98,12 @@ if __name__ == '__main__':
 			answer['ndns_gain'] = ndns_scored_answer.gain
 			# goes from 1.0 to 0.0
 			# add max non top answer score to make sure ndns is ranked higher
-			# TODO if ndns gain is 0.0 then switch to other ranking?
 			answer['ndns_score'] = (1.0 - (ndns_rank / len(ranking.answers))) + max_non_top_score
 			ndns_rank += 1
 
 		for answer in question_answers:
 			if 'ndns_score' not in answer:
-				if answer['top']:
-					answer['ndns_score'] = answer['score']
-				else:
-					answer['ndns_score'] = answer['score']
+				answer['ndns_score'] = answer['score']
 			else:
 				answer['score'] = answer['ndns_score']
 		query = queries[question_id]
