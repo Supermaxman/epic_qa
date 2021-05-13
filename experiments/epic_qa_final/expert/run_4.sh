@@ -241,6 +241,7 @@ if [[ ${RUN_RGQE_SELF} = true ]]; then
       --max_seq_len ${RGQE_SEQ_LEN} \
       --batch_size ${RGQE_BATCH_SIZE} \
       --gpus ${GPUS} \
+      --top_k ${RGQE_TOP_K} \
       --mode self \
     ; \
     python rgqe/format_rgqe_self.py \
