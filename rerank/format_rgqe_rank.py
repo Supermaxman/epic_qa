@@ -39,4 +39,4 @@ if __name__ == '__main__':
 	output_path = args.output_path
 	question_scores = load_predictions(input_path)
 	with open(output_path, 'w') as f:
-		json.dump(question_scores, output_path, indent=2)
+		json.dump(question_scores, f, indent=2)
