@@ -48,10 +48,7 @@ def create_components(question_entail_set_pairs, answer_sets, aq_ranks, cc_thres
 		entailed_set_answer_lookup = defaultdict(set)
 		for answer_a_id, answer_b_id, entail_set_a_id, entail_set_b_id, entail_prob in entail_set_pairs:
 
-			if aq_ranks[answer_a_id][str(entail_set_a_id)] > rr_threshold:
-				continue
-
-			if aq_ranks[answer_b_id][str(entail_set_b_id)] > rr_threshold:
+			if aq_ranks[answer_a_id][str(entail_set_a_id)] < rr_threshold and aq_ranks[answer_b_id][str(entail_set_b_id)] < rr_threshold:
 				continue
 
 			entailed_set_answer_lookup[answer_a_id].add(entail_set_a_id)
