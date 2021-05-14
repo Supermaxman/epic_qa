@@ -43,7 +43,7 @@ def create_components(sample_entail_pairs, answer_samples, threshold):
 			edges[sample_b_id].add(sample_a_id)
 
 		sample_texts = answer_samples[answer_id]
-		nodes = set([x for x in sample_texts.keys()])
+		nodes = list(range(len(sample_texts)))
 		dfs = DFS(
 			nodes=nodes,
 			edges=edges,
