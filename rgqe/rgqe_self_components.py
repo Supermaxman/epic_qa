@@ -10,19 +10,18 @@ import networkx as nx
 def create_components(sample_entail_pairs, answer_samples, threshold):
 	results = defaultdict(list)
 	entailed_set_id = 0
-	for answer_id, samples in sample_entail_pairs.items():
+	for answer_id, sample_texts in answer_samples.items():
 		a_graph = nx.Graph()
-		for sample_a_id, sample_b_id, score in samples:
-			if score < threshold:
-				continue
-			a_graph.add_edge(
-				sample_a_id,
-				sample_b_id,
-				weight=score
-			)
-
-		sample_texts = answer_samples[answer_id]
-
+		if answer_id in sample_entail_pairs:
+			samples = sample_entail_pairs[answer_id]
+			for sample_a_id, sample_b_id, score in samples:
+				if score < threshold:
+					continue
+				a_graph.add_edge(
+					sample_a_id,
+					sample_b_id,
+					weight=score
+				)
 		for node in range(len(sample_texts)):
 			a_graph.add_node(node)
 
