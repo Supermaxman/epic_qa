@@ -35,16 +35,14 @@ def create_components(sample_entail_pairs, answer_samples, threshold):
 	results = defaultdict(list)
 	entailed_set_id = 0
 	for answer_id, samples in sample_entail_pairs.items():
-		nodes = set()
 		edges = defaultdict(set)
 		for sample_a_id, sample_b_id, score in samples:
-			nodes.add(sample_a_id)
-			nodes.add(sample_b_id)
 			if score < threshold:
 				continue
 			edges[sample_a_id].add(sample_b_id)
 			edges[sample_b_id].add(sample_a_id)
 
+		nodes = set([x for x in answer_samples.keys()])
 		dfs = DFS(
 			nodes=nodes,
 			edges=edges,
