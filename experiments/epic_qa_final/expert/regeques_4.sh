@@ -312,6 +312,7 @@ if [[ ${RUN_RGQE_TOP} = true ]]; then
       --cc_path ${RGQE_CC_FILE_PATH} \
       --rr_path ${RGQE_RANK_FILE_PATH} \
       --output_path ${RGQE_TOP_CC_FILE_PATH} \
+      --graph_path ${RGQE_TOP_CC_FILE_PATH}/cc_graphs \
       --cc_threshold ${RGQE_TOP_C_THRESHOLD} \
       --rr_threshold ${RGQE_RANK_THRESHOLD}
 fi

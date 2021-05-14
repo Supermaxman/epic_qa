@@ -3,6 +3,7 @@ import sys
 from collections import defaultdict
 import argparse
 import json
+import os
 
 import networkx as nx
 
@@ -16,9 +17,11 @@ def create_components(question_entail_set_pairs, answer_sets, aq_ranks, cc_thres
 			entailed_set_text_lookup[entailed_set_id] = entailed_set_text
 
 	results = {}
+	graphs = {}
 	for question_id, entail_set_pairs in question_entail_set_pairs.items():
 		new_entailed_set_id = 0
 		q_graph = nx.Graph()
+		graphs[question_id] = q_graph
 
 		entailed_set_answer_lookup = defaultdict(set)
 		for answer_a_id, answer_b_id, entail_set_a_id, entail_set_b_id, entail_prob in entail_set_pairs:
@@ -32,7 +35,6 @@ def create_components(question_entail_set_pairs, answer_sets, aq_ranks, cc_thres
 			q_graph.add_node(entail_set_b_id)
 			# if entail_prob_above and (a_rank_above and b_rank_above):
 			if entail_prob_above:
-
 				q_graph.add_edge(
 					entail_set_a_id,
 					entail_set_b_id,
@@ -95,7 +97,7 @@ def create_components(question_entail_set_pairs, answer_sets, aq_ranks, cc_thres
 		}
 		print(f'{connected_answers/seen_answers:.2f}% answers part of at least one connected set '
 					f'({connected_answers}/{seen_answers})')
-	return results
+	return results, graphs
 
 
 if __name__ == '__main__':
@@ -105,6 +107,7 @@ if __name__ == '__main__':
 	parser.add_argument('-c', '--cc_path', required=True)
 	parser.add_argument('-r', '--rr_path', required=True)
 	parser.add_argument('-o', '--output_path', required=True)
+	parser.add_argument('-og', '--graph_path', required=True)
 	parser.add_argument('-tc', '--cc_threshold', default=0.01, type=float)
 	parser.add_argument('-tr', '--rr_threshold', default=0.0, type=float)
 
@@ -117,6 +120,10 @@ if __name__ == '__main__':
 	output_path = args.output_path
 	cc_threshold = args.cc_threshold
 	rr_threshold = args.rr_threshold
+	graph_path = args.graph_path
+
+	if not os.path.exists(graph_path):
+		os.mkdir(graph_path)
 
 	with open(input_path) as f:
 		question_entail_set_pairs = json.load(f)
@@ -126,13 +133,17 @@ if __name__ == '__main__':
 	with open(rr_path) as f:
 		aq_ranks = json.load(f)
 
-	component_results = create_components(
+	component_results, q_graphs = create_components(
 		question_entail_set_pairs,
 		answer_sets,
 		aq_ranks,
 		cc_threshold,
 		rr_threshold
 	)
+
+	for q_id, q_graph in q_graphs.items():
+		q_graph_path = os.path.join(graph_path, f'{q_id}.cc_graph')
+		nx.write_adjlist(q_graph, q_graph_path)
 
 	with open(output_path, 'w') as f:
 		json.dump(component_results, f, indent=2)
