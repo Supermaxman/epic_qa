@@ -99,6 +99,7 @@ export RGQE_QUESTION_FILE_PATH=${RGQE_QUESTION_PATH}/${RQE_RUN_NAME}.rgqe_questi
 export RGQE_TOP_PATH=${ARTIFACTS_PATH}/${RQE_RUN_NAME}_TOP
 export RGQE_TOP_FILE_PATH=${RGQE_TOP_PATH}/${RQE_RUN_NAME}.rgqe_top
 export RGQE_TOP_CC_FILE_PATH=${RGQE_TOP_PATH}/${RQE_RUN_NAME}.rgqe_top_cc
+export RGQE_TOP_CC_GRAPH_PATH=${RGQE_TOP_PATH}/cc_graphs
 export RGQE_TOP_RERANK_FILE_PATH=${RGQE_TOP_PATH}/${RQE_RUN_NAME}.rgqe_rerank
 
 export RERANK_RUN_PATH=${RERANK_PATH}/${RERANK_RUN_NAME}.txt
@@ -312,7 +313,7 @@ if [[ ${RUN_RGQE_TOP} = true ]]; then
       --cc_path ${RGQE_CC_FILE_PATH} \
       --rr_path ${RGQE_RANK_FILE_PATH} \
       --output_path ${RGQE_TOP_CC_FILE_PATH} \
-      --graph_path ${RGQE_TOP_CC_FILE_PATH}/cc_graphs \
+      --graph_path ${RGQE_TOP_CC_GRAPH_PATH} \
       --cc_threshold ${RGQE_TOP_C_THRESHOLD} \
       --rr_threshold ${RGQE_RANK_THRESHOLD}
 fi
