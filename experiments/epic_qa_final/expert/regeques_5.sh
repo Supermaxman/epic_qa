@@ -49,7 +49,7 @@ export RUN_RGQE_SELF=false
 # RGQE query-generated question entailment to filter poor generated questions
 export RUN_RGQE_QUESTION=false
 
-export RUN_RGQE_RANK=true
+export RUN_RGQE_RANK=false
 
 # RGQE full set-pairwise entailment for top_k answers for each query
 export RUN_RGQE_TOP=true

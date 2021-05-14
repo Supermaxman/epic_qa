@@ -153,6 +153,7 @@ class RGQETopPredictionDataset(Dataset):
 		self.input_path = input_path
 		self.search_path = search_path
 		self.qe_path = qe_path
+		self.rr_path = rr_path
 		self.top_k = top_k
 
 		with open(input_path) as f:
@@ -169,12 +170,12 @@ class RGQETopPredictionDataset(Dataset):
 
 		question_answer_count = defaultdict(int)
 		question_samples = defaultdict(list)
-		with open(self.search_path, 'r') as f:
+		with open(self.search_path) as f:
 			for line in f:
 				line = line.strip()
 				if line:
 					question_id, _, answer_id, rank, score, run_name = line.split()
-					if question_answer_count[question_id] > top_k:
+					if question_answer_count[question_id] >= top_k:
 						continue
 					question_answer_count[question_id] += 1
 					answer_sets = self.answers[answer_id]
