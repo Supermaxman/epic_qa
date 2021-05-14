@@ -232,19 +232,19 @@ fi
 if [[ ${RUN_RGQE_SELF} = true ]]; then
     echo "Running self RGQE..."
     # self entailment
-    python rgqe/rgqe.py \
-      --input_path ${EXP_ANSWER_FILE_PATH} \
-      --output_path ${RGQE_SELF_PATH} \
-      --model_name ${RQE_MODEL_NAME} \
-      --max_seq_len ${RGQE_SEQ_LEN} \
-      --batch_size ${RGQE_BATCH_SIZE} \
-      --gpus ${GPUS} \
-      --mode self \
-    ; \
-    python rgqe/format_rgqe_self.py \
-      --input_path ${RGQE_SELF_PATH} \
-      --output_path ${RGQE_SELF_FILE_PATH} \
-    ; \
+#    python rgqe/rgqe.py \
+#      --input_path ${EXP_ANSWER_FILE_PATH} \
+#      --output_path ${RGQE_SELF_PATH} \
+#      --model_name ${RQE_MODEL_NAME} \
+#      --max_seq_len ${RGQE_SEQ_LEN} \
+#      --batch_size ${RGQE_BATCH_SIZE} \
+#      --gpus ${GPUS} \
+#      --mode self \
+#    ; \
+#    python rgqe/format_rgqe_self.py \
+#      --input_path ${RGQE_SELF_PATH} \
+#      --output_path ${RGQE_SELF_FILE_PATH} \
+#    ; \
     python rgqe/rgqe_self_components.py \
       --input_path ${RGQE_SELF_FILE_PATH} \
       --expand_path ${EXP_ANSWER_FILE_PATH} \
