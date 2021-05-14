@@ -27,7 +27,7 @@ export EXP_ANSWER_TOP_K=10
 export EXP_ANSWER_NUM_SAMPLES=3
 export EXP_ANSWER_BATCH_SIZE=32
 
-export GPUS=4,5,6,7
+export GPUS=3,4,5,6
 #export TPU_IP_ADDRESS=10.155.6.34
 #export XRT_TPU_CONFIG="tpu_worker;0;$TPU_IP_ADDRESS:8470"
 
