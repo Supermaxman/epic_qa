@@ -3,6 +3,8 @@ import sys
 from collections import defaultdict
 import argparse
 import json
+import networkx as nx
+from collections import defaultdict
 
 
 class DFS(object):
@@ -43,15 +45,12 @@ def create_components(question_entail_set_pairs, answer_sets, aq_ranks, cc_thres
 	results = {}
 	for question_id, entail_set_pairs in question_entail_set_pairs.items():
 		new_entailed_set_id = 0
-		nodes = set()
-		edges = defaultdict(set)
+		q_graph = nx.Graph()
+
 		entailed_set_answer_lookup = defaultdict(set)
 		for answer_a_id, answer_b_id, entail_set_a_id, entail_set_b_id, entail_prob in entail_set_pairs:
 			entailed_set_answer_lookup[answer_a_id].add(entail_set_a_id)
 			entailed_set_answer_lookup[answer_b_id].add(entail_set_b_id)
-
-			nodes.add(entail_set_a_id)
-			nodes.add(entail_set_b_id)
 
 			entail_prob_above = entail_prob >= cc_threshold
 			a_rank_above = aq_ranks[answer_a_id][str(entail_set_a_id)] >= rr_threshold
@@ -59,22 +58,15 @@ def create_components(question_entail_set_pairs, answer_sets, aq_ranks, cc_thres
 
 			# if entail_prob_above and (a_rank_above and b_rank_above):
 			if entail_prob_above:
-				edges[entail_set_a_id].add(entail_set_b_id)
-				edges[entail_set_b_id].add(entail_set_a_id)
-
-		nodes = sorted(list(nodes))
-		dfs = DFS(
-			nodes=nodes,
-			edges=edges,
-		)
+				q_graph.add_edge(entail_set_a_id, entail_set_b_id)
 		merged_entailed_sets = []
-		entailed_sets = dfs.find_connected()
+		entailed_sets = nx.connected_components(q_graph)
 		merged_mapping = {}
 		for entailed_nodes in entailed_sets:
 			set_samples = []
 			for v in entailed_nodes:
 				merged_mapping[v] = new_entailed_set_id
-				num_connected = len(set(edges[v]).intersection(set(entailed_nodes)))
+				num_connected = len(set(q_graph.degree[v]).intersection(set(entailed_nodes)))
 				set_sample = {
 					'entailed_set_id': v,
 					'entailed_set_text': entailed_set_text_lookup[v],
