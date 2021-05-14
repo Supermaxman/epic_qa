@@ -42,14 +42,14 @@ def create_components(sample_entail_pairs, answer_samples, threshold):
 			edges[sample_a_id].add(sample_b_id)
 			edges[sample_b_id].add(sample_a_id)
 
-		nodes = set([x for x in answer_samples.keys()])
+		sample_texts = answer_samples[answer_id]
+		nodes = set([x for x in sample_texts.keys()])
 		dfs = DFS(
 			nodes=nodes,
 			edges=edges,
 		)
 		entailed_sets = dfs.find_connected()
 		answer_sets = []
-		sample_texts = answer_samples[answer_id]
 		for entailed_nodes in entailed_sets:
 			answer_set_samples = []
 			for v in entailed_nodes:
