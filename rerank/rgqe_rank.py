@@ -16,7 +16,7 @@ if __name__ == '__main__':
 	parser = argparse.ArgumentParser()
 	parser.add_argument('-i', '--input_path', required=True)
 	parser.add_argument('-o', '--output_path', required=True)
-	parser.add_argument('-c', '--collection_path', required=True)
+	parser.add_argument('-c', '--answers_path', required=True)
 	parser.add_argument('-pm', '--pre_model_name', default='nboost/pt-biobert-base-msmarco')
 	parser.add_argument('-mn', '--model_name', default='pt-biobert-base-msmarco')
 	parser.add_argument('-sd', '--save_directory', default='models')
@@ -39,7 +39,7 @@ if __name__ == '__main__':
 	if not os.path.exists(save_directory):
 		os.mkdir(save_directory)
 
-	collection_path = args.collection_path
+	answers_path = args.answers_path
 	input_path = args.input_path
 	output_path = args.output_path
 
@@ -83,10 +83,10 @@ if __name__ == '__main__':
 
 	logging.info(f'Loading tokenizer: {tokenizer_name}')
 	tokenizer = AutoTokenizer.from_pretrained(tokenizer_name)
-	logging.info(f'Loading dataset: {collection_path}')
+	logging.info(f'Loading dataset: {answers_path}')
 	eval_dataset = GeneratedQueryPassageDataset(
 		input_path,
-		collection_path
+		answers_path
 	)
 	logging.info(f'Loaded dataset, #examples={len(eval_dataset)}')
 	eval_data_loader = DataLoader(

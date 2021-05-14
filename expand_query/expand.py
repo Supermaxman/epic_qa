@@ -6,13 +6,14 @@ import logging
 from transformers import T5Tokenizer
 from pytorch_lightning import loggers as pl_loggers
 from torch.utils.data import DataLoader
-from data_utils import AnswerDataset, PredictionBatchCollator
+from data_utils import AnswerDataset, PredictionBatchCollator, AnswerCollectionDataset
 from model_utils import T5QueryGenerator
 
 
 if __name__ == '__main__':
   parser = argparse.ArgumentParser()
-  parser.add_argument('-c', '--collection_path', required=True)
+  parser.add_argument('-c', '--collection_path', default=None)
+  parser.add_argument('-a', '--answers_path', default=None)
   parser.add_argument('-ps', '--input_path', default=None)
   parser.add_argument('-o', '--output_path', default=None)
   parser.add_argument('-pm', '--pre_model_name', default='docT5query-base/model.ckpt-1004000')
@@ -24,7 +25,7 @@ if __name__ == '__main__':
   parser.add_argument('-se', '--seed', default=0, type=int)
   parser.add_argument('-cd', '--torch_cache_dir', default=None)
   parser.add_argument('-mo', '--max_output_length', default=32, type=int)
-  parser.add_argument('-k', '--top_k', default=10, type=int)
+  parser.add_argument('-k', '--sample_top_k', default=10, type=int)
   parser.add_argument('-rk', '--run_top_k', default=10000, type=int)
   parser.add_argument('-s', '--num_samples', default=10, type=int)
   parser.add_argument('-tpu', '--use_tpus', default=False, action='store_true')
@@ -46,6 +47,7 @@ if __name__ == '__main__':
     os.mkdir(output_path)
 
   collection_path = args.collection_path
+  answers_path = args.answers_path
   input_path = args.input_path
   pre_model_name = args.pre_model_name
   tokenizer_name = args.tokenizer_name
@@ -54,7 +56,7 @@ if __name__ == '__main__':
   torch_cache_dir = args.torch_cache_dir
 
   max_output_length = args.max_output_length
-  top_k = args.top_k
+  sample_top_k = args.sample_top_k
   num_samples = args.num_samples
 
   # export TPU_IP_ADDRESS=10.155.6.34
@@ -84,12 +86,18 @@ if __name__ == '__main__':
 
   logging.info(f'Loading tokenizer: {tokenizer_name}')
   tokenizer = T5Tokenizer.from_pretrained(tokenizer_name)
-  logging.info(f'Loading dataset: {collection_path}')
-  eval_dataset = AnswerDataset(
-    collection_path,
-    input_path,
-    run_top_k
-  )
+  if answers_path is not None:
+    logging.info(f'Loading dataset: {answers_path}')
+    eval_dataset = AnswerDataset(
+      answers_path
+    )
+  else:
+    logging.info(f'Loading dataset: {collection_path}')
+    eval_dataset = AnswerCollectionDataset(
+      collection_path,
+      input_path,
+      run_top_k
+    )
   eval_data_loader = DataLoader(
     eval_dataset,
     batch_size=batch_size,
@@ -109,7 +117,7 @@ if __name__ == '__main__':
     updates_total=0,
     weight_decay=0.01,
     max_output_length=max_output_length,
-    top_k=top_k,
+    top_k=sample_top_k,
     num_samples=num_samples,
     torch_cache_dir=torch_cache_dir,
     predict_mode=True,

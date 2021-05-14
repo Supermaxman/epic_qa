@@ -561,16 +561,19 @@ def answer_lookup(collection_path, answer_id):
 
 
 class GeneratedQueryPassageDataset(Dataset):
-	def __init__(self, gq_path, collection_path):
+	def __init__(self, gq_path, answers_path):
 		self.gq_path = gq_path
-		self.collection_path = collection_path
+		self.answers_path = answers_path
 
 		with open(gq_path) as f:
 			cc = json.load(f)
 
+		with open(answers_path) as f:
+			ans = json.load(f)['answer_text_lookup']
+
 		self.examples = []
-		for answer_id, answer_qs in tqdm(cc.items(), total=len(cc)):
-			answer_txt = answer_lookup(self.collection_path, answer_id)
+		for answer_id, answer_qs in cc.items():
+			answer_txt = ans[answer_id]
 			for answer_q in answer_qs:
 				es_id = answer_q['entailed_set_id']
 				es_txt = answer_q['entailed_set'][0]['sample_text']

@@ -17,7 +17,7 @@ def parse_id(doc_pass_sent_id):
 	return doc_id, pass_id, sent_start_id, sent_end_id
 
 
-class AnswerDataset(Dataset):
+class AnswerCollectionDataset(Dataset):
 	def __init__(self, collection_path, input_path, run_top_k):
 		self.collection_path = collection_path
 		self.input_path = input_path
@@ -73,6 +73,31 @@ class AnswerDataset(Dataset):
 							'text': text
 						}
 						self.examples.append(example)
+
+	def __len__(self):
+		return len(self.examples)
+
+	def __getitem__(self, idx):
+		if torch.is_tensor(idx):
+			idx = idx.tolist()
+
+		example = self.examples[idx]
+
+		return example
+
+
+class AnswerDataset(Dataset):
+	def __init__(self, answer_path):
+		self.answer_path = answer_path
+		self.examples = []
+		with open(answer_path, 'r') as f:
+			ans = json.load(f)['answer_text_lookup']
+		for answer_id, answer_txt in ans.items():
+			example = {
+				'id': answer_id,
+				'text': answer_txt
+			}
+			self.examples.append(example)
 
 	def __len__(self):
 		return len(self.examples)

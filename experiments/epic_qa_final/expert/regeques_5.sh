@@ -16,11 +16,11 @@ export DATASET=expert
 # major hyper-parameters for system
 export SEARCH_TOP_K=500
 export RGQE_TOP_K=500
-export RGQE_SELF_THRESHOLD=0.8
-export RGQE_TOP_C_THRESHOLD=0.8
+export RGQE_SELF_THRESHOLD=0.6
+export RGQE_TOP_C_THRESHOLD=0.6
 # TODO
 export RGQE_RANK_THRESHOLD=3.0
-export RQE_TOP_THRESHOLD=0.01
+export RQE_TOP_THRESHOLD=0.0007
 export RGQE_SEQ_LEN=64
 export RGQE_BATCH_SIZE=128
 export EXP_ANSWER_TOP_K=10
@@ -205,18 +205,21 @@ if [[ ${RUN_RERANK} = true ]]; then
       --input_path ${RERANK_FILE_PATH} \
       --output_path ${RERANK_RUN_PATH} \
       --top_k 1000
+    python rerank/extract_answers.py \
+      --search_path ${RERANK_RUN_PATH} \
+      --collection_path ${COLLECTION_PATH} \
+      --output_path ${ANSWERS_PATH}
 fi
 
 
 if [[ ${RUN_EXPAND_ANSWERS} = true ]]; then
     echo "Expanding answers..."
     python expand_query/expand.py \
-     --input_path ${RERANK_RUN_PATH} \
      --output_path ${EXP_ANSWER_PATH} \
-     --collection_path ${COLLECTION_PATH} \
+     --answers_path ${ANSWERS_PATH} \
      --pre_model_name ${EXP_PRE_MODEL_NAME} \
      --model_name ${EXP_MODEL_NAME} \
-     --top_k ${EXP_ANSWER_TOP_K} \
+     --sample_top_k ${EXP_ANSWER_TOP_K} \
      --num_samples ${EXP_ANSWER_NUM_SAMPLES} \
      --batch_size ${EXP_ANSWER_BATCH_SIZE} \
      --gpus ${GPUS} \
@@ -275,7 +278,7 @@ if [[ ${RUN_RGQE_RANK} = true ]]; then
     python rerank/rgqe_rank.py \
       --input_path ${RGQE_CC_FILE_PATH} \
       --output_path ${RGQE_RANK_PATH} \
-      --collection_path ${COLLECTION_PATH} \
+      --answers_path ${ANSWERS_PATH} \
       --pre_model_name ${RERANK_PRE_MODEL_NAME} \
       --model_name ${RERANK_MODEL_NAME} \
       --max_seq_len 96 \
@@ -319,10 +322,6 @@ fi
 
 
 if [[ ${RUN_RGQE_RERANK} = true ]]; then
-#    python rerank/extract_answers.py \
-#      --search_path ${RERANK_RUN_PATH} \
-#      --collection_path ${COLLECTION_PATH} \
-#      --output_path ${ANSWERS_PATH}
     echo "Running RGQE rerank..."
     python rgqe/rgqe_rerank.py \
       --cc_path ${RGQE_TOP_CC_FILE_PATH} \
