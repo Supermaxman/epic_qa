@@ -4,56 +4,34 @@ from collections import defaultdict
 import argparse
 import json
 
-
-class DFS(object):
-	def __init__(self, nodes, edges):
-		self.visited = {}
-		self.nodes = nodes
-		self.edges = edges
-		for v in self.nodes:
-			self.visited[v] = False
-
-	def find_connected(self):
-		components = []
-		for v in self.nodes:
-			if not self.visited[v]:
-				c_list = set()
-				c = self.dfs_search(v, c_list)
-				components.append(c)
-		return components
-
-	def dfs_search(self, v, c_list):
-		self.visited[v] = True
-		c_list.add(v)
-		for c in self.edges[v]:
-			if c in self.visited and not self.visited[c]:
-				self.dfs_search(c, c_list)
-		return c_list
+import networkx as nx
 
 
 def create_components(sample_entail_pairs, answer_samples, threshold):
 	results = defaultdict(list)
 	entailed_set_id = 0
 	for answer_id, samples in sample_entail_pairs.items():
-		edges = defaultdict(set)
+		a_graph = nx.Graph()
 		for sample_a_id, sample_b_id, score in samples:
 			if score < threshold:
 				continue
-			edges[sample_a_id].add(sample_b_id)
-			edges[sample_b_id].add(sample_a_id)
+			a_graph.add_edge(
+				sample_a_id,
+				sample_b_id,
+				weight=score
+			)
 
 		sample_texts = answer_samples[answer_id]
-		nodes = list(range(len(sample_texts)))
-		dfs = DFS(
-			nodes=nodes,
-			edges=edges,
-		)
-		entailed_sets = dfs.find_connected()
+
+		for node in range(len(sample_texts)):
+			a_graph.add_node(node)
+
+		entailed_sets = nx.connected_components(a_graph)
 		answer_sets = []
 		for entailed_nodes in entailed_sets:
 			answer_set_samples = []
 			for v in entailed_nodes:
-				num_connected = len(edges[v].intersection(entailed_nodes))
+				num_connected = len(set(a_graph.neighbors(v)).intersection(set(entailed_nodes)))
 				answer_sample = {
 					'sample_id': v,
 					'sample_text': sample_texts[v],
