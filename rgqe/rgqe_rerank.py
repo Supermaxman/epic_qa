@@ -16,7 +16,6 @@ if __name__ == '__main__':
 	parser.add_argument('-q', '--queries_path', required=True)
 	parser.add_argument('-o', '--output_path', required=True)
 	parser.add_argument('-t', '--threshold', default=0.5, type=float)
-	parser.add_argument('-r', '--ratio', default=1.0, type=float)
 
 	args = parser.parse_args()
 
@@ -26,7 +25,6 @@ if __name__ == '__main__':
 	queries_path = args.queries_path
 	output_path = args.output_path
 	threshold = args.threshold
-	ratio = args.ratio
 	if all_path is not None:
 		with open(all_path, 'r') as f:
 			# [question_id][answer_id] -> entailed sets

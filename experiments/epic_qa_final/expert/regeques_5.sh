@@ -6,7 +6,7 @@ export INDEX_NAME=HLTRI_REGEQUES_EXP_INDEX_1
 export SEARCH_RUN_NAME=HLTRI_REGEQUES_SEARCH_1
 export RERANK_RUN_NAME=HLTRI_REGEQUES_RERANK_1
 export RERANK_RUN_MODEL_NAME=HLTRI_REGEQUES_RERANK_1
-export EXP_ANSWER_RUN_NAME=HLTRI_REGEQUES_EXP_ANSWER_1
+export EXP_ANSWER_RUN_NAME=HLTRI_REGEQUES_EXP_ANSWER_2
 export RQE_RUN_NAME=HLTRI_REGEQUES_FINAL_5
 
 # collection and task names
@@ -15,20 +15,19 @@ export DATASET=expert
 
 # major hyper-parameters for system
 export SEARCH_TOP_K=500
-export RGQE_TOP_K=100
-export RGQE_SELF_THRESHOLD=0.6
-export RGQE_TOP_C_THRESHOLD=0.6
+export RGQE_TOP_K=500
+export RGQE_SELF_THRESHOLD=0.7
+export RGQE_TOP_C_THRESHOLD=0.7
 # TODO
-export RGQE_RANK_THRESHOLD=-10.0
-export RQE_TOP_THRESHOLD=0.01
-export RGQE_RATIO=0.9
-export RGQE_SEQ_LEN=96
+export RGQE_RANK_THRESHOLD=0.0
+export RQE_TOP_THRESHOLD=0.05
+export RGQE_SEQ_LEN=64
 export RGQE_BATCH_SIZE=64
-export EXP_ANSWER_TOP_K=20
-export EXP_ANSWER_NUM_SAMPLES=20
+export EXP_ANSWER_TOP_K=10
+export EXP_ANSWER_NUM_SAMPLES=3
 export EXP_ANSWER_BATCH_SIZE=16
 
-export GPUS=3,4,5,6
+export GPUS=4,5,6,7
 #export TPU_IP_ADDRESS=10.155.6.34
 #export XRT_TPU_CONFIG="tpu_worker;0;$TPU_IP_ADDRESS:8470"
 
@@ -43,21 +42,21 @@ export SEARCH_INDEX=false
 export RUN_RERANK=false
 
 # rerank answer query expansion flags
-export RUN_EXPAND_ANSWERS=false
+export RUN_EXPAND_ANSWERS=true
 
 # RGQE pairwise self-entailment to find entailed sets for each answer
-export RUN_RGQE_SELF=false
+export RUN_RGQE_SELF=true
 # RGQE query-generated question entailment to filter poor generated questions
-export RUN_RGQE_QUESTION=false
+export RUN_RGQE_QUESTION=true
 
 export RUN_RGQE_RANK=false
 
 # RGQE full set-pairwise entailment for top_k answers for each query
-export RUN_RGQE_TOP=true
+export RUN_RGQE_TOP=false
 # RGQE rerank answers based on generated question entailment sets
-export RUN_RGQE_RERANK=true
+export RUN_RGQE_RERANK=false
 
-export EVAL_RGQE=true
+export EVAL_RGQE=false
 
 export RERANK_MODEL_NAME=rerank-${DATASET}-${RERANK_RUN_MODEL_NAME}
 export EXP_MODEL_NAME=docT5query-base
@@ -99,6 +98,7 @@ export RGQE_QUESTION_FILE_PATH=${RGQE_QUESTION_PATH}/${RQE_RUN_NAME}.rgqe_questi
 export RGQE_TOP_PATH=${ARTIFACTS_PATH}/${RQE_RUN_NAME}_TOP
 export RGQE_TOP_FILE_PATH=${RGQE_TOP_PATH}/${RQE_RUN_NAME}.rgqe_top
 export RGQE_TOP_CC_FILE_PATH=${RGQE_TOP_PATH}/${RQE_RUN_NAME}.rgqe_top_cc
+export RGQE_TOP_CC_GRAPH_PATH=${RGQE_TOP_PATH}/cc_graphs
 export RGQE_TOP_RERANK_FILE_PATH=${RGQE_TOP_PATH}/${RQE_RUN_NAME}.rgqe_rerank
 
 export RERANK_RUN_PATH=${RERANK_PATH}/${RERANK_RUN_NAME}.txt
@@ -290,30 +290,31 @@ fi
 if [[ ${RUN_RGQE_TOP} = true ]]; then
     echo "Running top RGQE..."
     # top_k set entailment
-#    python rgqe/rgqe.py \
-#      --input_path ${RGQE_CC_FILE_PATH} \
-#      --output_path ${RGQE_TOP_PATH} \
-#      --qe_path ${RGQE_QUESTION_FILE_PATH} \
-#      --search_path ${RERANK_RUN_PATH} \
-#      --model_name ${RQE_MODEL_NAME} \
-#      --max_seq_len ${RGQE_SEQ_LEN} \
-#      --batch_size ${RGQE_BATCH_SIZE} \
-#      --mode top \
-#      --top_k ${RGQE_TOP_K} \
-#      --gpus ${GPUS} \
-#      --threshold ${RQE_TOP_THRESHOLD} \
-#    ; \
-#    python rgqe/format_rgqe_top.py \
-#      --input_path ${RGQE_TOP_PATH} \
-#      --output_path ${RGQE_TOP_FILE_PATH} \
-#    ; \
+    python rgqe/rgqe.py \
+      --input_path ${RGQE_CC_FILE_PATH} \
+      --output_path ${RGQE_TOP_PATH} \
+      --qe_path ${RGQE_QUESTION_FILE_PATH} \
+      --rr_path ${RGQE_RANK_FILE_PATH} \
+      --search_path ${RERANK_RUN_PATH} \
+      --model_name ${RQE_MODEL_NAME} \
+      --max_seq_len ${RGQE_SEQ_LEN} \
+      --batch_size ${RGQE_BATCH_SIZE} \
+      --mode top \
+      --top_k ${RGQE_TOP_K} \
+      --gpus ${GPUS} \
+      --qe_threshold ${RQE_TOP_THRESHOLD} \
+      --rr_threshold ${RGQE_RANK_THRESHOLD} \
+    ; \
+    python rgqe/format_rgqe_top.py \
+      --input_path ${RGQE_TOP_PATH} \
+      --output_path ${RGQE_TOP_FILE_PATH} \
+    ; \
     python rgqe/rgqe_top_components.py \
       --input_path ${RGQE_TOP_FILE_PATH} \
       --cc_path ${RGQE_CC_FILE_PATH} \
-      --rr_path ${RGQE_RANK_FILE_PATH} \
       --output_path ${RGQE_TOP_CC_FILE_PATH} \
-      --cc_threshold ${RGQE_TOP_C_THRESHOLD} \
-      --rr_threshold ${RGQE_RANK_THRESHOLD}
+      --graph_path ${RGQE_TOP_CC_GRAPH_PATH} \
+      --cc_threshold ${RGQE_TOP_C_THRESHOLD}
 fi
 
 
@@ -328,7 +329,6 @@ if [[ ${RUN_RGQE_RERANK} = true ]]; then
       --answers_path ${ANSWERS_PATH} \
       --queries_path ${QUERY_PATH} \
       --output_path ${RGQE_TOP_RERANK_FILE_PATH} \
-      --ratio ${RGQE_RATIO} \
     ; \
     python rgqe/format_eval.py \
       --results_path ${RGQE_TOP_RERANK_FILE_PATH} \
