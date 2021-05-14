@@ -57,7 +57,8 @@ def create_components(question_entail_set_pairs, answer_sets, aq_ranks, cc_thres
 			a_rank_above = aq_ranks[answer_a_id][str(entail_set_a_id)] >= rr_threshold
 			b_rank_above = aq_ranks[answer_b_id][str(entail_set_b_id)] >= rr_threshold
 
-			if entail_prob_above and (a_rank_above and b_rank_above):
+			# if entail_prob_above and (a_rank_above and b_rank_above):
+			if entail_prob_above:
 				edges[entail_set_a_id].add(entail_set_b_id)
 				edges[entail_set_b_id].add(entail_set_a_id)
 
