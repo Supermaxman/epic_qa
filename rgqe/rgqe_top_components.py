@@ -31,8 +31,8 @@ def create_components(question_entail_set_pairs, answer_sets, aq_ranks, cc_thres
 			entail_prob_above = entail_prob >= cc_threshold
 			a_rank_above = aq_ranks[answer_a_id][str(entail_set_a_id)] >= rr_threshold
 			b_rank_above = aq_ranks[answer_b_id][str(entail_set_b_id)] >= rr_threshold
-			q_graph.add_node(entail_set_a_id)
-			q_graph.add_node(entail_set_b_id)
+			q_graph.add_node(entail_set_a_id, text=f'({aq_ranks[answer_a_id][str(entail_set_a_id)]:.2f}): ' + entailed_set_text_lookup[entail_set_a_id])
+			q_graph.add_node(entail_set_b_id, text=f'({aq_ranks[answer_b_id][str(entail_set_b_id)]:.2f}): ' + entailed_set_text_lookup[entail_set_b_id])
 			# if entail_prob_above and (a_rank_above and b_rank_above):
 			if entail_prob_above:
 				q_graph.add_edge(
