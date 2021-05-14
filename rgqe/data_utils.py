@@ -149,7 +149,7 @@ class RGQEQuestionPredictionDataset(Dataset):
 
 
 class RGQETopPredictionDataset(Dataset):
-	def __init__(self, input_path, qe_path, search_path, top_k, threshold):
+	def __init__(self, input_path, qe_path, rr_path, search_path, top_k, qe_threshold, rr_threshold):
 		self.input_path = input_path
 		self.search_path = search_path
 		self.qe_path = qe_path
@@ -162,6 +162,10 @@ class RGQETopPredictionDataset(Dataset):
 		with open(qe_path) as f:
 			# [question_id][answer_id] -> (entailed set, entailed_prob)
 			self.qa_set_entailments = json.load(f)
+
+		with open(rr_path) as f:
+			# [answer_id][str(entailed_set_id)] -> rank
+			self.rr_ranks = json.load(f)
 
 		question_answer_count = defaultdict(int)
 		question_samples = defaultdict(list)
@@ -176,7 +180,10 @@ class RGQETopPredictionDataset(Dataset):
 					answer_sets = self.answers[answer_id]
 					answer_sets = {e['entailed_set_id']: e for e in answer_sets}
 					for entailed_set_id, entail_prob in self.qa_set_entailments[question_id][answer_id]:
-						if entail_prob < threshold:
+						if entail_prob < qe_threshold:
+							continue
+						es_rank = self.rr_ranks[answer_id][str(entailed_set_id)]
+						if es_rank < rr_threshold:
 							continue
 						entailed_set = answer_sets[entailed_set_id]
 						entailed_set_sample_text = entailed_set['entailed_set'][0]['sample_text']

@@ -8,7 +8,7 @@ import os
 import networkx as nx
 
 
-def create_components(question_entail_set_pairs, answer_sets, aq_ranks, cc_threshold, rr_threshold):
+def create_components(question_entail_set_pairs, answer_sets, cc_threshold):
 	entailed_set_text_lookup = {}
 	for answer_id, a_sets in answer_sets.items():
 		for a_set in a_sets:
@@ -28,13 +28,10 @@ def create_components(question_entail_set_pairs, answer_sets, aq_ranks, cc_thres
 			entailed_set_answer_lookup[answer_a_id].add(entail_set_a_id)
 			entailed_set_answer_lookup[answer_b_id].add(entail_set_b_id)
 
-			entail_prob_above = entail_prob >= cc_threshold
-			a_rank_above = aq_ranks[answer_a_id][str(entail_set_a_id)] >= rr_threshold
-			b_rank_above = aq_ranks[answer_b_id][str(entail_set_b_id)] >= rr_threshold
-			q_graph.add_node(entail_set_a_id, text=f'({aq_ranks[answer_a_id][str(entail_set_a_id)]:.2f}): ' + entailed_set_text_lookup[entail_set_a_id])
-			q_graph.add_node(entail_set_b_id, text=f'({aq_ranks[answer_b_id][str(entail_set_b_id)]:.2f}): ' + entailed_set_text_lookup[entail_set_b_id])
-			# if entail_prob_above and (a_rank_above and b_rank_above):
-			if entail_prob_above:
+			q_graph.add_node(entail_set_a_id)
+			q_graph.add_node(entail_set_b_id)
+
+			if entail_prob >= cc_threshold:
 				q_graph.add_edge(
 					entail_set_a_id,
 					entail_set_b_id,
@@ -105,21 +102,17 @@ if __name__ == '__main__':
 	parser = argparse.ArgumentParser()
 	parser.add_argument('-i', '--input_path', required=True)
 	parser.add_argument('-c', '--cc_path', required=True)
-	parser.add_argument('-r', '--rr_path', required=True)
 	parser.add_argument('-o', '--output_path', required=True)
 	parser.add_argument('-og', '--graph_path', required=True)
 	parser.add_argument('-tc', '--cc_threshold', default=0.01, type=float)
-	parser.add_argument('-tr', '--rr_threshold', default=0.0, type=float)
 
 	args = parser.parse_args()
 
 	sys.setrecursionlimit(10 ** 6)
 	input_path = args.input_path
 	cc_path = args.cc_path
-	rr_path = args.rr_path
 	output_path = args.output_path
 	cc_threshold = args.cc_threshold
-	rr_threshold = args.rr_threshold
 	graph_path = args.graph_path
 
 	if not os.path.exists(graph_path):
@@ -130,15 +123,11 @@ if __name__ == '__main__':
 
 	with open(cc_path) as f:
 		answer_sets = json.load(f)
-	with open(rr_path) as f:
-		aq_ranks = json.load(f)
 
 	component_results, q_graphs = create_components(
 		question_entail_set_pairs,
 		answer_sets,
-		aq_ranks,
 		cc_threshold,
-		rr_threshold
 	)
 
 	for q_id, q_graph in q_graphs.items():

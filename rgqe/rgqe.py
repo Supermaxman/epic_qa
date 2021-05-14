@@ -30,8 +30,10 @@ if __name__ == '__main__':
 	parser.add_argument('-qp', '--query_path', default=None)
 	parser.add_argument('-lp', '--label_path', default=None)
 	parser.add_argument('-qe', '--qe_path', default=None)
+	parser.add_argument('-rr', '--rr_path', default=None)
 	parser.add_argument('-cc', '--cc_path', default=None)
-	parser.add_argument('-te', '--threshold', default=0.5, type=float)
+	parser.add_argument('-qet', '--qe_threshold', default=0.6, type=float)
+	parser.add_argument('-rrt', '--rr_threshold', default=0.0, type=float)
 	parser.add_argument('-gpu', '--gpus', default='0')
 
 	args = parser.parse_args()
@@ -55,8 +57,10 @@ if __name__ == '__main__':
 	query_path = args.query_path
 	label_path = args.label_path
 	qe_path = args.qe_path
+	rr_path = args.rr_path
 	cc_path = args.cc_path
-	threshold = args.threshold
+	qe_threshold = args.qe_threshold
+	rr_threshold = args.rr_threshold
 
 	# export TPU_IP_ADDRESS=10.155.6.34
 	# export XRT_TPU_CONFIG="tpu_worker;0;$TPU_IP_ADDRESS:8470"
@@ -95,7 +99,7 @@ if __name__ == '__main__':
 			input_path,
 			qe_path,
 			cc_path,
-			threshold=threshold
+			threshold=qe_threshold
 		)
 	elif mode == 'self':
 		eval_dataset = RGQESelfPredictionDataset(
@@ -105,9 +109,11 @@ if __name__ == '__main__':
 		eval_dataset = RGQETopPredictionDataset(
 			input_path,
 			qe_path,
+			rr_path,
 			search_path,
 			top_k,
-			threshold=threshold
+			qe_threshold=qe_threshold,
+			rr_threshold=rr_threshold
 		)
 	elif mode == 'question':
 		logging.info('Loading queries...')

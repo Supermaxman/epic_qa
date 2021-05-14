@@ -25,7 +25,7 @@ export RGQE_SEQ_LEN=64
 export RGQE_BATCH_SIZE=64
 export EXP_ANSWER_TOP_K=10
 export EXP_ANSWER_NUM_SAMPLES=3
-export EXP_ANSWER_BATCH_SIZE=16
+export EXP_ANSWER_BATCH_SIZE=32
 
 export GPUS=4,5,6,7
 #export TPU_IP_ADDRESS=10.155.6.34
@@ -42,21 +42,21 @@ export SEARCH_INDEX=false
 export RUN_RERANK=false
 
 # rerank answer query expansion flags
-export RUN_EXPAND_ANSWERS=true
+export RUN_EXPAND_ANSWERS=false
 
 # RGQE pairwise self-entailment to find entailed sets for each answer
-export RUN_RGQE_SELF=true
+export RUN_RGQE_SELF=false
 # RGQE query-generated question entailment to filter poor generated questions
-export RUN_RGQE_QUESTION=true
+export RUN_RGQE_QUESTION=false
 
-export RUN_RGQE_RANK=false
+export RUN_RGQE_RANK=true
 
 # RGQE full set-pairwise entailment for top_k answers for each query
-export RUN_RGQE_TOP=false
+export RUN_RGQE_TOP=true
 # RGQE rerank answers based on generated question entailment sets
-export RUN_RGQE_RERANK=false
+export RUN_RGQE_RERANK=true
 
-export EVAL_RGQE=false
+export EVAL_RGQE=true
 
 export RERANK_MODEL_NAME=rerank-${DATASET}-${RERANK_RUN_MODEL_NAME}
 export EXP_MODEL_NAME=docT5query-base
