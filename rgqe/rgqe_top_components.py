@@ -3,35 +3,8 @@ import sys
 from collections import defaultdict
 import argparse
 import json
+
 import networkx as nx
-from collections import defaultdict
-
-
-class DFS(object):
-	def __init__(self, nodes, edges):
-		self.visited = {}
-		self.nodes = nodes
-		self.edges = edges
-		for v in self.nodes:
-			self.visited[v] = False
-
-	def find_connected(self):
-		components = []
-		for v in self.nodes:
-			if not self.visited[v]:
-				c_list = set()
-				c = self.dfs_search(v, c_list)
-				c = sorted(list(c))
-				components.append(c)
-		return components
-
-	def dfs_search(self, v, c_list):
-		self.visited[v] = True
-		c_list.add(v)
-		for c in sorted(self.edges[v]):
-			if c in self.visited and not self.visited[c]:
-				self.dfs_search(c, c_list)
-		return c_list
 
 
 def create_components(question_entail_set_pairs, answer_sets, aq_ranks, cc_threshold, rr_threshold):
@@ -58,7 +31,15 @@ def create_components(question_entail_set_pairs, answer_sets, aq_ranks, cc_thres
 
 			# if entail_prob_above and (a_rank_above and b_rank_above):
 			if entail_prob_above:
-				q_graph.add_edge(entail_set_a_id, entail_set_b_id)
+				# q_graph.add_node(
+				#
+				# )
+				q_graph.add_edge(
+					entail_set_a_id,
+					entail_set_b_id,
+					weight=entail_prob
+				)
+
 		merged_entailed_sets = []
 		entailed_sets = nx.connected_components(q_graph)
 		merged_mapping = {}
@@ -66,7 +47,7 @@ def create_components(question_entail_set_pairs, answer_sets, aq_ranks, cc_thres
 			set_samples = []
 			for v in entailed_nodes:
 				merged_mapping[v] = new_entailed_set_id
-				num_connected = len(set(q_graph.degree[v]).intersection(set(entailed_nodes)))
+				num_connected = len(set(q_graph.neighbors(v)).intersection(set(entailed_nodes)))
 				set_sample = {
 					'entailed_set_id': v,
 					'entailed_set_text': entailed_set_text_lookup[v],
