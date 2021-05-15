@@ -31,12 +31,12 @@ def create_components(question_entail_set_pairs, answer_sets, cc_threshold):
 			q_graph.add_node(entail_set_a_id)
 			q_graph.add_node(entail_set_b_id)
 
-			# if entail_prob >= cc_threshold:
-			q_graph.add_edge(
-				entail_set_a_id,
-				entail_set_b_id,
-				weight=entail_prob
-			)
+			if entail_prob >= cc_threshold:
+				q_graph.add_edge(
+					entail_set_a_id,
+					entail_set_b_id,
+					weight=entail_prob
+				)
 
 		merged_entailed_sets = []
 		entailed_sets = nx.connected_components(q_graph)
