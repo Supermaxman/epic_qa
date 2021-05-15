@@ -30,9 +30,10 @@ def cluster_umap(q_graph):
 	label_lists = []
 	for l_id, l_nodes in label_list.items():
 		if l_id >= 0:
-			for node in l_nodes:
-				label_lists.append(int(node))
-
+			label_lists.append(l_nodes)
+		else:
+			for l_node in l_nodes:
+				label_lists.append([l_node])
 	return label_lists
 
 
