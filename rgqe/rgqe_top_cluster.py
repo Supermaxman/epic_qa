@@ -76,6 +76,8 @@ def create_entail_sets(question_entail_set_pairs, answer_sets, cc_threshold):
 			q_graph.remove_node(node)
 
 		entailed_sets = cluster_umap(q_graph)
+		for node in remove_nodes:
+			entailed_sets.append([node])
 		merged_entailed_sets = []
 		merged_mapping = {}
 		for entailed_nodes in entailed_sets:
