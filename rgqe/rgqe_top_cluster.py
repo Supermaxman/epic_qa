@@ -84,7 +84,10 @@ def create_entail_sets(question_entail_set_pairs, answer_sets, cc_threshold):
 			set_samples = []
 			for v in entailed_nodes:
 				merged_mapping[v] = new_entailed_set_id
-				num_connected = len(set(q_graph.neighbors(v)).intersection(set(entailed_nodes)))
+				if v in remove_nodes:
+					num_connected = 0
+				else:
+					num_connected = len(set(q_graph.neighbors(v)).intersection(set(entailed_nodes)))
 				set_sample = {
 					'entailed_set_id': v,
 					'entailed_set_text': entailed_set_text_lookup[v],
