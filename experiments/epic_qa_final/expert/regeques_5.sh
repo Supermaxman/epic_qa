@@ -45,11 +45,11 @@ export RUN_RERANK=false
 export RUN_EXPAND_ANSWERS=false
 
 # RGQE pairwise self-entailment to find entailed sets for each answer
-export RUN_RGQE_SELF=true
+export RUN_RGQE_SELF=false
 # RGQE query-generated question entailment to filter poor generated questions
-export RUN_RGQE_QUESTION=true
+export RUN_RGQE_QUESTION=false
 
-export RUN_RGQE_RANK=true
+export RUN_RGQE_RANK=false
 
 # RGQE full set-pairwise entailment for top_k answers for each query
 export RUN_RGQE_TOP=true
@@ -293,31 +293,37 @@ fi
 if [[ ${RUN_RGQE_TOP} = true ]]; then
     echo "Running top RGQE..."
     # top_k set entailment
-    python rgqe/rgqe.py \
-      --input_path ${RGQE_CC_FILE_PATH} \
-      --output_path ${RGQE_TOP_PATH} \
-      --qe_path ${RGQE_QUESTION_FILE_PATH} \
-      --rr_path ${RGQE_RANK_FILE_PATH} \
-      --search_path ${RERANK_RUN_PATH} \
-      --model_name ${RQE_MODEL_NAME} \
-      --max_seq_len ${RGQE_SEQ_LEN} \
-      --batch_size ${RGQE_BATCH_SIZE} \
-      --mode top \
-      --top_k ${RGQE_TOP_K} \
-      --gpus ${GPUS} \
-      --qe_threshold ${RQE_TOP_THRESHOLD} \
-      --rr_threshold ${RGQE_RANK_THRESHOLD} \
-    ; \
-    python rgqe/format_rgqe_top.py \
-      --input_path ${RGQE_TOP_PATH} \
-      --output_path ${RGQE_TOP_FILE_PATH} \
-    ; \
-    python rgqe/rgqe_top_components.py \
+#    python rgqe/rgqe.py \
+#      --input_path ${RGQE_CC_FILE_PATH} \
+#      --output_path ${RGQE_TOP_PATH} \
+#      --qe_path ${RGQE_QUESTION_FILE_PATH} \
+#      --rr_path ${RGQE_RANK_FILE_PATH} \
+#      --search_path ${RERANK_RUN_PATH} \
+#      --model_name ${RQE_MODEL_NAME} \
+#      --max_seq_len ${RGQE_SEQ_LEN} \
+#      --batch_size ${RGQE_BATCH_SIZE} \
+#      --mode top \
+#      --top_k ${RGQE_TOP_K} \
+#      --gpus ${GPUS} \
+#      --qe_threshold ${RQE_TOP_THRESHOLD} \
+#      --rr_threshold ${RGQE_RANK_THRESHOLD} \
+#    ; \
+#    python rgqe/format_rgqe_top.py \
+#      --input_path ${RGQE_TOP_PATH} \
+#      --output_path ${RGQE_TOP_FILE_PATH} \
+#    ; \
+    python rgqe/rgqe_top_cluster.py \
       --input_path ${RGQE_TOP_FILE_PATH} \
       --cc_path ${RGQE_CC_FILE_PATH} \
       --output_path ${RGQE_TOP_CC_FILE_PATH} \
       --graph_path ${RGQE_TOP_CC_GRAPH_PATH} \
       --cc_threshold ${RGQE_TOP_C_THRESHOLD}
+#    python rgqe/rgqe_top_components.py \
+#      --input_path ${RGQE_TOP_FILE_PATH} \
+#      --cc_path ${RGQE_CC_FILE_PATH} \
+#      --output_path ${RGQE_TOP_CC_FILE_PATH} \
+#      --graph_path ${RGQE_TOP_CC_GRAPH_PATH} \
+#      --cc_threshold ${RGQE_TOP_C_THRESHOLD}
 fi
 
 
