@@ -82,6 +82,9 @@ def create_components(question_entail_set_pairs, answer_sets, cc_threshold):
 			for entailed_set_id in a_sets:
 				if entailed_set_id in unconnected_sets:
 					num_unconnected += 1
+					# TODO added for CIKM for sparse questions
+					new_entailed_set_id = merged_mapping[entailed_set_id]
+					new_entailed_sets.add(new_entailed_set_id)
 				else:
 					new_entailed_set_id = merged_mapping[entailed_set_id]
 					new_entailed_sets.add(new_entailed_set_id)
