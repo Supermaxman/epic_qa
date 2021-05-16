@@ -10,7 +10,6 @@ from ndns_utils import get_ranking
 if __name__ == '__main__':
 
 	parser = argparse.ArgumentParser()
-	parser.add_argument('-l', '--all_path', default=None)
 	parser.add_argument('-c', '--cc_path', required=True)
 	parser.add_argument('-a', '--answers_path', required=True)
 	parser.add_argument('-q', '--queries_path', required=True)
@@ -18,17 +17,11 @@ if __name__ == '__main__':
 
 	args = parser.parse_args()
 
-	all_path = args.all_path
 	cc_path = args.cc_path
 	answers_path = args.answers_path
 	queries_path = args.queries_path
 	output_path = args.output_path
-	if all_path is not None:
-		with open(all_path, 'r') as f:
-			# [question_id][answer_id] -> entailed sets
-			question_answer_sets = json.load(f)
-	else:
-		question_answer_sets = {}
+	question_answer_sets = {}
 
 	with open(queries_path, 'r') as f:
 		queries = json.load(f)
@@ -46,12 +39,6 @@ if __name__ == '__main__':
 	answer_text_lookup = answers['answer_text_lookup']
 	results = {}
 	for question_id, question_answers in rerank_scores.items():
-		if all_path is not None:
-			if question_id not in question_answer_sets:
-				answer_sets = {}
-				print(f'WARNING: {question_id} has no sets outside top 100')
-			else:
-				answer_sets = question_answer_sets[question_id]
 		if question_id in rgqe_top_q_cc:
 			rgqe_top_cc = rgqe_top_q_cc[question_id]
 			top_answer_sets = rgqe_top_cc['answer_sets']
@@ -75,12 +62,6 @@ if __name__ == '__main__':
 			else:
 				max_non_top_score = max(max_non_top_score, answer['score'])
 				qa_sets = set()
-				if all_path is not None:
-					if answer_id in answer_sets:
-						for entailed_set_a_id, entailed_set_b_id, entail_prob in answer_sets[answer_id]:
-							if entail_prob < threshold:
-								continue
-							qa_sets.add(entailed_set_b_id)
 			qa_sets = list(qa_sets)
 			if len(qa_sets) > 0:
 				num_answers_with_set += 1
