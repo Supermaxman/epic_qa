@@ -15,12 +15,12 @@ export DATASET=expert
 
 # major hyper-parameters for system
 export SEARCH_TOP_K=500
-export RGQE_TOP_K=20
+export RGQE_TOP_K=100
 export RGQE_SELF_THRESHOLD=0.6
 export RGQE_TOP_C_THRESHOLD=0.6
 # TODO
-export RGQE_RANK_THRESHOLD=1.0
-export RQE_TOP_THRESHOLD=0.2
+export RGQE_RANK_THRESHOLD=3.0
+export RQE_TOP_THRESHOLD=0.3
 export RGQE_SEQ_LEN=64
 export RGQE_BATCH_SIZE=128
 export EXP_ANSWER_TOP_K=20
@@ -300,25 +300,25 @@ fi
 if [[ ${RUN_RGQE_TOP} = true ]]; then
     echo "Running top RGQE..."
     # top_k set entailment
-#    python rgqe/rgqe.py \
-#      --input_path ${RGQE_CC_FILE_PATH} \
-#      --output_path ${RGQE_TOP_PATH} \
-#      --qe_path ${RGQE_QUESTION_FILE_PATH} \
-#      --rr_path ${RGQE_RANK_FILE_PATH} \
-#      --search_path ${RERANK_RUN_PATH} \
-#      --model_name ${RQE_MODEL_NAME} \
-#      --max_seq_len ${RGQE_SEQ_LEN} \
-#      --batch_size ${RGQE_BATCH_SIZE} \
-#      --mode top \
-#      --top_k ${RGQE_TOP_K} \
-#      --gpus ${GPUS} \
-#      --qe_threshold ${RQE_TOP_THRESHOLD} \
-#      --rr_threshold ${RGQE_RANK_THRESHOLD} \
-#    ; \
-#    python rgqe/format_rgqe_top.py \
-#      --input_path ${RGQE_TOP_PATH} \
-#      --output_path ${RGQE_TOP_FILE_PATH} \
-#    ; \
+    python rgqe/rgqe.py \
+      --input_path ${RGQE_CC_FILE_PATH} \
+      --output_path ${RGQE_TOP_PATH} \
+      --qe_path ${RGQE_QUESTION_FILE_PATH} \
+      --rr_path ${RGQE_RANK_FILE_PATH} \
+      --search_path ${RERANK_RUN_PATH} \
+      --model_name ${RQE_MODEL_NAME} \
+      --max_seq_len ${RGQE_SEQ_LEN} \
+      --batch_size ${RGQE_BATCH_SIZE} \
+      --mode top \
+      --top_k ${RGQE_TOP_K} \
+      --gpus ${GPUS} \
+      --qe_threshold ${RQE_TOP_THRESHOLD} \
+      --rr_threshold ${RGQE_RANK_THRESHOLD} \
+    ; \
+    python rgqe/format_rgqe_top.py \
+      --input_path ${RGQE_TOP_PATH} \
+      --output_path ${RGQE_TOP_FILE_PATH} \
+    ; \
     python rgqe/rgqe_top_components.py \
       --input_path ${RGQE_TOP_FILE_PATH} \
       --cc_path ${RGQE_CC_FILE_PATH} \
