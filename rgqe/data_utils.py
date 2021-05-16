@@ -159,14 +159,14 @@ class RGQETopPredictionDataset(Dataset):
 		with open(input_path) as f:
 			# [answer_id] -> entailed sets
 			self.answers = json.load(f)
-
-		with open(qe_path) as f:
-			# [question_id][answer_id] -> (entailed set, entailed_prob)
-			self.qa_set_entailments = json.load(f)
-
-		with open(rr_path) as f:
-			# [answer_id][str(entailed_set_id)] -> rank
-			self.rr_ranks = json.load(f)
+		if qe_path is not None:
+			with open(qe_path) as f:
+				# [question_id][answer_id] -> (entailed set, entailed_prob)
+				self.qa_set_entailments = json.load(f)
+		if rr_path is not None:
+			with open(rr_path) as f:
+				# [answer_id][str(entailed_set_id)] -> rank
+				self.rr_ranks = json.load(f)
 
 		question_answer_count = defaultdict(int)
 		question_samples = defaultdict(list)
@@ -179,14 +179,16 @@ class RGQETopPredictionDataset(Dataset):
 						continue
 					question_answer_count[question_id] += 1
 					answer_sets = self.answers[answer_id]
-					answer_sets = {e['entailed_set_id']: e for e in answer_sets}
-					for entailed_set_id, entail_prob in self.qa_set_entailments[question_id][answer_id]:
-						if entail_prob < qe_threshold:
-							continue
-						es_rank = self.rr_ranks[answer_id][str(entailed_set_id)]
-						if es_rank < rr_threshold:
-							continue
-						entailed_set = answer_sets[entailed_set_id]
+					for entailed_set in answer_sets:
+						entailed_set_id = entailed_set['entailed_set_id']
+						if qe_path is not None:
+							entail_prob = self.qa_set_entailments[question_id][answer_id][entailed_set_id]
+							if entail_prob < qe_threshold:
+								continue
+						if rr_path is not None:
+							es_rank = self.rr_ranks[answer_id][str(entailed_set_id)]
+							if es_rank < rr_threshold:
+								continue
 						entailed_set_sample_text = entailed_set['entailed_set'][0]['sample_text']
 						example = {
 							'id': f'{question_id}|{answer_id}|{entailed_set_id}',

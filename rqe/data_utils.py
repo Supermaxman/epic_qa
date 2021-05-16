@@ -66,6 +66,27 @@ def load_at_predictions(predictions_path):
 	return predictions
 
 
+def load_q_hier_data(data_path):
+	with open(data_path) as f:
+		data = json.load(f)
+
+	pos_examples = data['pos_examples']
+	neg_examples = data['neg_examples']
+	random.shuffle(neg_examples)
+	neg_examples = neg_examples[:3000]
+	examples = []
+	for p_example in pos_examples + neg_examples:
+		example = {
+			'id': p_example['id'],
+			'A': p_example['super_question'],
+			'B': p_example['sub_question'],
+			'label': p_example['label']
+		}
+		examples.append(example)
+
+	return examples
+
+
 def load_quora_data(data_path, at_predictions):
 	examples = []
 	with open(data_path, 'r') as f:
@@ -100,37 +121,21 @@ def load_quora_data(data_path, at_predictions):
 
 
 class BatchCollator(object):
-	def __init__(self, tokenizer,  max_seq_len: int, force_max_seq_len: bool, category_map, types_map):
+	def __init__(self, tokenizer,  max_seq_len: int, force_max_seq_len: bool):
 		super().__init__()
 		self.tokenizer = tokenizer
 		self.max_seq_len = max_seq_len
 		self.force_max_seq_len = force_max_seq_len
-		self.category_map = category_map
-		self.types_map = types_map
 
 	def __call__(self, examples):
 		# creates text examples
 		sequences = []
 		labels = []
 		ids = []
-		a_categories = []
-		b_categories = []
-		a_types = []
-		b_types = []
 		for ex in examples:
 			sequences.append((ex['A'], ex['B']))
 			labels.append(ex['label'])
 			ids.append(ex['id'])
-			a_categories.append(self.category_map[ex['A_category']])
-			b_categories.append(self.category_map[ex['B_category']])
-			a_type = torch.zeros(len(self.types_map), dtype=torch.float)
-			b_type = torch.zeros(len(self.types_map), dtype=torch.float)
-			for ex_t in ex['A_types']:
-				a_type[self.types_map[ex_t]] = 1.0
-			a_types.append(a_type)
-			for ex_t in ex['B_types']:
-				b_type[self.types_map[ex_t]] = 1.0
-			b_types.append(b_type)
 
 		# "input_ids": batch["input_ids"].to(device),
 		# "attention_mask": batch["attention_mask"].to(device),
@@ -143,11 +148,6 @@ class BatchCollator(object):
 			max_length=self.max_seq_len
 		)
 		labels = torch.tensor(labels, dtype=torch.long)
-		a_categories = torch.tensor(a_categories, dtype=torch.long)
-		b_categories = torch.tensor(b_categories, dtype=torch.long)
-		a_types = torch.stack(a_types, dim=0)
-		b_types = torch.stack(b_types, dim=0)
-
 		input_ids = tokenizer_batch['input_ids']
 		attention_mask = tokenizer_batch['attention_mask']
 		type_ids = tokenizer_batch['token_type_ids']
@@ -161,10 +161,6 @@ class BatchCollator(object):
 			'token_type_ids': type_ids,
 			'labels': labels,
 			'ids': ids,
-			'A_categories': a_categories,
-			'B_categories': b_categories,
-			'A_types': a_types,
-			'B_types': b_types,
 			'A_mask': a_mask,
 			'B_mask': b_mask,
 		}
