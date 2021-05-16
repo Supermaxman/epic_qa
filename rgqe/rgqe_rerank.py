@@ -54,12 +54,16 @@ if __name__ == '__main__':
 				print(f'WARNING: {question_id} has no sets outside top 100')
 			else:
 				answer_sets = question_answer_sets[question_id]
-		rgqe_top_cc = rgqe_top_q_cc[question_id]
-		top_answer_sets = rgqe_top_cc['answer_sets']
-		entailed_sets_text = {
-			e['entailed_set_id']: e['entailed_set'][0]['entailed_set_text'] for e in
-			rgqe_top_cc['entailed_sets']
-		}
+		if question_id in rgqe_top_q_cc:
+			rgqe_top_cc = rgqe_top_q_cc[question_id]
+			top_answer_sets = rgqe_top_cc['answer_sets']
+			entailed_sets_text = {
+				e['entailed_set_id']: e['entailed_set'][0]['entailed_set_text'] for e in
+				rgqe_top_cc['entailed_sets']
+			}
+		else:
+			top_answer_sets = {}
+			entailed_sets_text = {}
 		num_answers_with_set = 0
 		answer_lookup = {}
 		top_answers = []
