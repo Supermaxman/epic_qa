@@ -19,8 +19,8 @@ export RGQE_TOP_K=100
 export RGQE_SELF_THRESHOLD=0.6
 export RGQE_TOP_C_THRESHOLD=0.6
 # TODO
-export RGQE_RANK_THRESHOLD=3.0
-export RQE_TOP_THRESHOLD=0.3
+export RGQE_RANK_THRESHOLD=2.0
+export RQE_TOP_THRESHOLD=0.0001
 export RGQE_SEQ_LEN=64
 export RGQE_BATCH_SIZE=128
 export EXP_ANSWER_TOP_K=20
@@ -319,14 +319,14 @@ if [[ ${RUN_RGQE_TOP} = true ]]; then
       --input_path ${RGQE_TOP_PATH} \
       --output_path ${RGQE_TOP_FILE_PATH} \
     ; \
-    python rgqe/rgqe_top_components.py \
+    python rgqe/rgqe_top_cluster.py \
       --input_path ${RGQE_TOP_FILE_PATH} \
       --cc_path ${RGQE_CC_FILE_PATH} \
       --output_path ${RGQE_TOP_CC_FILE_PATH} \
       --graph_path ${RGQE_TOP_CC_GRAPH_PATH} \
       --cc_threshold ${RGQE_TOP_C_THRESHOLD}
 
-#    python rgqe/rgqe_top_cluster.py \
+#    python rgqe/rgqe_top_components.py \
 #      --input_path ${RGQE_TOP_FILE_PATH} \
 #      --cc_path ${RGQE_CC_FILE_PATH} \
 #      --output_path ${RGQE_TOP_CC_FILE_PATH} \
