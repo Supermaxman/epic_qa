@@ -34,6 +34,7 @@ if __name__ == "__main__":
 	parser.add_argument('--lr_warmup', type=float, default=0.1)
 	parser.add_argument('--weight_decay', type=float, default=0.01)
 	parser.add_argument('--save_directory', type=str, default='models')
+	parser.add_argument('--neg_samples', type=int, default=None)
 	parser.add_argument('--load_model', action='store_true', default=False)
 
 	args = parser.parse_args()
@@ -47,6 +48,7 @@ if __name__ == "__main__":
 
 	torch_cache_dir = args.torch_cache_dir
 	root_save_directory = args.save_directory
+	neg_samples = args.neg_samples
 
 	batch_size = args.batch_size
 	epochs = args.epochs
@@ -96,7 +98,7 @@ if __name__ == "__main__":
 		max_seq_len = 64
 		# do 80% train 10% dev 10% test
 		logging.info('Loading q_hier dataset...')
-		train_examples = load_q_hier_data(train_path)
+		train_examples = load_q_hier_data(train_path, neg_samples)
 		random.shuffle(train_examples)
 		val_examples = load_q_hier_data(test_path)
 

@@ -66,14 +66,15 @@ def load_at_predictions(predictions_path):
 	return predictions
 
 
-def load_q_hier_data(data_path):
+def load_q_hier_data(data_path, neg_samples=None):
 	with open(data_path) as f:
 		data = json.load(f)
 
 	pos_examples = data['pos_examples']
 	neg_examples = data['neg_examples']
-	random.shuffle(neg_examples)
-	neg_examples = neg_examples[:3000]
+	if neg_samples is not None:
+		random.shuffle(neg_examples)
+		neg_examples = neg_examples[:neg_samples]
 	examples = []
 	for p_example in pos_examples + neg_examples:
 		example = {

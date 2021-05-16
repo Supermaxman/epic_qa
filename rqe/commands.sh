@@ -69,6 +69,7 @@ python -m rqe.rqe_train \
   --learning_rate 5e-5 \
   --batch_size=8 \
   --save_directory=models/rqe \
+  --neg_samples=3000 \
   --epochs 10
 
 #python -m rqe.rqe_eval \
