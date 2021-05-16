@@ -218,9 +218,8 @@ if __name__ == "__main__":
 	if load_model:
 		logging.info(f'Loading from checkpoint: {pre_checkpoint_path}')
 		model.load_state_dict(torch.load(pre_checkpoint_path))
-	else:
-		tokenizer.save_pretrained(save_directory)
-		model.config.save_pretrained(save_directory)
+	tokenizer.save_pretrained(save_directory)
+	model.config.save_pretrained(save_directory)
 
 	logger = pl_loggers.TensorBoardLogger(
 		save_dir=save_directory,

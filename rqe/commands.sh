@@ -67,7 +67,8 @@ python -m rqe.rqe_train \
   --model_type=lm \
   --load_model \
   --learning_rate 5e-5 \
-  --batch_size=4 \
+  --batch_size=8 \
+  --save_directory=models/rqe \
   --epochs 10
 
 #python -m rqe.rqe_eval \
