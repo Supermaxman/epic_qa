@@ -67,3 +67,7 @@ if [[ ${RQE_EVAL} = true ]]; then
     --save_directory=${RQE_SAVE_DIRECTORY} \
     --gpus "${RQE_EVAL_GPUS}"
 fi
+
+
+echo "Freeing ${RQE_NUM_GPUS} GPUs: ${RQE_GPUS}"
+python gpu/free_gpus.py -i "${RQE_GPUS}"
