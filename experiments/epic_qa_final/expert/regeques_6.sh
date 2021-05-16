@@ -110,6 +110,13 @@ export RUN_PATH=${RGQE_TOP_PATH}/${RQE_RUN_NAME}.txt
 export EVAL_PATH=${RGQE_TOP_PATH}/${RQE_RUN_NAME}.eval
 
 
+handler()
+{
+    echo "Experiment aborted."
+    exit -1
+}
+trap handler SIGINT
+
 if [[ ${CREATE_INDEX} = true ]]; then
     echo "Creating index..."
     if [[ ${EXPAND_INDEX} = true ]]; then
