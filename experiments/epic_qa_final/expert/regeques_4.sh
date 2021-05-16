@@ -20,15 +20,14 @@ export RGQE_SELF_THRESHOLD=0.6
 export RGQE_TOP_C_THRESHOLD=0.6
 # TODO
 export RGQE_RANK_THRESHOLD=2.0
-export RQE_TOP_THRESHOLD=0.01
-export RGQE_RATIO=0.9
-export RGQE_SEQ_LEN=96
-export RGQE_BATCH_SIZE=64
+export RQE_TOP_THRESHOLD=0.0001
+export RGQE_SEQ_LEN=64
+export RGQE_BATCH_SIZE=128
 export EXP_ANSWER_TOP_K=20
 export EXP_ANSWER_NUM_SAMPLES=20
 export EXP_ANSWER_BATCH_SIZE=16
 
-export GPUS=3,4,5,6
+export GPUS=0
 #export TPU_IP_ADDRESS=10.155.6.34
 #export XRT_TPU_CONFIG="tpu_worker;0;$TPU_IP_ADDRESS:8470"
 
@@ -110,6 +109,13 @@ export RERANK_EVAL_PATH=${RERANK_PATH}/${RERANK_RUN_NAME}.eval
 export RUN_PATH=${RGQE_TOP_PATH}/${RQE_RUN_NAME}.txt
 export EVAL_PATH=${RGQE_TOP_PATH}/${RQE_RUN_NAME}.eval
 
+
+handler()
+{
+    echo "Experiment aborted."
+    exit -1
+}
+trap handler SIGINT
 
 if [[ ${CREATE_INDEX} = true ]]; then
     echo "Creating index..."
@@ -206,18 +212,21 @@ if [[ ${RUN_RERANK} = true ]]; then
       --input_path ${RERANK_FILE_PATH} \
       --output_path ${RERANK_RUN_PATH} \
       --top_k 1000
+    python rerank/extract_answers.py \
+      --search_path ${RERANK_RUN_PATH} \
+      --collection_path ${COLLECTION_PATH} \
+      --output_path ${ANSWERS_PATH}
 fi
 
 
 if [[ ${RUN_EXPAND_ANSWERS} = true ]]; then
     echo "Expanding answers..."
     python expand_query/expand.py \
-     --input_path ${RERANK_RUN_PATH} \
      --output_path ${EXP_ANSWER_PATH} \
-     --collection_path ${COLLECTION_PATH} \
+     --answers_path ${ANSWERS_PATH} \
      --pre_model_name ${EXP_PRE_MODEL_NAME} \
      --model_name ${EXP_MODEL_NAME} \
-     --top_k ${EXP_ANSWER_TOP_K} \
+     --sample_top_k ${EXP_ANSWER_TOP_K} \
      --num_samples ${EXP_ANSWER_NUM_SAMPLES} \
      --batch_size ${EXP_ANSWER_BATCH_SIZE} \
      --gpus ${GPUS} \
@@ -276,7 +285,7 @@ if [[ ${RUN_RGQE_RANK} = true ]]; then
     python rerank/rgqe_rank.py \
       --input_path ${RGQE_CC_FILE_PATH} \
       --output_path ${RGQE_RANK_PATH} \
-      --collection_path ${COLLECTION_PATH} \
+      --answers_path ${ANSWERS_PATH} \
       --pre_model_name ${RERANK_PRE_MODEL_NAME} \
       --model_name ${RERANK_MODEL_NAME} \
       --max_seq_len 96 \
@@ -291,46 +300,47 @@ fi
 if [[ ${RUN_RGQE_TOP} = true ]]; then
     echo "Running top RGQE..."
     # top_k set entailment
-#    python rgqe/rgqe.py \
-#      --input_path ${RGQE_CC_FILE_PATH} \
-#      --output_path ${RGQE_TOP_PATH} \
-#      --qe_path ${RGQE_QUESTION_FILE_PATH} \
-#      --search_path ${RERANK_RUN_PATH} \
-#      --model_name ${RQE_MODEL_NAME} \
-#      --max_seq_len ${RGQE_SEQ_LEN} \
-#      --batch_size ${RGQE_BATCH_SIZE} \
-#      --mode top \
-#      --top_k ${RGQE_TOP_K} \
-#      --gpus ${GPUS} \
-#      --threshold ${RQE_TOP_THRESHOLD} \
-#    ; \
-#    python rgqe/format_rgqe_top.py \
-#      --input_path ${RGQE_TOP_PATH} \
-#      --output_path ${RGQE_TOP_FILE_PATH} \
-#    ; \
-    python rgqe/rgqe_top_components.py \
+    python rgqe/rgqe.py \
+      --input_path ${RGQE_CC_FILE_PATH} \
+      --output_path ${RGQE_TOP_PATH} \
+      --qe_path ${RGQE_QUESTION_FILE_PATH} \
+      --rr_path ${RGQE_RANK_FILE_PATH} \
+      --search_path ${RERANK_RUN_PATH} \
+      --model_name ${RQE_MODEL_NAME} \
+      --max_seq_len ${RGQE_SEQ_LEN} \
+      --batch_size ${RGQE_BATCH_SIZE} \
+      --mode top \
+      --top_k ${RGQE_TOP_K} \
+      --gpus ${GPUS} \
+      --qe_threshold ${RQE_TOP_THRESHOLD} \
+      --rr_threshold ${RGQE_RANK_THRESHOLD} \
+    ; \
+    python rgqe/format_rgqe_top.py \
+      --input_path ${RGQE_TOP_PATH} \
+      --output_path ${RGQE_TOP_FILE_PATH} \
+    ; \
+    python rgqe/rgqe_top_cluster.py \
       --input_path ${RGQE_TOP_FILE_PATH} \
       --cc_path ${RGQE_CC_FILE_PATH} \
-      --rr_path ${RGQE_RANK_FILE_PATH} \
       --output_path ${RGQE_TOP_CC_FILE_PATH} \
       --graph_path ${RGQE_TOP_CC_GRAPH_PATH} \
-      --cc_threshold ${RGQE_TOP_C_THRESHOLD} \
-      --rr_threshold ${RGQE_RANK_THRESHOLD}
+      --cc_threshold ${RGQE_TOP_C_THRESHOLD}
+#    python rgqe/rgqe_top_components.py \
+#      --input_path ${RGQE_TOP_FILE_PATH} \
+#      --cc_path ${RGQE_CC_FILE_PATH} \
+#      --output_path ${RGQE_TOP_CC_FILE_PATH} \
+#      --graph_path ${RGQE_TOP_CC_GRAPH_PATH} \
+#      --cc_threshold ${RGQE_TOP_C_THRESHOLD}
 fi
 
 
 if [[ ${RUN_RGQE_RERANK} = true ]]; then
-#    python rerank/extract_answers.py \
-#      --search_path ${RERANK_RUN_PATH} \
-#      --collection_path ${COLLECTION_PATH} \
-#      --output_path ${ANSWERS_PATH}
     echo "Running RGQE rerank..."
     python rgqe/rgqe_rerank.py \
       --cc_path ${RGQE_TOP_CC_FILE_PATH} \
       --answers_path ${ANSWERS_PATH} \
       --queries_path ${QUERY_PATH} \
       --output_path ${RGQE_TOP_RERANK_FILE_PATH} \
-      --ratio ${RGQE_RATIO} \
     ; \
     python rgqe/format_eval.py \
       --results_path ${RGQE_TOP_RERANK_FILE_PATH} \
