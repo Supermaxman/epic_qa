@@ -21,6 +21,7 @@ if __name__ == "__main__":
 	parser = argparse.ArgumentParser()
 	parser.add_argument('--dataset', help='clinical-qe/quora', type=str, default='quora')
 	parser.add_argument('--pre_model_name', type=str, default='nboost/pt-bert-base-uncased-msmarco')
+	parser.add_argument('--model_name', type=str, default='nboost/pt-bert-base-uncased-msmarco')
 	parser.add_argument('--at_model', type=str, default='models/smart-dbpedia-at-v3')
 	parser.add_argument('--model_type', help='seq/lm/seq-at', type=str, default='seq')
 	parser.add_argument('--seed', help='random seed', type=int, default=0)
@@ -36,6 +37,8 @@ if __name__ == "__main__":
 	parser.add_argument('--save_directory', type=str, default='models')
 	parser.add_argument('--neg_samples', type=int, default=None)
 	parser.add_argument('--load_model', action='store_true', default=False)
+	parser.add_argument('-gpu', '--gpus', default='0')
+	parser.add_argument('-tpu', '--use_tpus', default=False, action='store_true')
 
 	args = parser.parse_args()
 	# TODO parameterize below into config file for reproducibility
@@ -105,18 +108,18 @@ if __name__ == "__main__":
 	else:
 		raise ValueError(f'Unknown dataset: {dataset}')
 
-	model_name = f'{dataset}-{model_type}-{pre_model_name.replace("/", "-")}'
+	model_name = args.model_name
 	# export TPU_IP_ADDRESS=10.155.6.34
 	# export XRT_TPU_CONFIG="tpu_worker;0;$TPU_IP_ADDRESS:8470"
-	# TODO move to args
-	use_tpus = False
+	use_tpus = args.use_tpus
 	train_model = True
 	load_model = args.load_model
 	calc_seq_len = False
-	is_distributed = False
 
-	gpus = [0]
+	gpus = [int(x) for x in args.gpus.split(',')]
+	is_distributed = len(gpus) > 1
 	precision = 16 if use_tpus else 32
+	# precision = 32
 	tpu_cores = 8
 	num_workers = 4
 	deterministic = True

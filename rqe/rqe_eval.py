@@ -34,6 +34,8 @@ if __name__ == "__main__":
 	parser.add_argument('--lr_warmup', type=float, default=0.1)
 	parser.add_argument('--weight_decay', type=float, default=0.01)
 	parser.add_argument('--save_directory', type=str, default='models')
+	parser.add_argument('-gpu', '--gpus', default='0')
+	parser.add_argument('-tpu', '--use_tpus', default=False, action='store_true')
 
 	args = parser.parse_args()
 	# TODO parameterize below into config file for reproducibility
@@ -102,12 +104,10 @@ if __name__ == "__main__":
 	model_name = args.model_name
 	# export TPU_IP_ADDRESS=10.155.6.34
 	# export XRT_TPU_CONFIG="tpu_worker;0;$TPU_IP_ADDRESS:8470"
-	# TODO move to args
-	use_tpus = False
-	is_distributed = False
-
-	gpus = [0]
-	precision = 16 if use_tpus else 32
+	gpus = [int(x) for x in args.gpus.split(',')]
+	is_distributed = len(gpus) > 1
+	precision = 16 if args.use_tpus else 32
+	# precision = 32
 	tpu_cores = 8
 	num_workers = 4
 	deterministic = True
@@ -133,7 +133,7 @@ if __name__ == "__main__":
 			logging.StreamHandler()]
 	)
 
-	num_batches_per_step = (len(gpus) if not use_tpus else tpu_cores)
+	num_batches_per_step = (len(gpus) if not args.use_tpus else tpu_cores)
 	updates_epoch = 0
 	updates_total = updates_epoch * epochs
 
@@ -148,7 +148,7 @@ if __name__ == "__main__":
 		collate_fn=BatchCollator(
 			tokenizer,
 			max_seq_len,
-			force_max_seq_len=use_tpus
+			force_max_seq_len=args.use_tpus
 		)
 	)
 	logging.info('Loading model...')
@@ -181,7 +181,7 @@ if __name__ == "__main__":
 		max_queue=2
 	)
 
-	if use_tpus:
+	if args.use_tpus:
 		trainer = pl.Trainer(
 			logger=logger,
 			tpu_cores=tpu_cores,

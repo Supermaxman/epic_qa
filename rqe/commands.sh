@@ -72,6 +72,18 @@ python -m rqe.rqe_train \
   --neg_samples=3000 \
   --epochs 10
 
+python -m rqe.rqe_train \
+  --dataset=q_hier \
+  --pre_model_name=models/quora-lm-models-mt-dnn-base-uncased \
+  --model_type=lm \
+  --load_model \
+  --learning_rate 5e-5 \
+  --batch_size=8 \
+  --save_directory=models/rqe \
+  --neg_samples=4000 \
+  --epochs 10
+
+
 #python -m rqe.rqe_eval \
 #  --dataset=q_hier \
 #  --model_name=quora-lm-models-mt-dnn-base-uncased \
