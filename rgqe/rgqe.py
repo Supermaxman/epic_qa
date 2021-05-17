@@ -167,7 +167,7 @@ if __name__ == '__main__':
 		predict_mode=True,
 		predict_path=output_path
 	)
-	# model.load_state_dict(torch.load(checkpoint_path))
+	model.load_state_dict(torch.load(checkpoint_path))
 
 	logger = pl_loggers.TensorBoardLogger(
 		save_dir=save_directory,
