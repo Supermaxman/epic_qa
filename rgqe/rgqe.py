@@ -6,7 +6,7 @@ from transformers import AutoTokenizer
 from torch.utils.data import DataLoader
 from model_utils import RGQEPredictionBert
 from data_utils import RGQEAllPredictionDataset, RGQESelfPredictionDataset, RGQETopPredictionDataset, \
-	RGQEQuestionPredictionDataset, PredictionBatchCollator
+	RGQEQuestionPredictionDataset, PredictionBatchCollator, RGQEQuestionSelfPredictionDataset
 import logging
 from pytorch_lightning import loggers as pl_loggers
 import torch
@@ -140,6 +140,32 @@ if __name__ == '__main__':
 			queries,
 			top_k,
 		)
+	elif mode == 'question_self':
+		logging.info('Loading queries...')
+		keep_ids = None
+		if label_path:
+			keep_ids = set()
+			with open(label_path) as f:
+				questions = json.load(f)
+				for question in questions:
+					question_id = question['question_id']
+					keep_ids.add(question_id)
+
+		queries = []
+		with open(query_path) as f:
+			all_queries = json.load(f)
+			for query in all_queries:
+				if keep_ids is not None and query['question_id'] not in keep_ids:
+					continue
+				else:
+					queries.append(query)
+		eval_dataset = RGQEQuestionSelfPredictionDataset(
+			input_path,
+			search_path,
+			queries,
+			top_k,
+		)
+
 	else:
 		raise ValueError(f'Unknown mode: {mode}')
 	logging.info(f'num_examples={len(eval_dataset)}')

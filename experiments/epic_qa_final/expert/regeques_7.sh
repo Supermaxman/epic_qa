@@ -17,9 +17,9 @@ export DATASET=expert
 export SEARCH_TOP_K=500
 export RGQE_TOP_K=100
 export RGQE_SELF_THRESHOLD=0.995
+export RGQE_QE_THRESHOLD=0.995
 export RGQE_TOP_C_THRESHOLD=0.995
 
-export RQE_TOP_THRESHOLD=0.004
 export RGQE_SEQ_LEN=64
 export RGQE_BATCH_SIZE=128
 export EXP_ANSWER_TOP_K=20
@@ -43,10 +43,11 @@ export RUN_RERANK=false
 # rerank answer query expansion flags
 export RUN_EXPAND_ANSWERS=false
 
-# RGQE pairwise self-entailment to find entailed sets for each answer
-export RUN_RGQE_SELF=false
 # RGQE query-generated question entailment to filter poor generated questions
 export RUN_RGQE_QUESTION=true
+
+# RGQE pairwise self-entailment to find entailed sets for each answer
+export RUN_RGQE_SELF=false
 
 # RGQE full set-pairwise entailment for top_k answers for each query
 export RUN_RGQE_TOP=false
@@ -234,6 +235,27 @@ if [[ ${RUN_EXPAND_ANSWERS} = true ]]; then
       --output_path ${EXP_ANSWER_FILE_PATH}
 fi
 
+
+if [[ ${RUN_RGQE_QUESTION} = true ]]; then
+    echo "Running question RGQE..."
+    # query-question entailment to filter out bad generated questions
+    python rgqe/rgqe.py \
+      --input_path ${EXP_ANSWER_FILE_PATH} \
+      --output_path ${RGQE_QUESTION_PATH} \
+      --search_path ${RERANK_RUN_PATH} \
+      --query_path ${QUERY_PATH} \
+      --model_name ${RQE_MODEL_NAME} \
+      --save_directory ${RQE_MODEL_SAVE_DIRECTORY} \
+      --max_seq_len ${RGQE_SEQ_LEN} \
+      --batch_size ${RGQE_BATCH_SIZE} \
+      --gpus ${GPUS} \
+      --mode question_self \
+    ; \
+    python rgqe/format_rgqe_question_self.py \
+      --input_path ${RGQE_QUESTION_PATH} \
+      --output_path ${RGQE_QUESTION_FILE_PATH}
+fi
+
 if [[ ${RUN_RGQE_SELF} = true ]]; then
     echo "Running self RGQE..."
     # self entailment
@@ -251,31 +273,17 @@ if [[ ${RUN_RGQE_SELF} = true ]]; then
 #      --input_path ${RGQE_SELF_PATH} \
 #      --output_path ${RGQE_SELF_FILE_PATH} \
 #    ; \
-    python rgqe/rgqe_self_components.py \
-      --input_path ${RGQE_SELF_FILE_PATH} \
-      --expand_path ${EXP_ANSWER_FILE_PATH} \
-      --output_path ${RGQE_CC_FILE_PATH} \
-      --threshold ${RGQE_SELF_THRESHOLD}
-fi
-
-if [[ ${RUN_RGQE_QUESTION} = true ]]; then
-    echo "Running question RGQE..."
-    # query-question entailment to filter out bad generated questions
-    python rgqe/rgqe.py \
-      --input_path ${RGQE_CC_FILE_PATH} \
-      --output_path ${RGQE_QUESTION_PATH} \
-      --search_path ${RERANK_RUN_PATH} \
-      --query_path ${QUERY_PATH} \
-      --model_name ${RQE_MODEL_NAME} \
-      --save_directory ${RQE_MODEL_SAVE_DIRECTORY} \
-      --max_seq_len ${RGQE_SEQ_LEN} \
-      --batch_size ${RGQE_BATCH_SIZE} \
-      --gpus ${GPUS} \
-      --mode question \
-    ; \
-    python rgqe/format_rgqe_question.py \
-      --input_path ${RGQE_QUESTION_PATH} \
-      --output_path ${RGQE_QUESTION_FILE_PATH}
+#    python rgqe/rgqe_self_components.py \
+#      --input_path ${RGQE_SELF_FILE_PATH} \
+#      --expand_path ${EXP_ANSWER_FILE_PATH} \
+#      --output_path ${RGQE_CC_FILE_PATH} \
+#      --self_threshold ${RGQE_SELF_THRESHOLD}
+      python rgqe/rgqe_qe_self_components.py \
+        --input_path ${RGQE_SELF_FILE_PATH} \
+        --expand_path ${EXP_ANSWER_FILE_PATH} \
+        --output_path ${RGQE_CC_FILE_PATH} \
+        --self_threshold ${RGQE_SELF_THRESHOLD} \
+        --qe_threshold ${RGQE_QE_THRESHOLD}
 fi
 
 
@@ -285,7 +293,6 @@ if [[ ${RUN_RGQE_TOP} = true ]]; then
     python rgqe/rgqe.py \
       --input_path ${RGQE_CC_FILE_PATH} \
       --output_path ${RGQE_TOP_PATH} \
-      --qe_path ${RGQE_QUESTION_FILE_PATH} \
       --search_path ${RERANK_RUN_PATH} \
       --model_name ${RQE_MODEL_NAME} \
       --save_directory ${RQE_MODEL_SAVE_DIRECTORY} \
@@ -294,7 +301,6 @@ if [[ ${RUN_RGQE_TOP} = true ]]; then
       --mode top \
       --top_k ${RGQE_TOP_K} \
       --gpus ${GPUS} \
-      --qe_threshold ${RQE_TOP_THRESHOLD} \
     ; \
     python rgqe/format_rgqe_top.py \
       --input_path ${RGQE_TOP_PATH} \

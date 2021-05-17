@@ -289,3 +289,51 @@ class RGQEAllPredictionDataset(Dataset):
 		example = self.examples[idx]
 
 		return example
+
+
+class RGQEQuestionSelfPredictionDataset(Dataset):
+	def __init__(self, input_path, search_path, queries, top_k):
+		self.input_path = input_path
+		self.search_path = search_path
+		self.top_k = top_k
+		self.queries = {q['question_id']: q for q in queries}
+
+		with open(input_path) as f:
+			self.answer_samples = json.load(f)
+
+		question_answer_count = defaultdict(int)
+		answer_questions = defaultdict(list)
+		with open(self.search_path, 'r') as f:
+			for line in f:
+				line = line.strip()
+				if line:
+					question_id, _, answer_id, rank, score, run_name = line.split()
+					if question_answer_count[question_id] > top_k:
+						continue
+					question_answer_count[question_id] += 1
+					answer_questions[answer_id].append(question_id)
+
+		self.examples = []
+		for answer_id, question_ids in answer_questions.items():
+			samples = self.answer_samples[answer_id]
+			for question_id in question_ids:
+				question_text = self.queries[question_id]['question']
+				for s_id, sample_text in enumerate(samples):
+					example = {
+						'question_a_id': f'{answer_id}|{s_id}',
+						'question_b_id': question_id,
+						'question_a_text': sample_text,
+						'question_b_text': question_text,
+					}
+					self.examples.append(example)
+
+	def __len__(self):
+		return len(self.examples)
+
+	def __getitem__(self, idx):
+		if torch.is_tensor(idx):
+			idx = idx.tolist()
+
+		example = self.examples[idx]
+
+		return example
