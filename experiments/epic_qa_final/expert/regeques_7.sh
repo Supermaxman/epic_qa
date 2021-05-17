@@ -18,7 +18,7 @@ export SEARCH_TOP_K=500
 export RGQE_TOP_K=100
 export RGQE_QE_THRESHOLD=0.001
 export RGQE_SELF_THRESHOLD=0.99
-export RGQE_TOP_C_THRESHOLD=0.99
+export RGQE_TOP_C_THRESHOLD=0.9985
 
 export RGQE_SEQ_LEN=64
 export RGQE_BATCH_SIZE=128
@@ -298,10 +298,10 @@ if [[ ${RUN_RGQE_TOP} = true ]]; then
 #      --top_k ${RGQE_TOP_K} \
 #      --gpus ${GPUS} \
 #    ; \
-    python rgqe/format_rgqe_top_question.py \
-      --input_path ${RGQE_TOP_PATH} \
-      --output_path ${RGQE_TOP_FILE_PATH} \
-    ; \
+#    python rgqe/format_rgqe_top_question.py \
+#      --input_path ${RGQE_TOP_PATH} \
+#      --output_path ${RGQE_TOP_FILE_PATH} \
+#
     python rgqe/rgqe_top_question_components.py \
       --input_path ${RGQE_TOP_FILE_PATH} \
       --cc_path ${RGQE_CC_FILE_PATH} \
