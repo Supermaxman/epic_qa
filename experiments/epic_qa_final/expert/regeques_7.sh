@@ -48,7 +48,7 @@ export RUN_EXPAND_ANSWERS=false
 export RUN_RGQE_QUESTION=false
 
 # RGQE pairwise self-entailment to find entailed sets for each answer
-export RUN_RGQE_SELF=true
+export RUN_RGQE_SELF=false
 
 # RGQE full set-pairwise entailment for top_k answers for each query
 export RUN_RGQE_TOP=true
