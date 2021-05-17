@@ -17,8 +17,8 @@ RQE_SAVE_DIRECTORY=models/rqe
 
 RQE_NUM_GPUS=1
 
-RQE_TRAIN=false
-RQE_EVAL=true
+RQE_TRAIN=true
+RQE_EVAL=false
 
 export TOKENIZERS_PARALLELISM=true
 
