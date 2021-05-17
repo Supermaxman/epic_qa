@@ -472,7 +472,7 @@ def compute_f1(scores, labels, threshold):
 
 def compute_best_f1(scores, labels, threshold_range=None):
 	if threshold_range is None:
-		threshold_range = np.arange(start=0.001, stop=1.0, step=0.001)
+		threshold_range = np.arange(start=0.0001, stop=1.0, step=0.0001)
 	best_f1 = float('-inf')
 	best_p = None
 	best_r = None
