@@ -26,7 +26,7 @@ export EXP_ANSWER_TOP_K=20
 export EXP_ANSWER_NUM_SAMPLES=20
 export EXP_ANSWER_BATCH_SIZE=16
 
-export GPUS=0
+export GPUS=1,3
 #export TPU_IP_ADDRESS=10.155.6.34
 #export XRT_TPU_CONFIG="tpu_worker;0;$TPU_IP_ADDRESS:8470"
 
@@ -44,7 +44,7 @@ export RUN_RERANK=false
 export RUN_EXPAND_ANSWERS=false
 
 # RGQE query-generated question entailment to filter poor generated questions
-export RUN_RGQE_QUESTION=false
+export RUN_RGQE_QUESTION=true
 
 # RGQE pairwise self-entailment to find entailed sets for each answer
 export RUN_RGQE_SELF=true
@@ -239,18 +239,18 @@ fi
 if [[ ${RUN_RGQE_QUESTION} = true ]]; then
     echo "Running question RGQE..."
     # query-question entailment to filter out bad generated questions
-#    python rgqe/rgqe.py \
-#      --input_path ${EXP_ANSWER_FILE_PATH} \
-#      --output_path ${RGQE_QUESTION_PATH} \
-#      --search_path ${RERANK_RUN_PATH} \
-#      --query_path ${QUERY_PATH} \
-#      --model_name ${RQE_MODEL_NAME} \
-#      --save_directory ${RQE_MODEL_SAVE_DIRECTORY} \
-#      --max_seq_len ${RGQE_SEQ_LEN} \
-#      --batch_size ${RGQE_BATCH_SIZE} \
-#      --gpus ${GPUS} \
-#      --mode question_self \
-#    ; \
+    python rgqe/rgqe.py \
+      --input_path ${EXP_ANSWER_FILE_PATH} \
+      --output_path ${RGQE_QUESTION_PATH} \
+      --search_path ${RERANK_RUN_PATH} \
+      --query_path ${QUERY_PATH} \
+      --model_name ${RQE_MODEL_NAME} \
+      --save_directory ${RQE_MODEL_SAVE_DIRECTORY} \
+      --max_seq_len ${RGQE_SEQ_LEN} \
+      --batch_size ${RGQE_BATCH_SIZE} \
+      --gpus ${GPUS} \
+      --mode question_self \
+    ; \
     python rgqe/format_rgqe_question_self.py \
       --input_path ${RGQE_QUESTION_PATH} \
       --output_path ${RGQE_QUESTION_FILE_PATH}
@@ -259,20 +259,20 @@ fi
 if [[ ${RUN_RGQE_SELF} = true ]]; then
     echo "Running self RGQE..."
     # self entailment
-#    python rgqe/rgqe.py \
-#      --input_path ${EXP_ANSWER_FILE_PATH} \
-#      --output_path ${RGQE_SELF_PATH} \
-#      --model_name ${RQE_MODEL_NAME} \
-#      --save_directory ${RQE_MODEL_SAVE_DIRECTORY} \
-#      --max_seq_len ${RGQE_SEQ_LEN} \
-#      --batch_size ${RGQE_BATCH_SIZE} \
-#      --gpus ${GPUS} \
-#      --mode self \
-#    ; \
-#    python rgqe/format_rgqe_self.py \
-#      --input_path ${RGQE_SELF_PATH} \
-#      --output_path ${RGQE_SELF_FILE_PATH} \
-#    ; \
+    python rgqe/rgqe.py \
+      --input_path ${EXP_ANSWER_FILE_PATH} \
+      --output_path ${RGQE_SELF_PATH} \
+      --model_name ${RQE_MODEL_NAME} \
+      --save_directory ${RQE_MODEL_SAVE_DIRECTORY} \
+      --max_seq_len ${RGQE_SEQ_LEN} \
+      --batch_size ${RGQE_BATCH_SIZE} \
+      --gpus ${GPUS} \
+      --mode self \
+    ; \
+    python rgqe/format_rgqe_self.py \
+      --input_path ${RGQE_SELF_PATH} \
+      --output_path ${RGQE_SELF_FILE_PATH} \
+    ; \
 #    python rgqe/rgqe_self_components.py \
 #      --input_path ${RGQE_SELF_FILE_PATH} \
 #      --expand_path ${EXP_ANSWER_FILE_PATH} \
