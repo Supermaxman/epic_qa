@@ -239,18 +239,18 @@ fi
 if [[ ${RUN_RGQE_QUESTION} = true ]]; then
     echo "Running question RGQE..."
     # query-question entailment to filter out bad generated questions
-    python rgqe/rgqe.py \
-      --input_path ${EXP_ANSWER_FILE_PATH} \
-      --output_path ${RGQE_QUESTION_PATH} \
-      --search_path ${RERANK_RUN_PATH} \
-      --query_path ${QUERY_PATH} \
-      --model_name ${RQE_MODEL_NAME} \
-      --save_directory ${RQE_MODEL_SAVE_DIRECTORY} \
-      --max_seq_len ${RGQE_SEQ_LEN} \
-      --batch_size ${RGQE_BATCH_SIZE} \
-      --gpus ${GPUS} \
-      --mode question_self \
-    ; \
+#    python rgqe/rgqe.py \
+#      --input_path ${EXP_ANSWER_FILE_PATH} \
+#      --output_path ${RGQE_QUESTION_PATH} \
+#      --search_path ${RERANK_RUN_PATH} \
+#      --query_path ${QUERY_PATH} \
+#      --model_name ${RQE_MODEL_NAME} \
+#      --save_directory ${RQE_MODEL_SAVE_DIRECTORY} \
+#      --max_seq_len ${RGQE_SEQ_LEN} \
+#      --batch_size ${RGQE_BATCH_SIZE} \
+#      --gpus ${GPUS} \
+#      --mode question_self \
+#    ; \
     python rgqe/format_rgqe_question_self.py \
       --input_path ${RGQE_QUESTION_PATH} \
       --output_path ${RGQE_QUESTION_FILE_PATH}
