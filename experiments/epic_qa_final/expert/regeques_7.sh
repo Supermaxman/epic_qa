@@ -271,20 +271,20 @@ if [[ ${RUN_RGQE_SELF} = true ]]; then
     ; \
     python rgqe/format_rgqe_self.py \
       --input_path ${RGQE_SELF_PATH} \
-      --output_path ${RGQE_SELF_FILE_PATH} \
-    ; \
+      --output_path ${RGQE_SELF_FILE_PATH}
+
+    python rgqe/rgqe_qe_self_components.py \
+      --input_path ${RGQE_SELF_FILE_PATH} \
+      --expand_path ${EXP_ANSWER_FILE_PATH} \
+      --output_path ${RGQE_CC_FILE_PATH} \
+      --qe_path ${RGQE_QUESTION_FILE_PATH} \
+      --self_threshold ${RGQE_SELF_THRESHOLD} \
+      --qe_threshold ${RGQE_QE_THRESHOLD}
 #    python rgqe/rgqe_self_components.py \
 #      --input_path ${RGQE_SELF_FILE_PATH} \
 #      --expand_path ${EXP_ANSWER_FILE_PATH} \
 #      --output_path ${RGQE_CC_FILE_PATH} \
 #      --self_threshold ${RGQE_SELF_THRESHOLD}
-      python rgqe/rgqe_qe_self_components.py \
-        --input_path ${RGQE_SELF_FILE_PATH} \
-        --expand_path ${EXP_ANSWER_FILE_PATH} \
-        --output_path ${RGQE_CC_FILE_PATH} \
-        --qe_path ${RGQE_QUESTION_FILE_PATH} \
-        --self_threshold ${RGQE_SELF_THRESHOLD} \
-        --qe_threshold ${RGQE_QE_THRESHOLD}
 fi
 
 
