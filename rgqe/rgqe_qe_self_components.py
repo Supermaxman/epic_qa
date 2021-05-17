@@ -14,7 +14,6 @@ def create_components(sample_entail_pairs, answer_samples, self_threshold, qe_pr
 		results = defaultdict(list)
 		for answer_id, as_probs in q_a_probs.items():
 			a_graph = nx.Graph()
-			as_probs = {x: y for (x, y) in as_probs}
 			sample_texts = answer_samples[answer_id]
 			if answer_id in sample_entail_pairs:
 				samples = sample_entail_pairs[answer_id]
