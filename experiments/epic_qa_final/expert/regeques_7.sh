@@ -55,9 +55,9 @@ export RUN_RGQE_SELF=false
 # RGQE full set-pairwise entailment for top_k answers for each query
 export RUN_RGQE_TOP=true
 # RGQE rerank answers based on generated question entailment sets
-export RUN_RGQE_RERANK=true
+export RUN_RGQE_RERANK=false
 
-export EVAL_RGQE=true
+export EVAL_RGQE=false
 
 export RERANK_MODEL_NAME=rerank-${DATASET}-${RERANK_RUN_MODEL_NAME}
 export EXP_MODEL_NAME=docT5query-base
