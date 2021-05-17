@@ -18,8 +18,8 @@ export SEARCH_TOP_K=500
 export RGQE_TOP_K=100
 export RGQE_QE_THRESHOLD=0.01
 export RGQE_SELF_THRESHOLD=0.9
-export RGQE_TOP_C_THRESHOLD=0.9985
-#export RGQE_TOP_C_THRESHOLD=$1
+#export RGQE_TOP_C_THRESHOLD=0.9985
+export RGQE_TOP_C_THRESHOLD=$1
 
 export RGQE_SEQ_LEN=64
 export RGQE_BATCH_SIZE=128
@@ -48,7 +48,7 @@ export RUN_EXPAND_ANSWERS=false
 export RUN_RGQE_QUESTION=false
 
 # RGQE pairwise self-entailment to find entailed sets for each answer
-export RUN_RGQE_SELF=true
+export RUN_RGQE_SELF=false
 
 # RGQE full set-pairwise entailment for top_k answers for each query
 export RUN_RGQE_TOP=true
