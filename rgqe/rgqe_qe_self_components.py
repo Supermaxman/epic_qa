@@ -19,7 +19,7 @@ def create_components(sample_entail_pairs, answer_samples, self_threshold, qe_pr
 				samples = sample_entail_pairs[answer_id]
 				for sample_a_id, sample_b_id, score in samples:
 					a_qe_prob = as_probs[str(sample_a_id)]
-					b_qe_prob = as_probs[str(sample_a_id)]
+					b_qe_prob = as_probs[str(sample_b_id)]
 					if a_qe_prob < qe_threshold or b_qe_prob < qe_threshold or score < self_threshold:
 						continue
 
