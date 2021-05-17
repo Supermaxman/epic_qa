@@ -6,7 +6,8 @@ from transformers import AutoTokenizer
 from torch.utils.data import DataLoader
 from model_utils import RGQEPredictionBert
 from data_utils import RGQEAllPredictionDataset, RGQESelfPredictionDataset, RGQETopPredictionDataset, \
-	RGQEQuestionPredictionDataset, PredictionBatchCollator, RGQEQuestionSelfPredictionDataset
+	RGQEQuestionPredictionDataset, PredictionBatchCollator, RGQEQuestionSelfPredictionDataset, \
+	RGQETopQuestionPredictionDataset
 import logging
 from pytorch_lightning import loggers as pl_loggers
 import torch
@@ -114,6 +115,12 @@ if __name__ == '__main__':
 			top_k,
 			qe_threshold=qe_threshold,
 			rr_threshold=rr_threshold
+		)
+	elif mode == 'top_question':
+		eval_dataset = RGQETopQuestionPredictionDataset(
+			input_path,
+			search_path,
+			top_k
 		)
 	elif mode == 'question':
 		logging.info('Loading queries...')

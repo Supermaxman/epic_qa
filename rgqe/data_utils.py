@@ -337,3 +337,62 @@ class RGQEQuestionSelfPredictionDataset(Dataset):
 		example = self.examples[idx]
 
 		return example
+
+
+class RGQETopQuestionPredictionDataset(Dataset):
+	def __init__(self, input_path, search_path, top_k):
+		self.input_path = input_path
+		self.search_path = search_path
+		self.top_k = top_k
+
+		with open(input_path) as f:
+			# [question_id][answer_id] -> entailed sets
+			self.question_answer_sets = json.load(f)
+
+		question_answer_count = defaultdict(int)
+		question_samples = defaultdict(list)
+		with open(self.search_path) as f:
+			for line in f:
+				line = line.strip()
+				if line:
+					question_id, _, answer_id, rank, score, run_name = line.split()
+					if question_answer_count[question_id] >= top_k:
+						continue
+					question_answer_count[question_id] += 1
+					if answer_id in self.question_answer_sets[question_id]:
+						answer_sets = self.question_answer_sets[question_id][answer_id]
+						for entailed_set in answer_sets:
+							entailed_set_id = entailed_set['entailed_set_id']
+							entailed_set_sample_text = entailed_set['entailed_set'][0]['sample_text']
+							example = {
+								'id': f'{question_id}|{answer_id}|{entailed_set_id}',
+								'answer_id': answer_id,
+								'entailed_set_text': entailed_set_sample_text
+							}
+							question_samples[question_id].append(example)
+
+		self.examples = []
+		for question_id, q_samples in question_samples.items():
+			print(f'{question_id}: {len(q_samples)}')
+			for sample_a, sample_b in itertools.combinations(q_samples, r=2):
+				# ignore self entailment since that was already computed
+				if sample_a['answer_id'] == sample_b['answer_id']:
+					continue
+				example = {
+					'question_a_id': sample_a['id'],
+					'question_b_id': sample_b['id'],
+					'question_a_text': sample_a['entailed_set_text'],
+					'question_b_text': sample_b['entailed_set_text'],
+				}
+				self.examples.append(example)
+
+	def __len__(self):
+		return len(self.examples)
+
+	def __getitem__(self, idx):
+		if torch.is_tensor(idx):
+			idx = idx.tolist()
+
+		example = self.examples[idx]
+
+		return example

@@ -294,11 +294,11 @@ if [[ ${RUN_RGQE_TOP} = true ]]; then
       --save_directory ${RQE_MODEL_SAVE_DIRECTORY} \
       --max_seq_len ${RGQE_SEQ_LEN} \
       --batch_size ${RGQE_BATCH_SIZE} \
-      --mode top \
+      --mode top_question \
       --top_k ${RGQE_TOP_K} \
       --gpus ${GPUS} \
     ; \
-    python rgqe/format_rgqe_top.py \
+    python rgqe/format_rgqe_top_questioon.py \
       --input_path ${RGQE_TOP_PATH} \
       --output_path ${RGQE_TOP_FILE_PATH} \
     ; \
