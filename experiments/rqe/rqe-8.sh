@@ -48,7 +48,6 @@ if [[ ${RQE_TRAIN} = true ]]; then
     --pre_model_name=${RQE_PRE_MODEL_NAME} \
     --model_name="${RQE_MODEL_NAME}" \
     --model_type=${RQE_MODEL_TYPE} \
-    --load_model \
     --learning_rate ${RQE_LEARNING_RATE} \
     --batch_size=${RQE_BATCH_SIZE} \
     --save_directory=${RQE_SAVE_DIRECTORY} \
