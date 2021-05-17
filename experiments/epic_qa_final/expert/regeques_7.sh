@@ -16,9 +16,9 @@ export DATASET=expert
 # major hyper-parameters for system
 export SEARCH_TOP_K=500
 export RGQE_TOP_K=100
-export RGQE_SELF_THRESHOLD=0.995
-export RGQE_QE_THRESHOLD=0.995
-export RGQE_TOP_C_THRESHOLD=0.995
+export RGQE_QE_THRESHOLD=0.001
+export RGQE_SELF_THRESHOLD=0.99
+export RGQE_TOP_C_THRESHOLD=0.99
 
 export RGQE_SEQ_LEN=64
 export RGQE_BATCH_SIZE=128
@@ -44,17 +44,17 @@ export RUN_RERANK=false
 export RUN_EXPAND_ANSWERS=false
 
 # RGQE query-generated question entailment to filter poor generated questions
-export RUN_RGQE_QUESTION=true
+export RUN_RGQE_QUESTION=false
 
 # RGQE pairwise self-entailment to find entailed sets for each answer
 export RUN_RGQE_SELF=true
 
 # RGQE full set-pairwise entailment for top_k answers for each query
-export RUN_RGQE_TOP=false
+export RUN_RGQE_TOP=true
 # RGQE rerank answers based on generated question entailment sets
-export RUN_RGQE_RERANK=false
+export RUN_RGQE_RERANK=true
 
-export EVAL_RGQE=false
+export EVAL_RGQE=true
 
 export RERANK_MODEL_NAME=rerank-${DATASET}-${RERANK_RUN_MODEL_NAME}
 export EXP_MODEL_NAME=docT5query-base
@@ -259,19 +259,19 @@ fi
 if [[ ${RUN_RGQE_SELF} = true ]]; then
     echo "Running self RGQE..."
     # self entailment
-    python rgqe/rgqe.py \
-      --input_path ${EXP_ANSWER_FILE_PATH} \
-      --output_path ${RGQE_SELF_PATH} \
-      --model_name ${RQE_MODEL_NAME} \
-      --save_directory ${RQE_MODEL_SAVE_DIRECTORY} \
-      --max_seq_len ${RGQE_SEQ_LEN} \
-      --batch_size ${RGQE_BATCH_SIZE} \
-      --gpus ${GPUS} \
-      --mode self \
-    ; \
-    python rgqe/format_rgqe_self.py \
-      --input_path ${RGQE_SELF_PATH} \
-      --output_path ${RGQE_SELF_FILE_PATH}
+#    python rgqe/rgqe.py \
+#      --input_path ${EXP_ANSWER_FILE_PATH} \
+#      --output_path ${RGQE_SELF_PATH} \
+#      --model_name ${RQE_MODEL_NAME} \
+#      --save_directory ${RQE_MODEL_SAVE_DIRECTORY} \
+#      --max_seq_len ${RGQE_SEQ_LEN} \
+#      --batch_size ${RGQE_BATCH_SIZE} \
+#      --gpus ${GPUS} \
+#      --mode self \
+#    ; \
+#    python rgqe/format_rgqe_self.py \
+#      --input_path ${RGQE_SELF_PATH} \
+#      --output_path ${RGQE_SELF_FILE_PATH}
 
     python rgqe/rgqe_qe_self_components.py \
       --input_path ${RGQE_SELF_FILE_PATH} \
@@ -280,11 +280,6 @@ if [[ ${RUN_RGQE_SELF} = true ]]; then
       --qe_path ${RGQE_QUESTION_FILE_PATH} \
       --self_threshold ${RGQE_SELF_THRESHOLD} \
       --qe_threshold ${RGQE_QE_THRESHOLD}
-#    python rgqe/rgqe_self_components.py \
-#      --input_path ${RGQE_SELF_FILE_PATH} \
-#      --expand_path ${EXP_ANSWER_FILE_PATH} \
-#      --output_path ${RGQE_CC_FILE_PATH} \
-#      --self_threshold ${RGQE_SELF_THRESHOLD}
 fi
 
 
