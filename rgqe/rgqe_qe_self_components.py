@@ -46,7 +46,7 @@ def create_components(sample_entail_pairs, answer_samples, self_threshold, qe_pr
 						'qe_prob': as_probs[str(v)]
 					}
 					answer_set_samples.append(answer_sample)
-				answer_set_samples = list(sorted(answer_set_samples, key=lambda x: x['qe_prob'], reverse=True))
+				answer_set_samples = list(sorted(answer_set_samples, key=lambda x: x['num_connected'], reverse=True))
 				answer_set = {
 					'entailed_set_id': entailed_set_id,
 					'entailed_set': answer_set_samples
