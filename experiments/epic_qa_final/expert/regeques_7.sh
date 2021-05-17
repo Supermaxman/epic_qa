@@ -21,7 +21,7 @@ export RGQE_QE_THRESHOLD=0.975
 # 0.9
 export RGQE_SELF_THRESHOLD=0.7
 #export RGQE_TOP_C_THRESHOLD=0.9985
-export RGQE_TOP_C_THRESHOLD=0.99
+export RGQE_TOP_C_THRESHOLD=0.9985
 
 export RGQE_SEQ_LEN=64
 export RGQE_BATCH_SIZE=128
@@ -289,21 +289,21 @@ fi
 if [[ ${RUN_RGQE_TOP} = true ]]; then
     echo "Running top RGQE..."
     # top_k set entailment
-    python rgqe/rgqe.py \
-      --input_path ${RGQE_CC_FILE_PATH} \
-      --output_path ${RGQE_TOP_PATH} \
-      --search_path ${RERANK_RUN_PATH} \
-      --model_name ${RQE_MODEL_NAME} \
-      --save_directory ${RQE_MODEL_SAVE_DIRECTORY} \
-      --max_seq_len ${RGQE_SEQ_LEN} \
-      --batch_size ${RGQE_BATCH_SIZE} \
-      --mode top_question \
-      --top_k ${RGQE_TOP_K} \
-      --gpus ${GPUS} \
-    ; \
-    python rgqe/format_rgqe_top_question.py \
-      --input_path ${RGQE_TOP_PATH} \
-      --output_path ${RGQE_TOP_FILE_PATH}
+#    python rgqe/rgqe.py \
+#      --input_path ${RGQE_CC_FILE_PATH} \
+#      --output_path ${RGQE_TOP_PATH} \
+#      --search_path ${RERANK_RUN_PATH} \
+#      --model_name ${RQE_MODEL_NAME} \
+#      --save_directory ${RQE_MODEL_SAVE_DIRECTORY} \
+#      --max_seq_len ${RGQE_SEQ_LEN} \
+#      --batch_size ${RGQE_BATCH_SIZE} \
+#      --mode top_question \
+#      --top_k ${RGQE_TOP_K} \
+#      --gpus ${GPUS} \
+#    ; \
+#    python rgqe/format_rgqe_top_question.py \
+#      --input_path ${RGQE_TOP_PATH} \
+#      --output_path ${RGQE_TOP_FILE_PATH}
 
     python rgqe/rgqe_top_question_components.py \
       --input_path ${RGQE_TOP_FILE_PATH} \
